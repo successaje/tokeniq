@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { BellIcon, WalletIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
+import { ConnectButton } from '../Web3Modal';
 
 const networks = [
   { id: 'ethereum', name: 'Ethereum', icon: '🔷' },
@@ -15,10 +16,7 @@ export function Topbar() {
     <div className="h-16 bg-gray-900 border-b border-gray-800">
       <div className="flex items-center justify-between h-full px-6">
         <div className="flex items-center space-x-4">
-          <button className="flex items-center px-4 py-2 space-x-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
-            <WalletIcon className="w-5 h-5" />
-            <span>Connect Wallet</span>
-          </button>
+          <ConnectButton />
 
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center px-3 py-2 space-x-2 text-gray-300 rounded-lg hover:bg-gray-800">
