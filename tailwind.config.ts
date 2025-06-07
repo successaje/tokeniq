@@ -11,21 +11,25 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-          950: '#042f2e',
+          DEFAULT: 'hsl(183 100% 35%)',
+          foreground: 'hsl(210 40% 98%)',
+          50: 'hsl(0 0% 100%)',
+          100: 'hsl(0 0% 100%)',
+          200: 'hsl(0 0% 100%)',
+          300: 'hsl(0 0% 100%)',
+          400: 'hsl(0 0% 100%)',
+          500: 'hsl(183 100% 35%)',
+          600: 'hsl(183 100% 28%)',
+          700: 'hsl(183 100% 21%)',
+          800: 'hsl(183 100% 15%)',
+          900: 'hsl(183 100% 10%)',
+          950: 'hsl(183 100% 5%)',
         },
         gray: {
           850: '#1f2937',
-        }
+        },
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
       },
       spacing: {
         '18': '4.5rem',
@@ -48,4 +52,4 @@ const config: Config = {
   plugins: [],
 }
 
-export default config 
+export default config

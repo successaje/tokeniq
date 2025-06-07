@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -18,10 +16,10 @@
   }
 }
 
-@layer base {
-  body {
-    @apply bg-gray-900 text-white;
-  }
+/* Base body styles */
+body {
+  background-color: rgb(17 24 39);
+  color: white;
 }
 
 /* Custom Scrollbar */
@@ -31,31 +29,190 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-900;
+  background-color: rgb(17 24 39);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-700 rounded-full;
+  background-color: #4b5563;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-600;
+  background-color: #6b7280;
 }
 
 /* Range Input Styling */
 input[type="range"] {
-  @apply appearance-none bg-gray-700 h-2 rounded-lg;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
 }
 
+/* Track styles */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #374151;
+  border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #374151;
+  border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+/* Thumb styles */
 input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4 rounded-full bg-primary-500 cursor-pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -4px;
+  background-color: #10b981;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
 }
 
 input[type="range"]::-moz-range-thumb {
-  @apply w-4 h-4 rounded-full bg-primary-500 cursor-pointer border-0;
+  background-color: #10b981;
+  border: none;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+}
+
+/* Remove focus outline */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* Hover effect for thumb */
+input[type="range"]::-webkit-slider-thumb:hover {
+  background-color: #059669;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background-color: #059669;
 }
 
 /* Focus Styles */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900;
+:focus-visible {
+  outline: 2px solid hsl(183 100% 35%);
+  outline-offset: 2px;
+}
+
+/* Remove default focus styles for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Smooth scrolling for the whole document */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Remove default button styles */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Better responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Remove list styles */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Remove default link styles */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Better form element styling */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
+/* Print styles */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
 }
