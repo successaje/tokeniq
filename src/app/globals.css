@@ -2,6 +2,8 @@
 
 @layer base {
   :root {
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --primary: 183 100% 35%;
@@ -25,6 +27,8 @@
   }
 
   .dark {
+    --sidebar: 222.2 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;

@@ -1,128 +1,186 @@
 "use client";
-import { Fragment } from 'react';
+
+import { Fragment, useState, useEffect } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { BellIcon, WalletIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { clsx } from 'clsx';
+import { 
+  Bars3Icon, 
+  MagnifyingGlassIcon, 
+  BellIcon, 
+  QuestionMarkCircleIcon,
+  ChevronDownIcon 
+} from '@heroicons/react/24/outline';
+import { cn } from '@/lib/utils';
 import { ConnectButton } from '../Web3Modal';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-const networks = [
-  { id: 'ethereum', name: 'Ethereum', icon: '🔷' },
-  { id: 'polygon', name: 'Polygon', icon: '💜' },
-  { id: 'arbitrum', name: 'Arbitrum', icon: '🔵' },
-];
+interface TopbarProps {
+  onMenuClick: () => void;
+  sidebarCollapsed: boolean;
+}
 
-export function Topbar() {
+export function Topbar({ onMenuClick, sidebarCollapsed }: TopbarProps) {
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  
+  // Only run on client side
+  useEffect(() => {
+    setMounted(true);
+    
+    return () => {
+      setMounted(false);
+    };
+  }, []);
+
+  // Don't render anything during SSR or before mount
+  if (typeof window === 'undefined' || !mounted) {
+    return (
+      <header className="sticky top-0 z-30 w-full border-b border-border/40 bg-background/95 backdrop-blur h-16" />
+    );
+  }
+  
   return (
-    <div className="h-16 bg-gray-900 border-b border-gray-800">
-      <div className="flex items-center justify-between h-full px-6">
-        <div className="flex items-center space-x-4">
-          <ConnectButton />
-
-          <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center px-3 py-2 space-x-2 text-gray-300 rounded-lg hover:bg-gray-800">
-              <span>🔷</span>
-              <span>Ethereum</span>
-              <ChevronDownIcon className="w-4 h-4" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute left-0 w-48 mt-2 origin-top-left bg-gray-900 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1">
-                  {networks.map((network) => (
-                    <Menu.Item key={network.id}>
-                      {({ active }) => (
-                        <button
-                          className={clsx(
-                            'flex items-center w-full px-4 py-2 text-sm space-x-2',
-                            active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                          )}
-                        >
-                          <span>{network.icon}</span>
-                          <span>{network.name}</span>
-                        </button>
-                      )}
-                    </Menu.Item>
-                  ))}
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button className="relative p-2 text-gray-300 rounded-lg hover:bg-gray-800">
-            <BellIcon className="w-6 h-6" />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-primary-500 rounded-full" />
-          </button>
-
-          <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center space-x-3 text-gray-300 rounded-lg hover:bg-gray-800">
-              <div className="w-8 h-8 rounded-full bg-primary-600" />
-              <ChevronDownIcon className="w-4 h-4" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-gray-900 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Your Profile
-                      </a>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Settings
-                      </a>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Sign out
-                      </a>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
+    <header className={cn(
+      'sticky top-0 z-30 w-full border-b border-border/40',
+      'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+      'transition-all duration-300 ease-in-out',
+      'h-16 flex items-center'
+    )}>
+      {/* Mobile search bar - only shows on small screens */}
+      <div className="md:hidden px-4 py-2">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-2 border border-border rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+            placeholder="Search vaults, tokens..."
+          />
         </div>
       </div>
-    </div>
+      
+      {/* Top bar */}
+      <div className="flex w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Left section */}
+        <div className="flex items-center">
+          {/* Mobile menu button */}
+          <button
+            type="button"
+            className="-m-2.5 p-2.5 text-muted-foreground hover:text-foreground lg:hidden"
+            onClick={onMenuClick}
+          >
+            <span className="sr-only">Open sidebar</span>
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+          </button>
+
+          {/* Logo */}
+          <div className="ml-4 flex items-center">
+            <Link href="/" className="text-xl font-bold flex items-center">
+              <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                TokenIQ X
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right section */}
+        <div className="flex items-center space-x-4">
+          {/* Desktop search */}
+          <div className="relative hidden md:block">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <input
+              type="text"
+              className="block w-64 pl-10 pr-3 py-2 border border-border rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent"
+              placeholder="Search vaults, tokens..."
+            />
+          </div>
+
+          {/* Notification button */}
+          <button
+            type="button"
+            className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            <span className="sr-only">View notifications</span>
+            <BellIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
+
+          {/* Help button */}
+          <button
+            type="button"
+            className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            <span className="sr-only">Help</span>
+            <QuestionMarkCircleIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
+
+          {/* Network selector */}
+          <Menu as="div" className="relative">
+            <Menu.Button className="flex items-center gap-x-1.5 rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-primary/50">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span>Ethereum</span>
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-card shadow-lg ring-1 ring-border focus:outline-none">
+                <div className="py-1">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm',
+                          active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                        )}
+                      >
+                        Ethereum Mainnet
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm',
+                          active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                        )}
+                      >
+                        Arbitrum One
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={cn(
+                          'block w-full px-4 py-2 text-left text-sm',
+                          active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                        )}
+                      >
+                        Polygon
+                      </button>
+                    )}
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+
+          {/* Wallet connection */}
+          <div className="ml-2">
+            <ConnectButton />
+          </div>
+        </div>
+      </div>
+    </header>
   );
-} 
+}

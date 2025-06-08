@@ -1,6 +1,7 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useTheme } from '@/context/theme-context';
 
 const data = [
   {
@@ -34,9 +35,12 @@ const data = [
 ];
 
 export default function TokenChart() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
-    <div className="w-full h-[400px] bg-gray-800 rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-4">Token Price (USD)</h2>
+    <div className="w-full h-[400px] bg-card rounded-lg p-4">
+      <h2 className="text-xl font-semibold mb-4 text-foreground">Token Price (USD)</h2>
       <ResponsiveContainer width="100%" height="90%">
         <LineChart
           data={data}
@@ -47,31 +51,40 @@ export default function TokenChart() {
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke={isDark ? 'hsl(var(--border))' : 'hsl(var(--muted))'} 
+          />
           <XAxis 
             dataKey="name" 
-            stroke="#9CA3AF"
+            stroke={isDark ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))'}
+            tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))' }}
           />
           <YAxis 
-            stroke="#9CA3AF"
+            stroke={isDark ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))'}
+            tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))' }}
             domain={[0, 'dataMax + 1000']}
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: isDark ? 'hsl(var(--card))' : 'hsl(var(--background))',
+              border: `1px solid ${isDark ? 'hsl(var(--border))' : 'hsl(var(--border))'}`,
               borderRadius: '0.5rem',
-              color: '#F9FAFB'
+              color: isDark ? 'hsl(var(--card-foreground))' : 'hsl(var(--foreground))'
             }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{
+              color: isDark ? 'hsl(var(--muted-foreground))' : 'hsl(var(--foreground))'
+            }}
+          />
           <Line
             type="monotone"
             dataKey="price"
-            stroke="#10B981"
+            stroke="hsl(var(--primary))"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 6 }}
+            activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
             name="Token Price"
           />
         </LineChart>

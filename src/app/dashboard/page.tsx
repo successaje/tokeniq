@@ -1,227 +1,281 @@
+import React from 'react';
 import { 
-  BanknotesIcon, 
-  ChartBarIcon, 
-  CubeIcon, 
-  SparklesIcon 
+  ArrowDownTrayIcon,
+  ArrowsRightLeftIcon,
+  BanknotesIcon,
+  ChartBarIcon,
+  CubeIcon,
+  SparklesIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ArrowUpIcon,
+  ArrowDownIcon
 } from '@heroicons/react/24/outline';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import TokenChart from '../../components/TokenChart';
 import TokenAllocationChart from '../../components/TokenAllocationChart';
-import VolumeChart from '../../components/VolumeChart';
-import YieldPerformanceChart from '../../components/YieldPerformanceChart';
+
+// Mock data for treasury strategies
+const treasuryStrategies = [
+  {
+    id: 1,
+    name: 'Stablecoin Yield',
+    apy: '5.8%',
+    tvl: '$8.4M',
+    change: '+1.2%',
+    isPositive: true,
+    strategy: 'Money Market',
+    chain: 'Ethereum',
+    risk: 'Low',
+    icon: '🏦'
+  },
+  {
+    id: 2,
+    name: 'Treasury Bonds',
+    apy: '4.2%',
+    tvl: '$15.2M',
+    change: '+0.5%',
+    isPositive: true,
+    strategy: 'Fixed Income',
+    chain: 'Arbitrum',
+    risk: 'Low',
+    icon: '📈'
+  },
+  {
+    id: 3,
+    name: 'LST Yield',
+    apy: '7.1%',
+    tvl: '$22.6M',
+    change: '-0.8%',
+    isPositive: false,
+    strategy: 'Liquid Staking',
+    chain: 'Ethereum',
+    risk: 'Medium',
+    icon: '🔄'
+  },
+];
+
+// Mock data for treasury allocation
+const treasuryAllocation = [
+  { name: 'Cash & Equivalents', value: 40, color: 'bg-blue-500' },
+  { name: 'Fixed Income', value: 30, color: 'bg-green-500' },
+  { name: 'Growth Assets', value: 20, color: 'bg-purple-500' },
+  { name: 'Alternative Investments', value: 10, color: 'bg-orange-500' },
+];
 
 export default function DashboardPage() {
+  // Mock chart data
+  const chartData = [
+    { date: 'Jan', value: 100 },
+    { date: 'Feb', value: 200 },
+    { date: 'Mar', value: 150 },
+    { date: 'Apr', value: 300 },
+    { date: 'May', value: 250 },
+    { date: 'Jun', value: 400 },
+  ];
+
+  // Mock treasury activity data
+  const recentActivity = [
+    { id: 1, type: 'Deposit', amount: '1,000,000', token: 'USDC', time: '2 min ago' },
+    { id: 2, type: 'Strategy Execution', amount: '500,000', token: 'USDT', strategy: 'Money Market', time: '1 hour ago' },
+    { id: 3, type: 'Rebalance', amount: '250,000', token: 'ETH', from: 'Stablecoin', to: 'LST', time: '3 hours ago' },
+  ];
+
   return (
-    <DashboardLayout>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Treasury Overview */}
-        <Card
-          title="Treasury Overview"
-          subtitle="Total value across all chains"
-          icon={<BanknotesIcon className="w-6 h-6 text-primary-500" />}
-          variant="gradient"
-          className="col-span-2"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">Total Value</div>
-              <div className="text-2xl font-semibold">$1,234,567</div>
-            </div>
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">24h Change</div>
-              <div className="text-2xl font-semibold text-green-500">+5.67%</div>
-            </div>
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">Active Chains</div>
-              <div className="text-2xl font-semibold">4</div>
-            </div>
+    <>
+      {/* Hero Section */}
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Treasury Dashboard</h1>
+            <p className="mt-1 text-muted-foreground">
+              AI-optimized treasury management across multiple chains
+            </p>
           </div>
-          <div className="h-96 mt-6">
-            <TokenChart />
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" className="gap-2">
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              Deposit
+            </Button>
+            <Button className="gap-2">
+              <SparklesIcon className="h-4 w-4" />
+              Create Vault
+            </Button>
           </div>
-        </Card>
+        </div>
 
-        {/* Tokenized Assets */}
-        <Card
-          title="Tokenized Assets"
-          subtitle="Portfolio allocation"
-          icon={<CubeIcon className="w-6 h-6 text-primary-500" />}
-          className="row-span-2"
-        >
-          <div className="space-y-4 mb-6">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-gray-400 font-medium">
-              <div className="col-span-5">Asset</div>
-              <div className="col-span-2 text-right">Price</div>
-              <div className="col-span-2 text-right">24h %</div>
-              <div className="col-span-3 text-right">Allocation</div>
-            </div>
-            
-            {/* Token Rows */}
-            {[
-              { 
-                name: 'Ethereum', 
-                symbol: 'ETH', 
-                price: '$3,450.21', 
-                change: '+5.2%', 
-                changeType: 'positive', 
-                allocation: '45%',
-                icon: '🟣'
-              },
-              { 
-                name: 'Bitcoin', 
-                symbol: 'BTC', 
-                price: '$64,123.45', 
-                change: '+2.1%', 
-                changeType: 'positive', 
-                allocation: '25%',
-                icon: '🟠'
-              },
-              { 
-                name: 'USD Coin', 
-                symbol: 'USDC', 
-                price: '$1.00', 
-                change: '0.0%', 
-                changeType: 'neutral', 
-                allocation: '15%',
-                icon: '🔵'
-              },
-              { 
-                name: 'Chainlink', 
-                symbol: 'LINK', 
-                price: '$18.76', 
-                change: '-1.2%', 
-                changeType: 'negative', 
-                allocation: '8%',
-                icon: '🔗'
-              },
-              { 
-                name: 'Aave', 
-                symbol: 'AAVE', 
-                price: '$245.67', 
-                change: '+3.4%', 
-                changeType: 'positive', 
-                allocation: '7%',
-                icon: '🦉'
-              },
-            ].map((asset, i) => (
-              <div 
-                key={i}
-                className="grid grid-cols-12 gap-4 p-4 bg-gray-900/50 rounded-lg items-center hover:bg-gray-800/50 transition-colors"
-              >
-                <div className="col-span-5 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-600/20 rounded-full flex items-center justify-center text-xl">
-                    {asset.icon}
-                  </div>
-                  <div>
-                    <div className="font-medium">{asset.name}</div>
-                    <div className="text-sm text-gray-400">{asset.symbol}</div>
-                  </div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <div className="font-mono">{asset.price}</div>
-                </div>
-                <div className="col-span-2 text-right">
-                  <span className={`font-medium ${
-                    asset.changeType === 'positive' ? 'text-green-500' : 
-                    asset.changeType === 'negative' ? 'text-red-500' : 'text-gray-400'
-                  }`}>
-                    {asset.change}
-                  </span>
-                </div>
-                <div className="col-span-3">
-                  <div className="flex items-center justify-end space-x-2">
-                    <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div 
-                        className="bg-primary-500 h-2 rounded-full" 
-                        style={{ width: asset.allocation }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-400 w-12">{asset.allocation}</span>
-                  </div>
-                </div>
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="p-4 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Treasury Value</p>
+                <p className="mt-1 text-2xl font-semibold text-foreground">$24,567,890</p>
               </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* AI Strategy Suggestions */}
-        <Card
-          title="AI Strategy Suggestions"
-          subtitle="Personalized recommendations"
-          icon={<SparklesIcon className="w-6 h-6 text-primary-500" />}
-        >
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="p-4 bg-gray-900/50 rounded-lg"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium">Strategy #{i}</div>
-                  <div className="text-sm text-primary-500">High Confidence</div>
-                </div>
-                <p className="text-sm text-gray-400 mb-3">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="text-gray-400">Expected Return</div>
-                  <div className="text-green-500">+12.34%</div>
-                </div>
+              <div className="p-2 rounded-lg bg-primary/10">
+                <BanknotesIcon className="h-6 w-6 text-primary" />
               </div>
-            ))}
-          </div>
-        </Card>
+            </div>
+            <div className="mt-3 flex items-center text-sm">
+              <TrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+              <span className="text-green-500 font-medium">+5.67%</span>
+              <span className="text-muted-foreground ml-1">vs last 24h</span>
+            </div>
+          </Card>
 
-        {/* Asset Allocation */}
-        <Card
-          title="Asset Allocation"
-          subtitle="Portfolio distribution"
-          icon={<ChartBarIcon className="w-6 h-6 text-primary-500" />}
-        >
-          <TokenAllocationChart />
-        </Card>
+          <Card className="p-4 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">30-Day Yield</p>
+                <p className="mt-1 text-2xl font-semibold text-foreground">5.42%</p>
+              </div>
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <ChartBarIcon className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm">
+              <TrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+              <span className="text-green-500 font-medium">+1.2%</span>
+              <span className="text-muted-foreground ml-1">vs last week</span>
+            </div>
+          </Card>
 
-        {/* Trading Volume */}
-        <Card
-          title="Trading Volume"
-          subtitle="Last 6 months"
-          icon={<SparklesIcon className="w-6 h-6 text-primary-500" />}
-        >
-          <VolumeChart />
-        </Card>
+          <Card className="p-4 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Risk Score</p>
+                <p className="mt-1 text-2xl font-semibold text-foreground">3.2/10</p>
+              </div>
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <CubeIcon className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center text-sm">
+              <span className="text-muted-foreground">Across 3 chains</span>
+            </div>
+          </Card>
 
-        {/* Yield Performance */}
-        <Card
-          title="Yield Performance"
-          subtitle="Across all strategies"
-          icon={<ChartBarIcon className="w-6 h-6 text-primary-500" />}
-          className="col-span-2"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">Total Yield</div>
-              <div className="text-2xl font-semibold">$12,345</div>
+          <Card className="p-4 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Strategies</p>
+                <p className="mt-1 text-2xl font-semibold text-foreground">6</p>
+              </div>
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <ArrowsRightLeftIcon className="h-6 w-6 text-purple-500" />
+              </div>
             </div>
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">APY</div>
-              <div className="text-2xl font-semibold text-green-500">8.67%</div>
+            <div className="mt-3 flex items-center text-sm">
+              <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+              <span className="text-red-500 font-medium">+12.3%</span>
+              <span className="text-muted-foreground ml-1">vs yesterday</span>
             </div>
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">Active Strategies</div>
-              <div className="text-2xl font-semibold">6</div>
-            </div>
-            <div className="p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-sm text-gray-400">Total Value Locked</div>
-              <div className="text-2xl font-semibold">$234,567</div>
-            </div>
-          </div>
-          <div className="h-64">
-            <YieldPerformanceChart />
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
-    </DashboardLayout>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Portfolio Overview */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Portfolio Value Chart */}
+          <Card className="bg-card">
+            <div className="p-4 pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">Treasury Performance</h3>
+                  <p className="text-sm text-muted-foreground">Last 90 days</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">1M</Button>
+                  <Button variant="outline" size="sm">3M</Button>
+                  <Button variant="primary" size="sm">1Y</Button>
+                  <Button variant="outline" size="sm">All</Button>
+                </div>
+              </div>
+              <div className="h-80 mt-4">
+                <TokenChart data={chartData} />
+              </div>
+            </div>
+          </Card>
+
+          {/* Active Strategies */}
+          <Card className="bg-card">
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-foreground mb-4">Active Strategies</h3>
+              <div className="space-y-4">
+                {treasuryStrategies.map((strategy) => (
+                  <div
+                    key={strategy.id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="text-2xl">{strategy.icon}</div>
+                      <div>
+                        <h4 className="font-medium text-foreground">{strategy.name}</h4>
+                        <p className="text-sm text-muted-foreground">{strategy.strategy} • {strategy.chain}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-foreground">{strategy.tvl}</p>
+                      <p className="text-sm text-muted-foreground">APY: {strategy.apy}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${
+                        strategy.isPositive ? 'text-green-500' : 'text-red-500'
+                      }`}>
+                        {strategy.change}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Treasury Allocation */}
+          <Card className="bg-card">
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-foreground mb-4">Treasury Allocation</h3>
+              <TokenAllocationChart />
+            </div>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card className="bg-card">
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-foreground mb-4">Recent Activity</h3>
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">{activity.type}</p>
+                      <p className="text-sm text-muted-foreground">{activity.time}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-foreground">{activity.amount} {activity.token}</p>
+                      {activity.strategy && (
+                        <p className="text-sm text-muted-foreground">{activity.strategy}</p>
+                      )}
+                      {activity.from && (
+                        <p className="text-sm text-muted-foreground">
+                          {activity.from} → {activity.to}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </>
   );
-} 
+}

@@ -1,9 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isDashboard = pathname.startsWith('/dashboard');
+  
+  // Don't render the navbar on dashboard routes
+  if (isDashboard) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
@@ -38,7 +47,6 @@ export function Navbar() {
           </div>
           <nav className="flex items-center">
             <ThemeToggle />
-            {/* Add user profile/connect wallet button here */}
           </nav>
         </div>
       </div>
