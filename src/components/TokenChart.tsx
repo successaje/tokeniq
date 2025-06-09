@@ -1,7 +1,7 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useTheme } from '@/context/theme-context';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const data = [
   {

@@ -2,9 +2,11 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { config } from '@/config/wagmi'
 import { useState, useEffect } from 'react'
 import { Web3ModalProvider } from './Web3ModalProvider'
+import '@rainbow-me/rainbowkit/styles.css'
 
 // Create a simple in-memory storage for SSR
 const createSSRStorage = () => ({
@@ -29,21 +31,18 @@ export function Web3Providers({ children }: { children: React.ReactNode }) {
     setMounted(true)
   }, [])
 
-  // Return a loading state during SSR or before mount
   if (!mounted) {
-    return (
-      <div className="min-h-screen bg-background">
-        {children}
-      </div>
-    )
+    return null;
   }
 
   return (
-    <WagmiProvider config={config} storage={createSSRStorage()}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <Web3ModalProvider>
-          {children}
-        </Web3ModalProvider>
+        <RainbowKitProvider>
+          <Web3ModalProvider>
+            {children}
+          </Web3ModalProvider>
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )

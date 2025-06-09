@@ -1,6 +1,13 @@
-import { http, createConfig as createViemConfig } from 'viem'
-import { mainnet, sepolia } from 'viem/chains'
-import { createConfig as createWagmiConfig } from 'wagmi'
+import { http } from 'wagmi'
+import { 
+  mainnet, 
+  arbitrum, 
+  base, 
+  avalanche, 
+  polygon, 
+  optimism 
+} from 'wagmi/chains'
+import { createConfig } from 'wagmi'
 import { injected, metaMask, walletConnect } from 'wagmi/connectors'
 
 // Check if we're in a browser environment
@@ -13,9 +20,12 @@ if (!projectId) {
   console.warn('WalletConnect project ID is not set. Please set NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID in your .env file')
 }
 
+// Configure chains
+const chains = [mainnet, arbitrum, base, avalanche, polygon, optimism]
+
 // 2. Create wagmiConfig
-export const config = createWagmiConfig({
-  chains: [mainnet, sepolia],
+export const config = createConfig({
+  chains,
   connectors: [
     injected({ shimDisconnect: true }),
     metaMask({ dappMetadata: { name: 'TokenIQ' } }),
@@ -30,10 +40,9 @@ export const config = createWagmiConfig({
       }
     }),
   ],
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-  },
+  transports: Object.fromEntries(
+    chains.map(chain => [chain.id, http()])
+  ),
   ssr: true,
   // Disable auto-connect to prevent hydration issues
   autoConnect: false

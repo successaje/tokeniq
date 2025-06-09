@@ -1,7 +1,7 @@
 "use client";
 
 import { Web3Providers } from './Web3Providers';
-import { ThemeProvider } from '@/context/theme-context';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Toaster } from '@/components/ui/Toaster';
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {

@@ -1,189 +1,167 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  HomeIcon, 
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  ArrowsRightLeftIcon,
-  BanknotesIcon,
-  ChartPieIcon, 
-  CubeIcon, 
-  CogIcon, 
-  QuestionMarkCircleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-  UserGroupIcon,
-  DocumentTextIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon
-} from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
+import {
+  HomeIcon,
+  ChartBarIcon,
+  DocumentTextIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+  DocumentDuplicateIcon,
+  ArrowsRightLeftIcon,
+  CurrencyDollarIcon,
+  ShieldCheckIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  BuildingOfficeIcon,
+  BriefcaseIcon,
+  GlobeAltIcon,
+  WalletIcon,
+  UserGroupIcon,
+  DocumentChartBarIcon,
+  BanknotesIcon,
+} from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { useDisconnect } from 'wagmi';
+
+const mainNavigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Portfolio', href: '/portfolio', icon: WalletIcon },
+  { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+  { name: 'Liquidity', href: '/liquidity', icon: BanknotesIcon },
+];
+
+const rwaNavigation = [
+  { name: 'RWA Management', href: '/rwa', icon: DocumentTextIcon },
+  { name: 'Tokenize', href: '/rwa/tokenize', icon: DocumentDuplicateIcon },
+  { name: 'Bridge', href: '/rwa/bridge', icon: ArrowsRightLeftIcon },
+  { name: 'Collateral', href: '/rwa/collateral', icon: CurrencyDollarIcon },
+  { name: 'Fractionalize', href: '/rwa/fractionalize', icon: ShieldCheckIcon },
+];
+
+const settingsNavigation = [
+  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+  { name: 'Team', href: '/team', icon: UserGroupIcon },
+  { name: 'Reports', href: '/reports', icon: DocumentChartBarIcon },
+];
 
 interface SidebarProps {
-  collapsed: boolean;
-  onCollapse: () => void;
+  collapsed?: boolean;
+  onCollapse?: () => void;
   onClose?: () => void;
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Vaults', href: '/vaults', icon: BanknotesIcon },
-  { name: 'Deposit', href: '/deposit', icon: ArrowDownTrayIcon },
-  { name: 'Withdraw', href: '/withdraw', icon: ArrowUpTrayIcon },
-  { name: 'Swap', href: '/swap', icon: ArrowsRightLeftIcon },
-  { name: 'Stake', href: '/stake', icon: ChartBarIcon },
-  { name: 'Governance', href: '/governance', icon: UserGroupIcon },
-  { name: 'Docs', href: '/docs', icon: DocumentTextIcon },
-];
-
-const secondaryNavigation = [
-  { name: 'Settings', href: '/settings', icon: CogIcon },
-  { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon },
-];
-
-export function Sidebar({ collapsed, onCollapse, onClose }: SidebarProps) {
+export function Sidebar({ collapsed = false, onCollapse, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = useState(false);
+  const { disconnect } = useDisconnect();
+  const [isRwaExpanded, setIsRwaExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleItemClick = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
-
-  // Check if any parent route is active
-  const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
   if (!mounted) {
     return null;
   }
 
-  return (
-    <>
-      <aside
+  const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
+    const isActive = pathname === item.href;
+    return (
+      <Link
+        href={item.href}
         className={cn(
-          'flex flex-col h-full',
-          'transition-all duration-300 ease-in-out',
-          'bg-card text-card-foreground',
-          'border-r border-border',
-          collapsed ? 'lg:w-20' : 'lg:w-56',
-          onClose ? 'w-72' : 'w-full'
+          'group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+          isActive
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground',
+          isSubItem && 'ml-2'
         )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Navigation */}
-        <nav className="flex-1 flex flex-col overflow-y-auto py-4">
-          <div className="space-y-1 px-2">
-            {navigation.map((item) => {
-              const active = isActive(item.href);
-              const Icon = item.icon;
-              
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={handleItemClick}
-                  className={cn(
-                    'group flex items-center px-4 py-3 rounded-lg transition-colors',
-                    'text-sm font-medium',
-                    active
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                    (collapsed && !isHovered) ? 'justify-center' : ''
-                  )}
-                >
-                  <Icon 
-                    className={cn('w-5 h-5 flex-shrink-0', {
-                      'mx-auto': collapsed && !isHovered,
-                      'mr-3': !collapsed || isHovered
-                    })} 
-                  />
-                  {(!collapsed || isHovered) && (
-                    <span className="truncate">{item.name}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+        <item.icon className={cn(
+          "h-5 w-5 shrink-0 transition-colors",
+          isActive ? "text-primary" : "text-muted-foreground group-hover:text-accent-foreground"
+        )} />
+        {!collapsed && (
+          <span className="flex-1">{item.name}</span>
+        )}
+      </Link>
+    );
+  };
 
-          <div className="mt-8 px-4 mb-4">
-            {(!collapsed || isHovered) ? (
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                Resources
-              </div>
-            ) : (
-              <div className="h-px bg-border my-2" />
+  return (
+    <div className="fixed top-16 left-0 bottom-0 z-40 flex w-64 flex-col bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/40">
+      {/* Navigation */}
+      <nav className="flex flex-1 flex-col px-2 py-4 space-y-6">
+        {/* Main Navigation */}
+        <div>
+          <div className="px-3 mb-2">
+            {!collapsed && (
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Main
+              </h2>
             )}
-            <div className="space-y-1">
-              {secondaryNavigation.map((item) => {
-                const active = isActive(item.href);
-                const Icon = item.icon;
-                
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={handleItemClick}
-                    className={cn(
-                      'group flex items-center px-4 py-2.5 rounded-lg transition-colors',
-                      'text-sm font-medium',
-                      active
-                        ? 'text-primary font-semibold'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-                      (collapsed && !isHovered) ? 'justify-center' : ''
-                    )}
-                  >
-                    <Icon 
-                      className={cn('w-5 h-5 flex-shrink-0', {
-                        'mx-auto': collapsed && !isHovered,
-                        'mr-3': !collapsed || isHovered
-                      })} 
-                    />
-                    {(!collapsed || isHovered) && (
-                      <span className="truncate">{item.name}</span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
           </div>
-        </nav>
-
-        {/* Collapse button */}
-        <div className="p-2 border-t border-border">
-          <button
-            onClick={onCollapse}
-            className={cn(
-              'w-full flex items-center justify-center p-2 rounded-lg',
-              'text-muted-foreground hover:bg-muted hover:text-foreground',
-              'transition-colors duration-200',
-              (collapsed && !isHovered) ? 'justify-center' : 'px-3'
-            )}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? (
-              <ChevronRightIcon className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeftIcon className="w-5 h-5 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </button>
+          <ul className="space-y-1">
+            {mainNavigation.map((item) => (
+              <li key={item.name}>
+                <NavItem item={item} />
+              </li>
+            ))}
+          </ul>
         </div>
-      </aside>
-    </>
+
+        {/* RWA Navigation */}
+        <div>
+          <div className="px-3 mb-2">
+            {!collapsed && (
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                RWA
+              </h2>
+            )}
+          </div>
+          <ul className="space-y-1">
+            {rwaNavigation.map((item) => (
+              <li key={item.name}>
+                <NavItem item={item} />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Settings Navigation */}
+        <div>
+          <div className="px-3 mb-2">
+            {!collapsed && (
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Settings
+              </h2>
+            )}
+          </div>
+          <ul className="space-y-1">
+            {settingsNavigation.map((item) => (
+              <li key={item.name}>
+                <NavItem item={item} />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Disconnect Button */}
+        <div className="mt-auto pt-4 border-t border-border/40">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-x-3 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            onClick={() => disconnect()}
+          >
+            <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
+            {!collapsed && 'Disconnect'}
+          </Button>
+        </div>
+      </nav>
+    </div>
   );
 }

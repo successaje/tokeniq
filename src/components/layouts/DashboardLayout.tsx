@@ -4,17 +4,17 @@ import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import { Sidebar } from './Sidebar';
+import { Topbar } from './Topbar';
 
-// Dynamically import client-side only components with proper typing
-const Sidebar = dynamic<{ collapsed: boolean; onCollapse: () => void; onClose?: () => void }>(
-  () => import('./Sidebar').then((mod) => mod.Sidebar),
-  { ssr: false }
-);
+// Dynamically import client-side only components
+const DynamicSidebar = dynamic(() => import('./Sidebar').then(mod => mod.Sidebar), {
+  ssr: false,
+});
 
-const Topbar = dynamic<{ onMenuClick: () => void; sidebarCollapsed: boolean }>(
-  () => import('./Topbar').then((mod) => mod.Topbar),
-  { ssr: false }
-);
+const DynamicTopbar = dynamic(() => import('./Topbar').then(mod => mod.Topbar), {
+  ssr: false,
+});
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -23,96 +23,46 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
-  // Set mounted state after component mounts
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Close mobile sidebar when route changes
+  // Close sidebar on pathname change
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const toggleCollapse = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  // Don't render anything until component is mounted on the client
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div className="relative flex min-h-screen w-full bg-background text-foreground">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar overlay */}
-      <div
-        className={cn(
-          'fixed inset-0 z-40 lg:hidden',
-          'bg-background/80 backdrop-blur-sm',
-          'transition-opacity duration-300 ease-in-out',
-          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        )}
-        onClick={() => setSidebarOpen(false)}
-      />
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      {/* Mobile sidebar */}
-      <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:hidden',
-          'bg-card border-r border-border shadow-lg',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          'flex flex-col'
-        )}
-      >
-        <Sidebar 
-          collapsed={false}
-          onCollapse={toggleCollapse}
+      {/* Desktop sidebar */}
+      <div className={cn(
+        "fixed top-16 left-0 bottom-0 z-40 w-64 transform transition-transform duration-200 ease-in-out lg:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <DynamicSidebar
+          collapsed={sidebarCollapsed}
+          onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           onClose={() => setSidebarOpen(false)}
         />
       </div>
 
-      {/* Desktop sidebar */}
-      <aside 
-        className={cn(
-          'hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col',
-          'transition-all duration-300 ease-in-out',
-          'bg-card border-r border-border',
-          'h-screen',
-          sidebarCollapsed ? 'w-20' : 'w-64'
-        )}
-      >
-        <Sidebar 
-          collapsed={sidebarCollapsed}
-          onCollapse={toggleCollapse}
-        />
-      </aside>
-
-      {/* Main content wrapper */}
+      {/* Main content */}
       <div className={cn(
-        'flex flex-col flex-1 w-full',
-        'transition-all duration-300 ease-in-out',
-        'lg:ml-0', // Start with no margin
-        {
-          'lg:ml-20': sidebarCollapsed,
-          'lg:ml-64': !sidebarCollapsed
-        }
+        "flex min-h-screen flex-col transition-all duration-200 ease-in-out",
+        sidebarCollapsed ? "lg:pl-16" : "lg:pl-64"
       )}>
-        <Topbar 
-          onMenuClick={toggleSidebar}
-          sidebarCollapsed={sidebarCollapsed}
+        <DynamicTopbar
+          onMenuClick={() => setSidebarOpen(true)}
+          onCollapseClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        
-        <main className="flex-1 overflow-y-auto bg-background">
-          <div className="mx-auto w-full max-w-7xl p-6">
-            {children}
-          </div>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
+          {children}
         </main>
       </div>
     </div>
