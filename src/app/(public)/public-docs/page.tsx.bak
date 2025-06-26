@@ -1,0 +1,107 @@
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Code, Book, Terminal, Database } from "lucide-react";
+import Link from "next/link";
+import { DocsHeader } from "@/components/layouts/DocsHeader";
+
+export default function DocumentationPage() {
+  return (
+    <div className="min-h-screen bg-background">
+      <DocsHeader />
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8">TokenIQ Documentation</h1>
+          
+          <div className="grid gap-8">
+            {/* Quick Start Section */}
+            <section className="bg-card rounded-lg p-6 border">
+              <h2 className="text-2xl font-semibold mb-4">Quick Start</h2>
+              <p className="text-muted-foreground mb-4">
+                Get started with TokenIQ in minutes. Our platform provides powerful APIs and SDKs for tokenizing real-world assets.
+              </p>
+              <div className="flex gap-4">
+                <Button asChild>
+                  <Link href="/docs/quickstart" className="inline-flex items-center gap-2">
+                    Quick Start Guide <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </section>
+
+            {/* Integration Options */}
+            <section className="grid md:grid-cols-2 gap-6">
+              <div className="bg-card rounded-lg p-6 border">
+                <div className="flex items-center gap-3 mb-4">
+                  <Code className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl font-semibold">API Reference</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Comprehensive API documentation for integrating TokenIQ into your applications.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link href="/docs/api" className="inline-flex items-center gap-2">
+                    View API Docs <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="bg-card rounded-lg p-6 border">
+                <div className="flex items-center gap-3 mb-4">
+                  <Terminal className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl font-semibold">SDK</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Official SDKs for JavaScript, Python, and other popular languages.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link href="/docs/sdk" className="inline-flex items-center gap-2">
+                    View SDK Docs <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="bg-card rounded-lg p-6 border">
+                <div className="flex items-center gap-3 mb-4">
+                  <Database className="h-6 w-6 text-primary" />
+                  <h3 className="text-xl font-semibold">Data Models</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Learn about our data models and how to work with tokenized assets.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link href="/docs/models" className="inline-flex items-center gap-2">
+                    View Data Models <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+
+            </section>
+
+            {/* Examples Section */}
+            <section className="bg-card rounded-lg p-6 border">
+              <div className="flex items-center gap-3 mb-4">
+                <Book className="h-6 w-6 text-primary" />
+                <h3 className="text-xl font-semibold">Examples & Tutorials</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Explore our collection of example implementations and step-by-step tutorials.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <Button variant="outline" asChild>
+                  <Link href="/docs/examples" className="inline-flex items-center gap-2">
+                    View Examples <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/docs/tutorials" className="inline-flex items-center gap-2">
+                    View Tutorials <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+} 

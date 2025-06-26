@@ -1,0 +1,166 @@
+'use client';
+
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Book, FileText, HelpCircle, MessageSquare, Search } from 'lucide-react';
+
+export default function HelpPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Help Center</h1>
+        <p className="text-muted-foreground">Find answers to your questions and get support.</p>
+      </div>
+
+      <div className="mb-8">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search for help..."
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <Tabs defaultValue="guides" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="guides">
+            <Book className="mr-2 h-4 w-4" />
+            Guides
+          </TabsTrigger>
+          <TabsTrigger value="faq">
+            <HelpCircle className="mr-2 h-4 w-4" />
+            FAQ
+          </TabsTrigger>
+          <TabsTrigger value="documentation">
+            <FileText className="mr-2 h-4 w-4" />
+            Documentation
+          </TabsTrigger>
+          <TabsTrigger value="support">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Support
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="guides" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Getting Started</h3>
+              <p className="text-muted-foreground mb-4">
+                Learn the basics of TokenIQ and how to set up your account.
+              </p>
+              <Button variant="outline">Read Guide</Button>
+            </Card>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Treasury Management</h3>
+              <p className="text-muted-foreground mb-4">
+                Understand how to manage your treasury and deploy strategies.
+              </p>
+              <Button variant="outline">Read Guide</Button>
+            </Card>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Security Best Practices</h3>
+              <p className="text-muted-foreground mb-4">
+                Learn about security features and best practices.
+              </p>
+              <Button variant="outline">Read Guide</Button>
+            </Card>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-2">API Integration</h3>
+              <p className="text-muted-foreground mb-4">
+                Integrate TokenIQ with your existing systems.
+              </p>
+              <Button variant="outline">Read Guide</Button>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="faq" className="space-y-6">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">What is TokenIQ?</h3>
+                <p className="text-muted-foreground">
+                  TokenIQ is an enterprise-grade DeFi treasury management platform that helps businesses manage their digital assets efficiently and securely.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">How secure is TokenIQ?</h3>
+                <p className="text-muted-foreground">
+                  TokenIQ implements industry-leading security measures, including multi-signature wallets, role-based access control, and comprehensive audit trails.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">What chains are supported?</h3>
+                <p className="text-muted-foreground">
+                  TokenIQ currently supports Ethereum mainnet and testnets, with plans to expand to other major chains in the future.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">How do I get started?</h3>
+                <p className="text-muted-foreground">
+                  Sign up for an account, complete the verification process, and follow our getting started guide to set up your treasury.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documentation" className="space-y-6">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">API Reference</h3>
+                <p className="text-muted-foreground mb-4">
+                  Comprehensive documentation of our REST API endpoints and WebSocket streams.
+                </p>
+                <Button variant="outline">View API Docs</Button>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">SDK Documentation</h3>
+                <p className="text-muted-foreground mb-4">
+                  Documentation for our official SDKs and client libraries.
+                </p>
+                <Button variant="outline">View SDK Docs</Button>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Integration Guides</h3>
+                <p className="text-muted-foreground mb-4">
+                  Step-by-step guides for integrating TokenIQ with your systems.
+                </p>
+                <Button variant="outline">View Integration Guides</Button>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="support" className="space-y-6">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Contact Support</h3>
+                <p className="text-muted-foreground mb-4">
+                  Our support team is available 24/7 to help you with any questions or issues.
+                </p>
+                <Button>Contact Support</Button>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Community</h3>
+                <p className="text-muted-foreground mb-4">
+                  Join our community to connect with other users and stay updated.
+                </p>
+                <div className="flex space-x-4">
+                  <Button variant="outline">Discord</Button>
+                  <Button variant="outline">Twitter</Button>
+                  <Button variant="outline">GitHub</Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+} 

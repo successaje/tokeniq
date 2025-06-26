@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   HomeIcon,
   ChartBarIcon,
@@ -13,12 +13,8 @@ import {
   DocumentDuplicateIcon,
   ArrowsRightLeftIcon,
   CurrencyDollarIcon,
-  ShieldCheckIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  BuildingOfficeIcon,
+  UserCircleIcon,
   BriefcaseIcon,
-  GlobeAltIcon,
   WalletIcon,
   UserGroupIcon,
   DocumentChartBarIcon,
@@ -26,12 +22,15 @@ import {
 } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import { useDisconnect } from 'wagmi';
+import { X } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 const mainNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Portfolio', href: '/portfolio', icon: WalletIcon },
+  { name: 'Assets', href: '/assets', icon: BriefcaseIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-  { name: 'Liquidity', href: '/liquidity', icon: BanknotesIcon },
+  { name: 'Strategies', href: '/strategies', icon: BanknotesIcon },
 ];
 
 const rwaNavigation = [
@@ -39,7 +38,6 @@ const rwaNavigation = [
   { name: 'Tokenize', href: '/rwa/tokenize', icon: DocumentDuplicateIcon },
   { name: 'Bridge', href: '/rwa/bridge', icon: ArrowsRightLeftIcon },
   { name: 'Collateral', href: '/rwa/collateral', icon: CurrencyDollarIcon },
-  { name: 'Fractionalize', href: '/rwa/fractionalize', icon: ShieldCheckIcon },
 ];
 
 const settingsNavigation = [
@@ -52,9 +50,17 @@ interface SidebarProps {
   collapsed?: boolean;
   onCollapse?: () => void;
   onClose?: () => void;
+  isOpen?: boolean;
+  className?: string;
 }
 
-export function Sidebar({ collapsed = false, onCollapse, onClose }: SidebarProps) {
+export function Sidebar({ 
+  isOpen = true, 
+  onClose, 
+  className = '',
+  collapsed = false,
+  onCollapse
+}: SidebarProps) {
   const pathname = usePathname();
   const { disconnect } = useDisconnect();
   const [isRwaExpanded, setIsRwaExpanded] = useState(false);
@@ -93,75 +99,140 @@ export function Sidebar({ collapsed = false, onCollapse, onClose }: SidebarProps
   };
 
   return (
-    <div className="fixed top-16 left-0 bottom-0 z-40 flex w-64 flex-col bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/40">
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col px-2 py-4 space-y-6">
-        {/* Main Navigation */}
-        <div>
-          <div className="px-3 mb-2">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div className={cn(
+        'fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r bg-background transition-all duration-300',
+        !isOpen && '-translate-x-full',
+        className
+      )}>
+        {/* Mobile header */}
+        <div className="flex h-16 items-center justify-between border-b px-4">
+          <Link href="/" className="flex items-center space-x-2">
+            <Logo className="h-8 w-8" />
+            {!collapsed && <span className="text-xl font-bold">TokenIQ</span>}
+          </Link>
+          <div className="flex items-center">
+            <button
+              onClick={onClose}
+              className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+              aria-label="Close sidebar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto">
+          <div className="space-y-1 p-2">
             {!collapsed && (
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                 Main
               </h2>
             )}
+            <ul className="space-y-1">
+              {mainNavigation.map((item) => (
+                <li key={item.name}>
+                  <NavItem item={item} />
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-1">
-            {mainNavigation.map((item) => (
-              <li key={item.name}>
-                <NavItem item={item} />
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        {/* RWA Navigation */}
-        <div>
-          <div className="px-3 mb-2">
-            {!collapsed && (
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                RWA
-              </h2>
+          <div className="space-y-1 p-2">
+            <div className="flex items-center justify-between">
+              {!collapsed && (
+                <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  RWA
+                </h2>
+              )}
+            </div>
+            <button
+              onClick={() => setIsRwaExpanded(!isRwaExpanded)}
+              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+            >
+              <div className="flex items-center gap-x-3">
+                <DocumentTextIcon className="h-5 w-5" />
+                {!collapsed && <span>Real World Assets</span>}
+              </div>
+              {!collapsed && (
+                <svg
+                  className={cn(
+                    'h-4 w-4 transition-transform',
+                    isRwaExpanded ? 'rotate-180' : ''
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              )}
+            </button>
+
+            {isRwaExpanded && (
+              <div className="mt-1 space-y-1 pl-4">
+                {rwaNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} isSubItem />
+                ))}
+              </div>
             )}
           </div>
-          <ul className="space-y-1">
-            {rwaNavigation.map((item) => (
-              <li key={item.name}>
-                <NavItem item={item} />
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        {/* Settings Navigation */}
-        <div>
-          <div className="px-3 mb-2">
+          <div className="border-t border-border/40 p-2">
             {!collapsed && (
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                 Settings
               </h2>
             )}
+            <ul className="space-y-1">
+              {settingsNavigation.map((item) => (
+                <li key={item.name}>
+                  <NavItem item={item} />
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-1">
-            {settingsNavigation.map((item) => (
-              <li key={item.name}>
-                <NavItem item={item} />
-              </li>
-            ))}
-          </ul>
-        </div>
+        </nav>
 
-        {/* Disconnect Button */}
-        <div className="mt-auto pt-4 border-t border-border/40">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-x-3 text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            onClick={() => disconnect()}
-          >
-            <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
-            {!collapsed && 'Disconnect'}
-          </Button>
+        {/* Bottom section */}
+        <div className="mt-auto border-t border-border/40 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-x-2">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <UserCircleIcon className="h-5 w-5 text-primary" />
+              </div>
+              {!collapsed && (
+                <div>
+                  <p className="text-sm font-medium">User Name</p>
+                  <p className="text-xs text-muted-foreground">user@example.com</p>
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => disconnect()}
+              className="text-muted-foreground hover:text-foreground"
+              title="Sign out"
+            >
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 }

@@ -22,19 +22,19 @@ export function Navbar() {
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
-              href="/dashboard"
+              href="/protected/dashboard"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
               Dashboard
             </Link>
             <Link
-              href="/assets"
+              href="/protected/assets"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
               Assets
             </Link>
             <Link
-              href="/portfolio"
+              href="/protected/portfolio"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
               Portfolio

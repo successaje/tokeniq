@@ -10,7 +10,7 @@ import { CustomConnectButton } from '@/components/Web3Modal';
 import { cn } from '@/lib/utils';
 import { Menu as MenuIcon, Sun, Moon, ChevronDownIcon } from 'lucide-react';
 import { useAccount, useChainId, useConfig } from 'wagmi';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },

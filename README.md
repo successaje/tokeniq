@@ -43,8 +43,64 @@
 | **Frontend** | Next.js, TailwindCSS, TypeScript, shadcn/ui, Framer Motion |
 | **Backend / Smart Contracts** | Solidity, Hardhat, Chainlink CCIP, Automation, Data Feeds |
 | **AI Integration** | ElizaOS, OpenAI/Anthropic (for market intelligence & NLP) |
-| **Deployment Targets** | Ethereum, Optimism, Polygon (modular EVM support) |
+| **Deployment Targets** | Ethereum, Avalanche, Base, Optimism, Polygon (modular EVM support) |
 | **Token Standards** | ERC-20, ERC-721, ERC-3643 (for RWA compliance) |
+
+---
+
+## 📁 Contract Structure
+```
+contracts/
+│
+├── VaultManager.sol # Main user deposit, vault, and yield routing logic
+├── VaultFactory.sol # Deploys StrategyVaults modularly
+│
+├── strategies/ # Yield-generating vault strategies
+│ ├── AaveVault.sol
+│ ├── CurveVault.sol
+│ └── RWAInvoiceVault.sol
+│
+├── rwa/ # Tokenized Real World Asset contracts
+│ ├── TokenizedInvoice.sol # ERC721 token for invoice representation
+│ └── InvoiceRegistry.sol # Stores metadata, valuation, status
+│
+├── ai/ # AI agent configuration (ElizaOS or off-chain trigger)
+│ └── TreasuryAIManager.sol
+│
+├── crosschain/ # Chainlink CCIP and message router
+│ └── CrossChainRouter.sol
+│
+└── governance/ # Optional governance and reward token logic
+└── TokenIQToken.sol
+```
+---
+
+
+## Deployed contracts 
+
+### AaveVault 
+- Ethereum Sepolia 
+    - [0xB791Be1D932397e3eFa757C8d4B9F6BAC86F1Ca1](https://sepolia.etherscan.io/address/0xB791Be1D932397e3eFa757C8d4B9F6BAC86F1Ca1#code)
+
+### CrossChainRouter
+- Ethereum Sepolia
+    - [0xD1d6EE0c5309A09Df9ca4c2936956A49cca9eb71](https://sepolia.etherscan.io/address/0xD1d6EE0c5309A09Df9ca4c2936956A49cca9eb71#code)
+- Avalanche Fuji
+    - [0x6444f16e29Bf33a8C9da2B89E472b58Bafe41b9c](https://testnet.snowtrace.io/address/0x6444f16e29Bf33a8C9da2B89E472b58Bafe41b9c#code)
+- Base Sepolia
+    - [0x7CC324d15E5fF17c43188fB63b462B9a79dA68f6](https://sepolia.basescan.org/address/0x7CC324d15E5fF17c43188fB63b462B9a79dA68f6#code)
+
+### TreasuryAIManager
+- Avalanche Fuji
+    - [0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc](https://testnet.snowtrace.io/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc#code)
+
+### VaultFactory
+- Avalanche Fuji
+    - [0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54](https://testnet.snowtrace.io/address/0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54#code)
+
+### VaultManager
+- Avalanche Fuji
+    - [0xF673F508104876c72C8724728f81d50E01649b40](https://testnet.snowtrace.io/address/0xF673F508104876c72C8724728f81d50E01649b40#code)
 
 ---
 

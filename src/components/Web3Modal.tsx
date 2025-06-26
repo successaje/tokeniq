@@ -3,7 +3,7 @@
 import { useAccount, useDisconnect } from 'wagmi'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useState, useEffect, Fragment } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ThemeToggle } from './theme-toggle'
 import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'

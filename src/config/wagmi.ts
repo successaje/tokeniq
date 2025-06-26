@@ -1,49 +1,70 @@
-import { http } from 'wagmi'
+import { http } from 'wagmi';
 import { 
   mainnet, 
-  arbitrum, 
-  base, 
-  avalanche, 
+  sepolia, 
   polygon, 
-  optimism 
-} from 'wagmi/chains'
-import { createConfig } from 'wagmi'
-import { injected, metaMask, walletConnect } from 'wagmi/connectors'
-
-// Check if we're in a browser environment
-const isBrowser = typeof window !== 'undefined';
-
-// 1. Get projectId at https://cloud.walletconnect.com
-const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''
-
-if (!projectId) {
-  console.warn('WalletConnect project ID is not set. Please set NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID in your .env file')
-}
+  polygonMumbai, 
+  arbitrum, 
+  arbitrumGoerli,
+  avalanche,
+  avalancheFuji,
+  bsc,
+  bscTestnet,
+  base,
+  baseSepolia
+} from 'wagmi/chains';
+import { injected, metaMask, walletConnect } from 'wagmi/connectors';
+import { createConfig } from 'wagmi';
 
 // Configure chains
-const chains = [mainnet, arbitrum, base, avalanche, polygon, optimism]
+export const supportedChains = [
+  mainnet, 
+  sepolia, 
+  polygon, 
+  polygonMumbai, 
+  arbitrum, 
+  arbitrumGoerli,
+  avalanche,
+  avalancheFuji,
+  bsc,
+  bscTestnet,
+  base,
+  baseSepolia
+] as const;
 
-// 2. Create wagmiConfig
-export const config = createConfig({
-  chains,
-  connectors: [
-    injected({ shimDisconnect: true }),
-    metaMask({ dappMetadata: { name: 'TokenIQ' } }),
-    walletConnect({ 
-      projectId,
-      showQrModal: false, // We'll use Web3Modal's modal
-      metadata: {
-        name: 'TokenIQ',
-        description: 'AI-Powered Treasury Management',
-        url: isBrowser ? window.location.hostname : '',
-        icons: ['https://tokeniq.xyz/logo.png']
-      }
-    }),
-  ],
-  transports: Object.fromEntries(
-    chains.map(chain => [chain.id, http()])
-  ),
-  ssr: true,
-  // Disable auto-connect to prevent hydration issues
-  autoConnect: false
-})
+// Helper function to create the config
+export function createWagmiConfig() {
+  // Only access environment variables on the client side
+  const projectId = typeof window !== 'undefined' ? 
+    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID : '';
+
+  // Configure transports for all supported chains
+  const transports = supportedChains.reduce((acc, chain) => {
+    acc[chain.id] = http();
+    return acc;
+  }, {} as Record<number, any>);
+
+  // Configure connectors
+  const connectors = [
+    injected(),
+    metaMask(),
+    ...(projectId ? [
+      walletConnect({
+        projectId,
+        showQrModal: true,
+      })
+    ] : []),
+  ];
+
+  return createConfig({
+    chains: supportedChains,
+    transports,
+    connectors,
+    ssr: false, // Disable SSR to prevent issues with browser APIs
+    // Note: autoConnect is not a valid config option in the current wagmi version
+    // We'll handle connection state in the UI components
+  });
+}
+
+// Export a default config for backward compatibility
+export const config = createWagmiConfig();

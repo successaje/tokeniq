@@ -1,14 +1,21 @@
 'use client';
 
-import { ThemeProvider } from './ThemeProvider';
 import { Web3Provider } from './Web3Provider';
+import { ThemeProviderWrapper } from '@/components/theme/ThemeProviderWrapper';
+import { ContractProviderWrapper } from './ContractProviderWrapper';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+type ProvidersProps = {
+  children: React.ReactNode;
+};
+
+export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider>
+    <ThemeProviderWrapper>
       <Web3Provider>
-        {children}
+        <ContractProviderWrapper>
+          {children}
+        </ContractProviderWrapper>
       </Web3Provider>
-    </ThemeProvider>
+    </ThemeProviderWrapper>
   );
-} 
+}

@@ -9,7 +9,7 @@ import {
   ChartBarIcon, 
   BoltIcon 
 } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { useAccount, useBalance, useWriteContract } from 'wagmi';

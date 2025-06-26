@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/Card'
+import { Card } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
 const data = [

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/Card'
+import { Card } from '@/components/ui/card'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const data = [

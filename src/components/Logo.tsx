@@ -11,8 +11,8 @@ interface LogoProps {
 }
 
 export function Logo({ className, width = 32, height = 32 }: LogoProps) {
-  const { theme } = useTheme();
-  const logoSrc = theme === 'dark' ? '/tokeniq-darkmode-logo.png' : '/tokeniq-lightmode-logo.png';
+  const { resolvedTheme } = useTheme();
+  const logoSrc = resolvedTheme === 'dark' ? '/tokeniq-darkmode-logo.png' : '/tokeniq-lightmode-logo.png';
 
   return (
     <div className={cn('relative', className)}>
