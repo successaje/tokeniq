@@ -242,7 +242,7 @@ export function StrategyMonitorModal({
 
                 {/* Withdrawal Confirmation Modal */}
                 {showConfirm && (
-                  <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50`}>
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
                     <div className={`p-6 rounded-lg max-w-md w-full ${
                       theme === 'dark' ? 'bg-gray-900' : 'bg-white'
                     }`}>

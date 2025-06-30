@@ -150,22 +150,39 @@ export function Sidebar({ isOpen = true, onClose, className = '' }: SidebarProps
   const router = useRouter();
 
   const NavItem = React.memo(({ item, onClose }: { item: NavigationItem; onClose?: () => void }) => {
-    const isActive = pathname === item.href || 
-                   (item.href !== '/' && pathname.startsWith(item.href) && 
-                   (pathname[item.href.length] === '/' || pathname.length === item.href.length));
+    const isActive = React.useMemo(() => 
+      pathname === item.href || 
+      (item.href !== '/' && pathname.startsWith(item.href) && 
+      (pathname[item.href.length] === '/' || pathname.length === item.href.length || 
+      (item.href === '/vaults' && pathname.startsWith('/vaults/')))),
+      [pathname, item.href]
+    );
+    
     const Icon = item.icon;
     const [isNavigating, setIsNavigating] = React.useState(false);
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = async (e: React.MouseEvent) => {
       e.preventDefault();
-      if (isActive) return;
+      if (isActive || isNavigating) return;
       
-      setIsNavigating(true);
-      router.push(item.href);
-      onClose?.();
-      
-      // Reset navigation state after a short delay
-      setTimeout(() => setIsNavigating(false), 500);
+      try {
+        setIsNavigating(true);
+        
+        // Close the sidebar first if it's open
+        if (onClose) {
+          onClose();
+          // Small delay to allow the sidebar to close before navigation
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Use router.push with error handling
+        await router.push(item.href);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        // Optionally show error toast here
+      } finally {
+        setIsNavigating(false);
+      }
     };
 
     return (

@@ -22,10 +22,41 @@ export default function DiscoverOverviewPage() {
   ];
 
   const chains = [
-    { name: 'Ethereum', value: 2200000, color: '#627EEA' },
-    { name: 'Arbitrum', value: 800000, color: '#28A0F0' },
-    { name: 'Optimism', value: 500000, color: '#FF0420' },
-    { name: 'Polygon', value: 300000, color: '#8247E5' },
+    { 
+      name: 'Ethereum', 
+      value: 2200000, 
+      color: '#627EEA',
+      logoUrl: '/logos/ethereum.png',
+      fallbackUrl: '/logos/ethereum copy.png' // Fallback in case the first one doesn't exist
+    },
+    { 
+      name: 'Arbitrum', 
+      value: 800000, 
+      color: '#28A0F0',
+      logoUrl: '/logos/arbitrum-arb-logo.png',
+      fallbackUrl: ''
+    },
+    { 
+      name: 'Optimism', 
+      value: 500000, 
+      color: '#FF0420',
+      logoUrl: '/logos/optimism.png',
+      fallbackUrl: ''
+    },
+    { 
+      name: 'Polygon', 
+      value: 300000, 
+      color: '#8247E5',
+      logoUrl: '/logos/polygon-matic-logo.png',
+      fallbackUrl: ''
+    },
+    { 
+      name: 'Avalanche', 
+      value: 250000, 
+      color: '#E84142',
+      logoUrl: '/logos/avalanche-avax-logo.png',
+      fallbackUrl: ''
+    },
   ];
 
   const yieldHistoryData = [
@@ -212,10 +243,23 @@ export default function DiscoverOverviewPage() {
                         <div key={chain.name} className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <div className="flex items-center">
-                              <div 
-                                className="w-3 h-3 rounded-full mr-2" 
-                                style={{ backgroundColor: chain.color }}
-                              />
+                              <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-muted flex items-center justify-center">
+                                <img 
+                                  src={chain.logoUrl} 
+                                  alt={`${chain.name} logo`}
+                                  className="w-4 h-4 object-contain"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    console.log(`Error loading ${chain.name} logo from ${target.src}`);
+                                    if (target.src !== chain.fallbackUrl) {
+                                      target.src = chain.fallbackUrl;
+                                    } else {
+                                      target.onerror = null;
+                                      target.src = `https://ui-avatars.com/api/?name=${chain.name}&background=${chain.color.replace('#', '')}&color=fff`;
+                                    }
+                                  }}
+                                />
+                              </div>
                               <span>{chain.name}</span>
                             </div>
                             <span className="font-medium">

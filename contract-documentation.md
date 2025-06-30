@@ -61,8 +61,8 @@ TokenIQ is a sophisticated DeFi protocol that combines automated yield strategie
 ### AaveVault
 
 **Network**: Ethereum Sepolia  
-**Address**: [0xB791B...1Ca1](https://sepolia.etherscan.io/address/0xB791Be1D932397e3eFa757C8d4B9F6BAC86F1Ca1)  
-**ABI**: [View ABI](https://sepolia.etherscan.io/address/0xB791Be1D932397e3eFa757C8d4B9F6BAC86F1Ca1#code)
+**Address**: [0xd7b55471Ff384d8a229E948e711CB4C4F952f277](https://sepolia.etherscan.io/address/0xd7b55471Ff384d8a229E948e711CB4C4F952f277)  
+**ABI**: [View ABI](https://sepolia.etherscan.io/address/0xd7b55471Ff384d8a229E948e711CB4C4F952f277#code)
 
 #### State Variables
 

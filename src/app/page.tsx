@@ -233,7 +233,7 @@ export default function Home() {
 
   if (isOnboarding) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
         <Card className="w-full max-w-md p-6 space-y-6">
           <h2 className="text-2xl font-bold text-center">Welcome to TokenIQ</h2>
           <p className="text-center text-muted-foreground mb-6">

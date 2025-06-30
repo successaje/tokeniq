@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layouts/NewSidebar';
 import { Header } from '@/components/layouts/Header';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ElizaProvider } from '@/providers/ElizaProvider';
 
 export default function ProtectedLayout({
   children,
@@ -29,7 +30,8 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <ElizaProvider>
+      <div className="min-h-screen flex flex-col bg-background">
       {/* Header - Fixed at the top */}
       <Header />
       
@@ -56,7 +58,8 @@ export default function ProtectedLayout({
             </AnimatePresence>
           </div>
         </main>
+        </div>
       </div>
-    </div>
+    </ElizaProvider>
   );
 }

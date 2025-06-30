@@ -2,15 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import * as ScrollArea from '@radix-ui/react-scroll-area';
+
 import { Brain, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { chatService } from '@/services/chat';
+import { ChatMessage } from '@/types/chat';
 
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-}
+
 
 export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -23,6 +21,12 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -37,22 +41,28 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
     setInput('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Only send the new user message to the chat service
+      const response = await chatService.sendMessage([userMessage]);
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Analyzing your question and preparing a detailed response...',
+        content: response,
         timestamp: new Date().toLocaleTimeString(),
       };
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error processing your request. Please try again later.',
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
 
-    // Scroll to bottom
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    // Auto-scroll is now handled by the useEffect
   };
 
   useEffect(() => {
@@ -88,23 +98,23 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
               <X className="h-4 w-4" />
             </button>
 
-            <div className="flex flex-col h-[calc(100vh-16rem)]">
-              <ScrollArea.Root className="flex-1 pr-4">
-                <div 
-                  ref={scrollRef}
-                  className="space-y-4 p-4"
-                >
+            <div className="flex flex-col h-[70vh] min-w-0 max-h-[80vh]">
+              <div 
+                className="flex-1 min-w-0 overflow-y-auto"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                <div className="space-y-4 p-4 w-full min-w-0">
                   {messages.map((message, index) => (
                     <div
                       key={index}
                       className={cn(
-                        "flex gap-2 p-3 rounded-lg",
+                        "flex gap-3 p-3 rounded-lg w-full min-w-0",
                         message.role === 'user' ? "bg-muted" : "bg-emerald-50/20"
                       )}
                     >
-                      <div className="flex items-center">
+                      <div className="flex-shrink-0 flex items-start">
                         <div className={cn(
-                          "h-8 w-8 rounded-full flex items-center justify-center",
+                          "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
                           message.role === 'user' ? "bg-primary" : "bg-emerald-500"
                         )}>
                           <span className="text-sm font-medium text-white">
@@ -112,8 +122,8 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                           </span>
                         </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-foreground break-words whitespace-pre-wrap">
                           {message.content}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -122,6 +132,7 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                       </div>
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                   {isLoading && (
                     <div className="flex gap-2 p-3 rounded-lg bg-emerald-50/20">
                       <div className="flex items-center">
@@ -137,9 +148,8 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                     </div>
                   )}
                 </div>
-              </ScrollArea.Root>
-
-              <div className="border-t border-border p-4">
+              </div>
+              <div className="border-t border-border p-4 flex-shrink-0 bg-background relative z-10">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -147,6 +157,12 @@ export function ChatModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-1 bg-input rounded-md p-2 border border-border focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
                   />
                   <button
                     onClick={handleSendMessage}

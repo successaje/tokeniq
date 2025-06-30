@@ -1,19 +1,70 @@
 'use client';
 
-import { useState } from 'react';
-import CrossChainBridge from './components/cross-chain-bridge';
-import { TransactionsHistory } from './components/transactions-history';
-import { FeesEstimator } from './components/fees-estimator';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, Shield, Zap, ArrowRight, Info } from 'lucide-react';
+import { CheckCircle2, Clock, Shield, Zap, ArrowRight, Info, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Dynamically import components with no SSR
+const CrossChainBridge = dynamic(
+  () => import('./components/cross-chain-bridge'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+);
+
+const TransactionsHistory = dynamic<{}>(
+  () => import('./components/transactions-history').then(mod => mod.TransactionsHistory),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+);
+
+const FeesEstimator = dynamic<{
+  fromChain: string;
+  toChain: string;
+  token: string;
+  amount: number;
+  isLoading?: boolean;
+}>(
+  () => import('./components/fees-estimator').then(mod => mod.FeesEstimator),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+);
+
 export default function CrossChainPage() {
-  const [selectedFromChain, setSelectedFromChain] = useState('Ethereum');
-  const [selectedToChain, setSelectedToChain] = useState('Polygon');
-  const [selectedToken, setSelectedToken] = useState('USDC');
+  const [selectedFromChain, setSelectedFromChain] = useState('Avalanche Fuji');
+  const [selectedToChain, setSelectedToChain] = useState('Avalanche Fuji');
+  const [selectedToken, setSelectedToken] = useState('CCIP-BnM');
   const [amount, setAmount] = useState(0);
   const [isBridgeActive, setIsBridgeActive] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Mock CCIP status data
   const ccipStatus = {
@@ -23,6 +74,17 @@ export default function CrossChainPage() {
     avgTransferTime: '2-5 minutes',
     securityScore: '99.9%'
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading bridge interface...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full space-y-8">
@@ -204,7 +266,13 @@ export default function CrossChainPage() {
               <CardDescription>Estimate your transfer costs</CardDescription>
             </CardHeader>
             <CardContent>
-              <FeesEstimator />
+              <FeesEstimator 
+                fromChain={selectedFromChain}
+                toChain={selectedToChain}
+                token={selectedToken}
+                amount={amount}
+                isLoading={isLoading}
+              />
             </CardContent>
           </Card>
 

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
-import { ClientLayout } from './ClientLayout';
+import ClientLayoutWrapper from './ClientLayoutWrapper';
 
 // Initialize the Inter font with required settings
 const inter = Inter({ 
@@ -78,9 +78,9 @@ export default function RootLayout({
         className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
         suppressHydrationWarning={true}
       >
-        <ClientLayout>
+        <ClientLayoutWrapper>
           {children}
-        </ClientLayout>
+        </ClientLayoutWrapper>
       </body>
     </html>
   );

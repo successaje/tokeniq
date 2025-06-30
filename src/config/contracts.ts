@@ -8,7 +8,7 @@ export const CONTRACT_ADDRESSES = {
   treasuryAIManager: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc' as Address, // Fuji
   
   // Vaults
-  aaveVault: '0xB791Be1D932397e3eFa757C8d4B9F6BAC86F1Ca1' as Address, // Sepolia
+  aaveVault: '0xd7b55471Ff384d8a229E948e711CB4C4F952f277' as Address, // New AaveVault deployment on Sepolia
   
   // Cross Chain
   crossChainRouter: {

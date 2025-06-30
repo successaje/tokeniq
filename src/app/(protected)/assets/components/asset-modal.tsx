@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Asset } from '../page';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const assetFormSchema = z.object({
   name: z.string().min(2, {
@@ -60,6 +61,7 @@ interface AssetModalProps {
 export function AssetModal({ children, asset }: AssetModalProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const defaultValues: Partial<AssetFormValues> = {
     name: asset?.name || '',
@@ -106,7 +108,12 @@ export function AssetModal({ children, asset }: AssetModalProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent 
+        className={cn(
+          'sm:max-w-[600px] z-[99999] transition-all duration-200',
+          isDropdownOpen && 'backdrop-blur-sm bg-opacity-80'
+        )}
+      >
         <DialogHeader>
           <DialogTitle>{asset ? 'Edit Asset' : 'Add New Asset'}</DialogTitle>
           <DialogDescription>
@@ -137,7 +144,12 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Asset Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="relative">
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        onOpenChange={setIsDropdownOpen}
+                      >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select asset type" />
@@ -151,7 +163,8 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                         <SelectItem value="Commodity">Commodity</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
-                    </Select>
+                      </Select>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -163,7 +176,12 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Blockchain</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="relative">
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        onOpenChange={setIsDropdownOpen}
+                      >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select blockchain" />
@@ -177,7 +195,8 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                         <SelectItem value="Avalanche">Avalanche</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
-                    </Select>
+                      </Select>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -203,7 +222,12 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="relative">
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        onOpenChange={setIsDropdownOpen}
+                      >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -215,7 +239,8 @@ export function AssetModal({ children, asset }: AssetModalProps) {
                         <SelectItem value="Inactive">Inactive</SelectItem>
                         <SelectItem value="Settled">Settled</SelectItem>
                       </SelectContent>
-                    </Select>
+                      </Select>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

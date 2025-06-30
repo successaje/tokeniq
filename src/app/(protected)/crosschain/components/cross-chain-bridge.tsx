@@ -1,435 +1,192 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useAccount } from 'wagmi';
-import { formatUnits, parseUnits, parseEther } from 'viem';
-import { useContractInstances } from '@/hooks/useContractInstances';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useAccount, usePublicClient } from 'wagmi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, RefreshCw, ArrowDown, ArrowRight, Wallet } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Chain, Transaction, NetworkType } from '../types';
 import { useToast } from '@/components/ui/use-toast';
+import { useContracts, SUPPORTED_CHAINS } from '@/contexts/ContractContext';
+import { formatUnits, parseUnits } from 'viem';
+import { Loader2, RefreshCw, ChevronDown, ArrowRight, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Helper function to get chains based on network type
-const getChains = (networkType: NetworkType = 'testnet'): Chain[] => {
-  const chains: Record<NetworkType, Chain[]> = {
-    testnet: [
-      {
-        id: '11155111',
-        name: 'Sepolia',
-        icon: 'eth.svg',
-        color: '#38bdf8',
-        component: undefined,
-        chainId: 11155111,
-        chainSelector: 'sepolia',
-        isTestnet: true,
-        symbol: 'ETH'
-      },
-      {
-        id: '5',
-        name: 'Goerli',
-        icon: 'eth.svg',
-        color: '#38bdf8',
-        component: undefined,
-        chainId: 5,
-        chainSelector: 'goerli',
-        isTestnet: true,
-        symbol: 'ETH'
-      },
-      {
-        id: '421613',
-        name: 'Arbitrum Nova Testnet',
-        icon: 'arbitrum.svg',
-        color: '#000000',
-        component: undefined,
-        chainId: 421613,
-        chainSelector: 'arbitrum-nova',
-        isTestnet: true,
-        symbol: 'ETH'
-      },
-    ],
-    mainnet: [
-      {
-        id: '1',
-        name: 'Ethereum',
-        icon: 'eth.svg',
-        color: '#38bdf8',
-        component: undefined,
-        chainId: 1,
-        chainSelector: 'ethereum',
-        isTestnet: false,
-        symbol: 'ETH'
-      },
-      {
-        id: '137',
-        name: 'Polygon',
-        icon: 'polygon.svg',
-        color: '#8247E5',
-        component: undefined,
-        chainId: 137,
-        chainSelector: 'polygon',
-        isTestnet: false,
-        symbol: 'MATIC'
-      },
-      {
-        id: '8453',
-        name: 'Base',
-        icon: 'base.svg',
-        color: '#000000',
-        component: undefined,
-        chainId: 8453,
-        chainSelector: 'base',
-        isTestnet: false,
-        symbol: 'ETH'
-      },
-    ],
-  } as const;
-
-  return chains[networkType] || chains.testnet;
+// Types
+type Chain = {
+  id: string;
+  name: string;
+  chainId: number;
+  icon: string;
+  symbol: string;
+  logo?: string;
 };
 
-type TokenAddresses = {
-  [key: string]: Record<ChainId, `0x${string}`>;
+type Token = {
+  id: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  icon: string;
+  addresses: Record<number, string>;
 };
 
-const TOKEN_ADDRESSES: TokenAddresses = {
-  USDC: {
-    // Testnet
-    11155111: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // Sepolia
-    43113: '0x5425890298aed601595a70AB815c96711a31Bc65', // Fuji
-    80001: '0x9999f7fea5938fd3b1e26a12c3f2fb024e194f97', // Mumbai
-    84532: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // Base Sepolia
-    // Mainnet
-    1: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Ethereum
-    137: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // Polygon
-    8453: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // Base
-  },
-  Native: {
-    // Native token addresses (0x0 for native tokens)
-    1: '0x0000000000000000000000000000000000000000', // ETH
-    11155111: '0x0000000000000000000000000000000000000000', // ETH Sepolia
-    137: '0x0000000000000000000000000000000000000000', // MATIC
-    80001: '0x0000000000000000000000000000000000000000', // MATIC Mumbai
-    8453: '0x0000000000000000000000000000000000000000', // ETH Base
-    84532: '0x0000000000000000000000000000000000000000', // ETH Base Sepolia
-    43113: '0x0000000000000000000000000000000000000000', // AVAX Fuji
-    [80001]: '0x0000000000000000000000000000000000000000' as const, // Native MATIC
-    [84532]: '0x0000000000000000000000000000000000000000' as const, // Native ETH on Base
-  },
-} as const;
+type ChainSelectorType = 'from' | 'to';
 
-// Token interface with proper typing
-namespace Token {
-  export interface LocalToken {
-    id: string;
-    symbol: string;
-    name: string;
-    icon: string;
-    color: string;
-    component?: React.ComponentType<{ className?: string }>;
-    decimals: number;
-    addresses: Record<ChainId, `0x${string}`>;
-  }
-}
+// Map SUPPORTED_CHAINS to the Chain type expected by the component
+const CHAINS: Chain[] = Object.values(SUPPORTED_CHAINS).map(chain => ({
+  id: chain.name.toLowerCase().replace(/\s+/g, '-'),
+  name: chain.name,
+  chainId: chain.id,
+  icon: chain.logo,
+  symbol: chain.nativeToken,
+}));
 
 const TOKENS: Token[] = [
   {
-    id: 'usdc',
-    symbol: 'USDC',
-    name: 'USD Coin',
-    icon: 'usdc.png',
-    color: 'text-blue-500',
-    component: undefined,
-    decimals: 6,
-    addresses: TOKEN_ADDRESSES.USDC,
+    id: 'ccip-bnm',
+    name: 'CCIP-BnM',
+    symbol: 'CCIP-BnM',
+    decimals: 18,
+    icon: '../icons/tokens/chainlink.png',
+    addresses: {
+      43113: '0xD21341536c5cF5EB1bcb58f6723cE26e8D8E90e4', // Fuji Testnet
+    },
   },
   {
-    id: 'eth',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    icon: 'ethereum.png',
-    color: 'text-blue-400',
-    component: undefined,
+    id: 'link',
+    name: 'Chainlink Token',
+    symbol: 'LINK',
     decimals: 18,
-    addresses: TOKEN_ADDRESSES.Native,
+
+    icon: '../icons/tokens/chainlink.png',
+    addresses: {
+      43113: '0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846', // Fuji Testnet
+    },
   },
 ];
 
-// Chain and token icon component
-interface ChainIconProps {
-  icon: {
-    component?: React.ComponentType<{ className?: string }>;
-    color: string;
-    icon?: string;
-    id?: string;
-    symbol?: string;
-    name?: string;
-  } | string;
-  className?: string;
-  size?: number;
-  isToken?: boolean;
-}
-
-const ChainIcon = ({
-  icon,
-  className = '',
-  size = 6,
-  isToken = false,
-}: ChainIconProps) => {
-  const sizeClassMap = {
-    4: 'h-4 w-4',
-    6: 'h-6 w-6',
-    8: 'h-8 w-8',
-  } as const;
-
-  const sizeClass = sizeClassMap[size as keyof typeof sizeClassMap] || 'h-6 w-6';
-
-  if (typeof icon === 'string') {
-    return (
-      <div className={cn('flex items-center justify-center rounded-full bg-muted', sizeClass, className)}>
-        <span className="text-xs font-medium">{icon}</span>
-      </div>
-    );
-  }
-
-  if ('icon' in icon && icon.icon) {
-    const iconPath = icon.icon.startsWith('http') ? icon.icon : `/icons/${isToken ? 'tokens' : 'chains'}/${icon.icon.replace(/\.svg$/, '.png')}`;
-    return (
-      <div className={cn('flex items-center justify-center rounded-full', icon.color, sizeClass, className)}>
-        <img
-          src={iconPath}
-          alt={icon.name || icon.symbol || 'Token icon'}
-          width={size * 4}
-          height={size * 4}
-          className={cn('rounded-full', isToken ? 'h-4 w-4' : 'h-5 w-5')}
-          priority="true"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            img.src = '/icons/tokens/default.png'; // Fallback to default icon
-          }}
-        />
-      </div>
-    );
-  }
-};
-
-const CrossChainBridge: React.FC<{
-  onFromChainChange?: (chain: Chain) => void;
-  onToChainChange?: (chain: Chain) => void;
-  onAmountChange?: (amount: number) => void;
-}> = ({
-  onFromChainChange = () => {},
-  onToChainChange = () => {},
-  onAmountChange = () => {},
-}) => {
+const CrossChainBridge = () => {
+  // Hooks
   const { address } = useAccount();
+  const publicClient = usePublicClient();
   const { toast } = useToast();
-  const contracts = useContractInstances();
-  const { 
-    sendCrossChainTokens, 
-    getTokenBalances, 
-    getNativeBalance, 
-    getTransactionHistory 
-  } = contracts?.crossChainRouter || {};
+  const { estimateCrossChainFee, sendCrossChainTokens } = useContracts();
 
-  // State variables
-  const [networkType, setNetworkType] = useState<NetworkType>('testnet');
+  // State
   const [selectedFromChain, setSelectedFromChain] = useState<Chain | null>(null);
   const [selectedToChain, setSelectedToChain] = useState<Chain | null>(null);
-  const [selectedToken, setSelectedToken] = useState<LocalToken | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [inputAmount, setInputAmount] = useState('');
-  const [tokenBalance, setTokenBalance] = useState<bigint>(0n);
-  const [loading, setLoading] = useState(false);
-  const [fetchingBalance, setFetchingBalance] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState<string>('0');
   const [showChainSelector, setShowChainSelector] = useState(false);
-  const [chainSelectorType, setChainSelectorType] = useState<'from' | 'to'>('from');
-// ...
   const [showTokenSelector, setShowTokenSelector] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [chainSelectorType, setChainSelectorType] = useState<ChainSelectorType>('from');
+  const [fetchingBalance, setFetchingBalance] = useState(false);
+  const [fetchingFee, setFetchingFee] = useState(false);
+  const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+  const [isBridgeLoading, setIsBridgeLoading] = useState(false);
+  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
 
-  // Get available chains based on network type
-  const availableChains = useMemo(() => getChains(networkType), [networkType]);
-
-  // Initialize with default chains
-  useEffect(() => {
-    if (availableChains.length >= 2) {
-      setSelectedFromChain(availableChains[0]);
-      setSelectedToChain(availableChains[1]);
-    }
-  }, [availableChains]);
-
-  // Toggle between testnet and mainnet
-  const toggleNetwork = () => {
-    const newNetworkType = networkType === 'testnet' ? 'mainnet' : 'testnet';
-    setNetworkType(newNetworkType);
-    setSelectedFromChain(null);
-    setSelectedToChain(null);
-    setSelectedToken(null);
-    setTokenBalance(0n);
-    setInputAmount('');
-    
-    toast({
-      title: `Switched to ${newNetworkType.toUpperCase()}`,
-      description: `Now using ${newNetworkType} networks`,
-    });
-  };
-
-  // Fetch token balance
+  // Fetch token balance when token or chain changes
   const fetchTokenBalance = useCallback(async () => {
-    if (!address || !selectedToken || !selectedFromChain) return;
-    
-    setFetchingBalance(true);
+    if (!address || !selectedToken || !selectedFromChain) {
+      setTokenBalance('0');
+      return;
+    }
+
+    const tokenAddress = selectedToken.addresses[selectedFromChain.chainId];
+    if (!tokenAddress) {
+      setTokenBalance('0');
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
     try {
-      const balance = await getTokenBalances(address, selectedToken.addresses[selectedFromChain.chainId]);
-      setTokenBalance(balance);
+      setIsBalanceLoading(true);
+      
+      // Try with a simpler RPC call
+      const balance = await publicClient.readContract({
+        address: tokenAddress as `0x${string}`,
+        abi: [
+          {
+            constant: true,
+            inputs: [{ name: '_owner', type: 'address' }],
+            name: 'balanceOf',
+            outputs: [{ name: 'balance', type: 'uint256' }],
+            type: 'function',
+            stateMutability: 'view',
+          },
+        ],
+        functionName: 'balanceOf',
+        args: [address],
+        blockTag: 'latest',
+      });
+
+      const formatted = formatUnits(balance as bigint, selectedToken.decimals);
+      setTokenBalance(formatted);
     } catch (error) {
-      console.error('Error fetching token balance:', error);
-      setTokenBalance(0n);
+      console.warn('Error fetching token balance:', error);
+      // Don't show error to user for balance fetches to avoid spamming
+      // Just keep the previous balance or show 0 if not loaded yet
+      if (tokenBalance === '0') {
+        setTokenBalance('0');
+      }
     } finally {
-      setFetchingBalance(false);
+      clearTimeout(timeoutId);
+      setIsBalanceLoading(false);
     }
-  }, [address, selectedToken, selectedFromChain, getTokenBalances]);
+  }, [address, selectedToken, selectedFromChain, publicClient, tokenBalance]);
 
-  // Handle chain selection
-  const handleChainSelect = useCallback((chain: Chain, type: 'from' | 'to') => {
-    if (type === 'from') {
-      setSelectedFromChain(chain);
-      onFromChainChange(chain);
-    } else {
-      setSelectedToChain(chain);
-      onToChainChange(chain);
-    }
-    setShowChainSelector(false);
-  }, [onFromChainChange, onToChainChange]);
-
-  // Format balance for display
-  // Format balance for display
-  const formattedBalance = useMemo(() => {
-    if (!selectedToken || !tokenBalance) return '0';
-    return formatUnits(tokenBalance, selectedToken.decimals);
-  }, [selectedToken, tokenBalance]);
-
-  // Handle token selection
-  const handleTokenSelect = useCallback((token: Token) => {
-    setSelectedToken(token);
-    onAmountChange(0);
-    fetchTokenBalance();
-  }, [fetchTokenBalance, onAmountChange]);
-
-  // Handle amount change
-  const handleAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const amount = parseFloat(value);
-    setInputAmount(value);
-    onAmountChange(amount);
-  }, [onAmountChange]);
-
-  // Handle max amount button click
-  const handleMaxAmount = useCallback(() => {
-    if (tokenBalance > 0n && selectedToken) {
-      try {
-        const maxAmount = formatUnits(tokenBalance, selectedToken.decimals);
-        setInputAmount(maxAmount);
-      } catch (error) {
-        console.error('Error setting max amount:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to set maximum amount',
-          variant: 'destructive',
-        });
-      }
-    }
-  }, [tokenBalance, selectedToken, toast]);
-
-  // Initialize transaction history on mount
+  // Initialize default chains on mount
   useEffect(() => {
-    if (address && getTransactionHistory) {
-      const loadHistory = async () => {
-        try {
-          const history = await getTransactionHistory(address);
-          if (history && Array.isArray(history)) {
-            // Transform TransactionHistory[] to Transaction[]
-            const formattedTransactions = history.map(tx => ({
-              id: tx.txHash || `tx-${Math.random().toString(36).substr(2, 9)}`,
-              fromChain: tx.sourceChainId,
-              toChain: tx.destinationChainId,
-              token: tx.tokenSymbol || 'USDC', // Store token symbol instead of token object
-              amount: tx.amount,
-              status: tx.status as 'pending' | 'completed' | 'failed',
-              timestamp: tx.timestamp || Date.now(),
-              txHash: tx.txHash
-            }));
-            setTransactions(formattedTransactions);
-          }
-        } catch (error) {
-          console.error('Error loading transaction history:', error);
-        }
-      };
-      loadHistory();
+    if (CHAINS.length >= 2) {
+      setSelectedFromChain(CHAINS[0]);
+      setSelectedToChain(CHAINS[1]);
     }
-  }, [address, getTransactionHistory, TOKENS]);
+  }, []);
 
-  // Handle chain swap
-  const handleSwapChains = useCallback(() => {
-    if (selectedFromChain && selectedToChain) {
-      const tempChain = selectedFromChain;
-      setSelectedFromChain(selectedToChain);
-      setSelectedToChain(tempChain);
-    }
-  }, [selectedFromChain, selectedToChain]);
-
-  // Handle refresh button click
-  const handleRefresh = useCallback(async () => {
-    await fetchTokenBalance();
-    if (getTransactionHistory && address) {
-      try {
-        const history = await getTransactionHistory(address);
-        if (history && Array.isArray(history)) {
-          const formattedTransactions = history.map(tx => ({
-            id: tx.txHash || `tx-${Math.random().toString(36).substr(2, 9)}`,
-            fromChain: tx.sourceChainId,
-            toChain: tx.destinationChainId,
-            token: tx.tokenSymbol || TOKENS[0].symbol,
-            amount: tx.amount,
-            status: tx.status as 'pending' | 'completed' | 'failed',
-            timestamp: tx.timestamp || Date.now(),
-            txHash: tx.txHash
-          }));
-          setTransactions(formattedTransactions);
-        }
-      } catch (error) {
-        console.error('Error refreshing transaction history:', error);
-      }
-    }
-  }, [fetchTokenBalance, getTransactionHistory, address, TOKENS]);
+  // Fetch balance when token or chain changes
+  useEffect(() => {
+    fetchTokenBalance();
+  }, [fetchTokenBalance]);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!address || !selectedToken || !selectedFromChain || !selectedToChain) return;
-    
-    setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!address || !selectedToken || !selectedFromChain || !selectedToChain || !inputAmount) return;
+
     try {
-      const amountInWei = parseUnits(inputAmount, selectedToken.decimals);
-      const success = await sendCrossChainTokens(
-        selectedToChain.chainId,
-        selectedToken.addresses[selectedFromChain.chainId],
-        amountInWei
-      );
+      setIsLoading(true);
       
-      if (success) {
-        toast({
-          title: 'Success',
-          description: 'Tokens sent successfully!',
-        });
-        setInputAmount('');
-        await fetchTokenBalance();
-        await getTransactionHistory(address);
-      } else {
-        throw new Error('Transaction failed');
+      const tokenAddress = selectedToken.addresses[selectedFromChain.chainId];
+      if (!tokenAddress) {
+        throw new Error('Token not supported on selected chain');
       }
+
+      const amount = parseUnits(inputAmount, selectedToken.decimals);
+      
+      // Estimate gas fee
+      await estimateCrossChainFee(
+        selectedToChain.chainId,
+        tokenAddress as `0x${string}`,
+        amount
+      );
+
+      // Send tokens
+      await sendCrossChainTokens(
+        selectedToChain.chainId,
+        tokenAddress as `0x${string}`,
+        amount
+      );
+
+      toast({
+        title: 'Success',
+        description: 'Your cross-chain transfer has been initiated.',
+      });
+      setInputAmount('');
     } catch (error) {
       console.error('Error sending tokens:', error);
       toast({
@@ -438,291 +195,342 @@ const CrossChainBridge: React.FC<{
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [address, inputAmount, selectedToken, selectedFromChain, selectedToChain, sendCrossChainTokens, fetchTokenBalance, getTransactionHistory, toast]);
+  };
 
-  // Fetch balance when token or chain changes
-  useEffect(() => {
-    if (address && selectedToken && selectedFromChain) {
-      fetchTokenBalance();
-    }
-  }, [address, selectedToken, selectedFromChain, fetchTokenBalance]);
+  // Render chain selection button
+  const renderChainButton = useCallback((chain: Chain | null, type: ChainSelectorType) => {
+    const isSource = type === 'from';
+    const chainToShow = chain || (isSource ? selectedFromChain : selectedToChain);
+    const isDisabled = isSource
+      ? selectedToChain?.chainId === chainToShow?.chainId
+      : selectedFromChain?.chainId === chainToShow?.chainId;
 
-  // Initialize with default token when chains are set
-  useEffect(() => {
-    if (selectedFromChain && !selectedToken && TOKENS.length > 0) {
-      const defaultToken = TOKENS.find(t => t.addresses[selectedFromChain.chainId]);
-      if (defaultToken) {
-        setSelectedToken(defaultToken);
-      }
-    }
-  }, [selectedFromChain, selectedToken]);
+    const handleClick = () => {
+      setChainSelectorType(type);
+      setShowChainSelector(true);
+    };
 
-  // Render chain selector button
-  const renderChainButton = useCallback((chain: Chain | null, type: 'from' | 'to') => {
+    if (!chainToShow) return <div>Select {type} chain</div>;
+
     return (
       <button
         type="button"
-        onClick={() => {
-          setShowChainSelector(true);
-          setChainSelectorType(type);
-        }}
-        className="flex items-center space-x-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors w-full text-left"
-      >
-        {chain ? (
-          <>
-            <ChainIcon icon={chain} />
-            <span className="font-medium">{chain.name}</span>
-          </>
-        ) : (
-          <span className="text-muted-foreground">Select {type} chain</span>
+        onClick={handleClick}
+        disabled={isDisabled}
+        className={cn(
+          'flex items-center justify-between w-full px-4 py-3 text-left rounded-lg border',
+          isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
         )}
-        <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+            {chainToShow.icon ? (
+              <img 
+                src={chainToShow.icon.startsWith('/') ? chainToShow.icon : `/${chainToShow.icon}`} 
+                alt={chainToShow.name}
+                className="w-5 h-5 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  const chainConfig = Object.values(SUPPORTED_CHAINS).find(c => c.id === chainToShow.chainId);
+                  if (chainConfig?.icon) {
+                    target.src = chainConfig.icon;
+                  } else {
+                    target.src = '/icons/chains/default.svg';
+                  }
+                }}
+              />
+            ) : (
+              <span className="text-xs">{chainToShow.symbol}</span>
+            )}
+          </div>
+          <span>{chainToShow.name}</span>
+        </div>
+        <ChevronDown className="w-4 h-4 opacity-70" />
       </button>
     );
-  }, [setShowChainSelector, setChainSelectorType]);
+  }, [selectedFromChain, selectedToChain]);
 
-  // Render token selector button
+  // Render token selection button
   const renderTokenButton = useCallback(() => {
+    const handleTokenClick = () => {
+      if (!selectedFromChain) return;
+      setShowTokenSelector(true);
+    };
+
+    if (!selectedFromChain) {
+      return (
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="min-w-[120px] justify-between"
+          disabled
+        >
+          Select Chain First
+        </Button>
+      );
+    }
+
     return (
-      <button
-        type="button"
-        onClick={() => setShowTokenSelector(true)}
-        className="flex items-center space-x-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors w-full text-left"
+      <Button 
+        type="button" 
+        variant="outline" 
+        onClick={handleTokenClick} 
+        className="min-w-[120px] justify-between"
       >
         {selectedToken ? (
-          <>
-            <ChainIcon icon={selectedToken} isToken />
-            <span className="font-medium">{selectedToken.symbol}</span>
-          </>
+          <div className="flex items-center gap-2">
+            <img 
+              src={`/tokens/${selectedToken.icon}`} 
+              alt={selectedToken.symbol} 
+              className="w-5 h-5"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/icons/tokens/default.png';
+              }} 
+            />
+            <span>{selectedToken.symbol}</span>
+          </div>
         ) : (
-          <span className="text-muted-foreground">Select token</span>
+          <span>Select Token</span>
         )}
-        <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
-      </button>
-    );
-  }, [selectedToken, setShowTokenSelector]);
-
-  // Render amount input
-  const renderAmountInput = useCallback(() => {
-    return (
-      <div className="relative">
-        <Input
-          type="text"
-          value={inputAmount}
-          onChange={handleAmountChange}
-          placeholder="0.0"
-          className="pr-14"
-        />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleMaxAmount}
-            className="text-xs font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!selectedToken || tokenBalance === 0n}
-          >
-            MAX
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {selectedToken?.symbol || 'TOKEN'}
-          </span>
-        </div>
-      </div>
-    );
-  }, [inputAmount, handleAmountChange, handleMaxAmount, selectedToken, tokenBalance]);
-
-  // Render balance
-  const renderBalance = useCallback(() => (
-    <div className="flex items-center justify-between text-sm text-muted-foreground">
-      <span>Balance: {fetchingBalance ? '...' : formattedBalance}</span>
-      {fetchingBalance && <RefreshCw className="h-3 w-3 animate-spin" />}
-    </div>
-  ), [fetchingBalance, formattedBalance]);
-
-  // Render submit button
-  const renderSubmitButton = useCallback(() => {
-    const isDisabled = !inputAmount || 
-      parseFloat(inputAmount) <= 0 || 
-      !address || 
-      fetchingBalance || 
-      loading ||
-      !selectedToken ||
-      !selectedFromChain ||
-      !selectedToChain;
-
-    return (
-      <Button
-        type="submit"
-        className="w-full py-6 text-base font-medium"
-        disabled={isDisabled}
-        onClick={handleSubmit}
-      >
-        {loading ? (
-          <>
-            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-            Processing...
-          </>
-        ) : !address ? (
-          <>
-            <Wallet className="mr-2 h-4 w-4" />
-            Connect Wallet
-          </>
-        ) : (
-          <>
-            <ArrowRight className="mr-2 h-4 w-4" />
-            Bridge Tokens
-          </>
-        )}
+        <ChevronDown className="ml-2 w-4 h-4 opacity-70" />
       </Button>
     );
-  }, [inputAmount, address, fetchingBalance, loading, selectedToken, selectedFromChain, selectedToChain, handleSubmit]);
+  }, [selectedToken, selectedFromChain]);
+
+  // Render amount input field
+  const renderAmountInput = useCallback(() => (
+    <div className="relative flex-1">
+      <Input
+        type="number"
+        placeholder="0.0"
+        value={inputAmount}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputAmount(e.target.value)}
+        className="text-lg py-6"
+        min="0"
+        step="any"
+        disabled={!selectedToken || !selectedFromChain || !selectedToChain}
+      />
+
+    </div>
+  ), [inputAmount, selectedToken, selectedFromChain, selectedToChain]);
+
+  // Loading overlay component
+  const LoadingOverlay = () => (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="bg-card p-8 rounded-xl shadow-lg max-w-md w-full mx-4">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <h3 className="text-xl font-semibold">Processing Transaction</h3>
+          <p className="text-muted-foreground text-center">
+            {isBridgeLoading 
+              ? 'Waiting for transaction confirmation...' 
+              : 'Please confirm the transaction in your wallet'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
-      {showChainSelector && selectedFromChain && selectedToChain && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-medium mb-4">Select {chainSelectorType === 'from' ? 'Source' : 'Destination'} Chain</h3>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {availableChains.map((chain) => (
+    <div className="max-w-4xl mx-auto p-6 bg-card rounded-xl shadow-sm relative">
+      {(isLoading || isBridgeLoading) && <LoadingOverlay />}
+      <h2 className="text-2xl font-bold mb-6">Cross-Chain Bridge</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* From Chain */}
+        <div className="space-y-2">
+          <Label>From Chain</Label>
+          {renderChainButton(selectedFromChain, 'from')}
+        </div>
+
+        {/* Swap Chains Button */}
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+            onClick={() => {
+              if (selectedFromChain && selectedToChain) {
+                setSelectedFromChain(selectedToChain);
+                setSelectedToChain(selectedFromChain);
+              }
+            }}
+            disabled={!selectedFromChain || !selectedToChain}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* To Chain */}
+        <div className="space-y-2">
+          <Label>To Chain</Label>
+          {renderChainButton(selectedToChain, 'to')}
+        </div>
+
+        {/* Token & Amount */}
+        <div className="space-y-2">
+          <Label>Token & Amount</Label>
+          <div className="flex flex-col space-y-4 mb-6 p-4 bg-muted/30 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <Label htmlFor="token" className="text-sm font-medium">
+                Select Token
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {selectedFromChain?.name || 'Select source chain first'}
+              </span>
+            </div>
+            {renderTokenButton()}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="amount" className="text-sm font-medium">
+                  Amount
+                </Label>
+                <div className="flex items-center gap-2">
+                  {isBalanceLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Balance: {Number(tokenBalance).toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                    </span>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-primary hover:text-foreground"
+                    onClick={() => setInputAmount(tokenBalance)}
+                    disabled={isBalanceLoading || tokenBalance === '0'}
+                  >
+                    Max
+                  </Button>
+                </div>
+              </div>
+              {renderAmountInput()}
+            </div>
+
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <Button 
+          type="submit" 
+          className="w-full h-12 text-base"
+          disabled={isLoading || !address || !selectedToken || !inputAmount}
+          size="lg"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Bridge Tokens
+            </>
+          )}
+        </Button>
+      </form>
+
+      {/* Chain Selector Modal */}
+      {showChainSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">
+              Select {chainSelectorType === 'from' ? 'Source' : 'Destination'} Chain
+            </h3>
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {CHAINS.map((chain) => (
                 <button
-                  key={chain.id}
-                  onClick={() => handleChainSelect(chain, chainSelectorType)}
-                  className="w-full flex items-center p-3 rounded-lg hover:bg-muted transition-colors"
+                  key={chain.chainId}
+                  type="button"
+                  onClick={() => {
+                    if (chainSelectorType === 'from') {
+                      setSelectedFromChain(chain);
+                    } else {
+                      setSelectedToChain(chain);
+                    }
+                    setShowChainSelector(false);
+                  }}
+                  disabled={
+                    chainSelectorType === 'from'
+                      ? selectedToChain?.chainId === chain.chainId
+                      : selectedFromChain?.chainId === chain.chainId
+                  }
+                  className="w-full p-3 text-left rounded-lg flex items-center gap-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ChainIcon icon={chain} />
-                  <span className="font-medium">{chain.name}</span>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    {chain.icon && (
+                      <img 
+                        src={`/icons/chains/${chain.icon}`} 
+                        alt={chain.name}
+                        className="w-6 h-6"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = '/icons/chains/default.svg';
+                        }}
+                      />
+                    )}
+                  </div>
+                  <span>{chain.name}</span>
                 </button>
               ))}
             </div>
-            <button 
-              onClick={() => setShowChainSelector(false)}
-              className="mt-4 w-full py-2 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Cancel
-            </button>
+            <div className="mt-4 flex justify-end">
+              <Button type="button" variant="outline" onClick={() => setShowChainSelector(false)}>
+                Cancel
+              </Button>
+            </div>
           </div>
         </div>
       )}
-      
+
+      {/* Token Selector Modal */}
       {showTokenSelector && selectedFromChain && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-medium mb-4">Select Token</h3>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {TOKENS
-                .filter((token) => token.addresses[selectedFromChain.chainId])
-                .map(token => (
-                  <button
-                    key={token.id}
-                    onClick={() => handleTokenSelect(token)}
-                    className="w-full flex items-center p-3 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <ChainIcon icon={token} isToken />
-                    <span className="font-medium">{token.symbol}</span>
-                  </button>
-                ))}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Select Token</h3>
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {TOKENS.filter((token) => token.addresses[selectedFromChain.chainId]).map((token) => (
+                <button
+                  key={`${token.id}-${selectedFromChain.chainId}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedToken(token);
+                    setShowTokenSelector(false);
+                  }}
+                  className="w-full p-3 text-left rounded-lg flex items-center gap-3 hover:bg-gray-50"
+                >
+                  <img
+                    src={`/tokens/${token.icon}`}
+                    alt={token.symbol}
+                    className="w-6 h-6"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = '/icons/tokens/default.png';
+                    }}
+                  />
+                  <span>{token.name}</span>
+                  <span className="text-gray-500 ml-auto">{token.symbol}</span>
+                </button>
+              ))}
             </div>
-            <button 
-              onClick={() => setShowTokenSelector(false)}
-              className="mt-4 w-full py-2 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Cancel
-            </button>
+            <div className="mt-4 flex justify-end">
+              <Button type="button" variant="outline" onClick={() => setShowTokenSelector(false)}>
+                Cancel
+              </Button>
+            </div>
           </div>
         </div>
       )}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Cross-Chain Bridge</h1>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleNetwork}
-              className="flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-full bg-muted hover:bg-muted/80 transition-colors"
-            >
-              <span>{networkType === 'testnet' ? 'Testnet' : 'Mainnet'}</span>
-              <ChevronDown className="h-4 w-4" />
-            </button>
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="w-full">
-        <form onSubmit={handleSubmit}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-foreground">Cross-Chain Bridge</h2>
-            <div className="flex items-center space-x-2">
-              <button 
-                type="button"
-                onClick={() => fetchTokenBalance()}
-                disabled={fetchingBalance}
-                className="p-2 rounded-full hover:bg-muted transition-colors disabled:opacity-50 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                aria-label="Refresh balance"
-              >
-                <RefreshCw className={`h-4 w-4 ${fetchingBalance ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-        
-          {/* Chain Selection */}
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-muted-foreground">From</Label>
-              <Label className="text-sm font-medium text-muted-foreground">To</Label>
-            </div>
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex-1 relative">
-                {renderChainButton(selectedFromChain, 'from')}
-              </div>
-              
-              <button
-                type="button"
-                onClick={handleSwapChains}
-                disabled={loading}
-                className="p-2.5 rounded-full bg-muted/50 hover:bg-muted/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Swap chains"
-              >
-                <ArrowDown className="h-6 w-6 transition-transform group-hover:rotate-180" />
-              </button>
-              
-              <div className="flex-1 relative">
-                {renderChainButton(selectedToChain, 'to')}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-muted-foreground">Token & Amount</Label>
-              <div className="flex items-center space-x-1">
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {address ? 'Connected' : 'Not Connected'}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="relative w-full">
-                {renderTokenButton()}
-              </div>
-              <div className="relative w-full">
-                {renderAmountInput()}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              {renderSubmitButton()}
-            </div>
-          </div>
-        </form>
-      </div>
-      {renderBalance()}
     </div>
   );
 };

@@ -56,8 +56,8 @@ export function AssetModal({ isOpen, onClose, onSubmit }: AssetModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-background p-6 rounded-lg w-full max-w-md relative">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+      <div className="bg-background p-6 rounded-lg w-full max-w-md relative z-[10000]">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Add New Asset</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>

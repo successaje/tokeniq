@@ -10,18 +10,18 @@ import Image from 'next/image';
 
 // Mock token data with icons
 const TOKENS: Token[] = [
-  { id: 'usdc', symbol: 'USDC', name: 'USD Coin', icon: '/icons/tokens/usdc.svg' },
-  { id: 'usdt', symbol: 'USDT', name: 'Tether', icon: '/icons/tokens/usdt.svg' },
-  { id: 'eth', symbol: 'ETH', name: 'Ethereum', icon: '/icons/tokens/ethereum.svg' },
-  { id: 'wbtc', symbol: 'WBTC', name: 'Wrapped BTC', icon: '/icons/tokens/wbtc.svg' },
+  { id: 'usdc', symbol: 'USDC', name: 'USD Coin', icon: '/icons/tokens/usdc.png' },
+  { id: 'usdt', symbol: 'USDT', name: 'Tether', icon: '/icons/tokens/usdt.png' },
+  { id: 'eth', symbol: 'ETH', name: 'Ethereum', icon: '/icons/tokens/ethereum.png' },
+  { id: 'avax', symbol: 'AVAX', name: 'Avalanche', icon: '/icons/tokens/avalanche.png' },
 ];
 
 const CHAIN_ICONS: Record<string, string> = {
-  'ethereum': '/icons/chains/ethereum.svg',
-  'polygon': '/icons/chains/polygon.svg',
-  'bsc': '/icons/chains/bsc.svg',
-  'arbitrum': '/icons/chains/arbitrum.svg',
-  'optimism': '/icons/chains/optimism.svg',
+  'ethereum': '/icons/chains/ethereum.png',
+  'polygon': '/icons/chains/polygon.png',
+  'bsc': '/icons/chains/bsc.png',
+  'arbitrum': '/icons/chains/arbitrum.png',
+  'optimism': '/icons/chains/optimism.png',
 };
 
 const getTokenIcon = (symbol: string) => {
@@ -151,7 +151,7 @@ const getStatusIcon = (status: TransactionStatus) => {
   }
 };
 
-export function TransactionsHistory() {
+export const TransactionsHistory = () => {
   const [showAll, setShowAll] = useState(false);
   const transactions = showAll ? MOCK_TRANSACTIONS : MOCK_TRANSACTIONS.slice(0, 3);
 
@@ -354,4 +354,4 @@ export function TransactionsHistory() {
       </CardContent>
     </Card>
   );
-}
+};

@@ -1,112 +1,168 @@
 'use client';
 
-import { WagmiConfig, useAccount } from 'wagmi';
+import * as React from 'react';
+import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
-import { useState, useEffect } from 'react';
-import { config, supportedChains, createWagmiConfig } from '@/config/wagmi';
+import { mainnet, sepolia, avalanche, avalancheFuji, base, baseSepolia, Chain } from 'viem/chains';
 
-// Create a single QueryClient instance
+// Import chain configurations
+import { SUPPORTED_CHAINS } from '@/contexts/ContractContext';
+
+// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 60 * 1000, // 1 minute
+      staleTime: 60 * 1000,
     },
   },
 });
 
-// Create config outside component to avoid re-creation
-const wagmiConfig = createWagmiConfig();
+// Define our supported chains with their RPC URLs
+const CHAINS = {
+  mainnet: {
+    ...mainnet,
+    rpcUrls: {
+      ...mainnet.rpcUrls,
+      default: { http: ['https://eth.llamarpc.com'] },
+    },
+  },
+  sepolia: {
+    ...sepolia,
+    rpcUrls: {
+      ...sepolia.rpcUrls,
+      default: { http: ['https://rpc.sepolia.org'] },
+    },
+  },
+  avalanche: {
+    ...avalanche,
+    rpcUrls: {
+      ...avalanche.rpcUrls,
+      default: { http: ['https://api.avax.network/ext/bc/C/rpc'] },
+    },
+  },
+  avalancheFuji: {
+    ...avalancheFuji,
+    rpcUrls: {
+      ...avalancheFuji.rpcUrls,
+      default: { http: ['https://api.avax-test.network/ext/bc/C/rpc'] },
+    },
+  },
+  base: {
+    ...base,
+    rpcUrls: {
+      ...base.rpcUrls,
+      default: { http: ['https://mainnet.base.org'] },
+    },
+  },
+  baseSepolia: {
+    ...baseSepolia,
+    rpcUrls: {
+      ...baseSepolia.rpcUrls,
+      default: { http: ['https://sepolia.base.org'] },
+    },
+  },
+};
 
-// Add a component to handle connection state
-function ConnectionHandler() {
-  const { isConnected, isConnecting, isDisconnected } = useAccount();
+// Create chains array from SUPPORTED_CHAINS
+const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
+  const chainId = chainConfig.id;
+  
+  // Map to our predefined chains
+  switch (chainId) {
+    case 1: return CHAINS.mainnet;
+    case 11155111: return CHAINS.sepolia;
+    case 43114: return CHAINS.avalanche;
+    case 43113: return CHAINS.avalancheFuji;
+    case 8453: return CHAINS.base;
+    case 84532: return CHAINS.baseSepolia;
+    default: return CHAINS.mainnet;
+  }
+});
 
-  useEffect(() => {
-    console.log('Wallet connection state changed:', {
-      isConnected,
-      isConnecting,
-      isDisconnected,
-    });
-  }, [isConnected, isConnecting, isDisconnected]);
-
-  return null;
+// Ensure we have at least one chain
+if (supportedChains.length === 0) {
+  throw new Error('No supported chains configured');
 }
 
-export function Web3Provider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+// Create wagmi config
+const config = createConfig({
+  chains: supportedChains as [Chain, ...Chain[]],
+  transports: {
+    [mainnet.id]: http(CHAINS.mainnet.rpcUrls.default.http[0]),
+    [sepolia.id]: http(CHAINS.sepolia.rpcUrls.default.http[0]),
+    [avalanche.id]: http(CHAINS.avalanche.rpcUrls.default.http[0]),
+    [avalancheFuji.id]: http(CHAINS.avalancheFuji.rpcUrls.default.http[0]),
+    [base.id]: http(CHAINS.base.rpcUrls.default.http[0]),
+    [baseSepolia.id]: http(CHAINS.baseSepolia.rpcUrls.default.http[0]),
+  },
+});
 
-  useEffect(() => {
-    try {
-      setMounted(true);
-      // Check if window.ethereum is available
-      if (typeof window !== 'undefined' && !window.ethereum) {
-        console.warn('No Ethereum provider detected. Please install MetaMask or another Web3 wallet.');
-      }
-    } catch (err) {
-      console.error('Error initializing Web3 provider:', err);
-      setError(err instanceof Error ? err : new Error('Failed to initialize Web3 provider'));
-    }
-    
-    return () => {
-      // Cleanup if needed
-    };
+// Create a client-side only wrapper component
+const ClientWeb3Provider = React.memo(({ children }: { children: React.ReactNode }) => {
+  // Memoize theme and config first to ensure stable references
+  const theme = React.useMemo(() => darkTheme({
+    accentColor: '#6366f1',
+    accentColorForeground: 'white',
+    borderRadius: 'medium',
+    fontStack: 'system',
+    overlayBlur: 'small',
+  }), []);
+
+  // Create a stable config reference
+  const wagmiConfig = React.useMemo(() => config, []);
+  
+  // Track if we're on the client
+  const [isClient, setIsClient] = React.useState(false);
+
+  // Use layout effect to set client state before paint
+  React.useLayoutEffect(() => {
+    setIsClient(true);
   }, []);
 
-  // Don't render anything until we're on the client
-  if (!mounted) {
+  // Don't render anything during SSR or before client-side hydration
+  if (!isClient) {
     return (
-      <div className="w-full h-full flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-sm text-muted-foreground">
-          Initializing wallet...
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full h-full flex items-center justify-center min-h-screen p-4">
-        <div className="max-w-md text-center">
-          <h2 className="text-xl font-bold mb-2">Connection Error</h2>
-          <p className="text-muted-foreground mb-4">
-            {error.message || 'Failed to connect to wallet. Please try refreshing the page.'}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Refresh Page
-          </button>
-        </div>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <WagmiConfig config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider 
-          chains={supportedChains}
-          theme={lightTheme({
-            accentColor: '#6366f1',
-            accentColorForeground: 'white',
-            borderRadius: 'medium',
-            fontStack: 'system',
-            overlayBlur: 'small',
-          })}
+        <RainbowKitProvider
+          theme={theme}
           modalSize="compact"
+          appInfo={{
+            appName: 'TokenIQ',
+            learnMoreUrl: 'https://tokeniq.xyz',
+          }}
         >
-          <ConnectionHandler />
-          <div className="w-full h-full">
-            {children}
-          </div>
+          {children}
         </RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
-} 
+});
+
+// Add display name for better debugging
+ClientWeb3Provider.displayName = 'ClientWeb3Provider';
+
+export function Web3Provider({ children }: { children: React.ReactNode }) {
+  // Don't render anything during SSR
+  if (typeof window === 'undefined') {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return <ClientWeb3Provider>{children}</ClientWeb3Provider>;
+}

@@ -25,7 +25,10 @@ export function useContractInstances() {
   return useMemo(() => {
     if (!chain || !publicClient) return null;
 
-    const getContractInstance = (address: Address, abi: any): ContractInstance => {
+    const getContractInstance = (address: Address, abiInput: any): ContractInstance => {
+      // Handle case where ABI might be nested in an 'abi' property (common in Hardhat/Foundry artifacts)
+      const abi = Array.isArray(abiInput) ? abiInput : (abiInput.abi || []);
+      
       const contract = {
         address,
         abi,
@@ -39,48 +42,68 @@ export function useContractInstances() {
       if (Array.isArray(abi)) {
         abi.forEach((item) => {
           if (item.type === 'function') {
+            const functionName = item.name;
+            if (!functionName) return;
+
             if (item.stateMutability === 'view' || item.stateMutability === 'pure') {
-              contract.read[item.name] = async (...args: any[]) => {
-                return publicClient.readContract({
-                  address,
-                  abi: [item],
-                  functionName: item.name,
-                  args,
-                });
+              contract.read[functionName] = async (...args: any[]) => {
+                try {
+                  return await publicClient.readContract({
+                    address,
+                    abi: [item],
+                    functionName,
+                    args: args.slice(0, item.inputs?.length || 0),
+                  });
+                } catch (error) {
+                  console.error(`Error in ${functionName} read call:`, error);
+                  throw error;
+                }
               };
             } else {
-              contract.write[item.name] = async (...args: any[]) => {
+              contract.write[functionName] = async (...args: any[]) => {
                 if (!walletClient) throw new Error('Wallet client not available');
-                const { request } = await publicClient.simulateContract({
-                  address,
-                  abi: [item],
-                  functionName: item.name,
-                  args: args.slice(0, item.inputs?.length || 0),
-                  account: walletClient.account,
-                });
-                return walletClient.writeContract(request);
+                try {
+                  const { request } = await publicClient.simulateContract({
+                    address,
+                    abi: [item],
+                    functionName,
+                    args: args.slice(0, item.inputs?.length || 0),
+                    account: walletClient.account,
+                  });
+                  return walletClient.writeContract(request);
+                } catch (error) {
+                  console.error(`Error in ${functionName} write call:`, error);
+                  throw error;
+                }
               };
               
-              contract.estimateGas[item.name] = async (...args: any[]) => {
-                const { request } = await publicClient.simulateContract({
-                  address,
-                  abi: [item],
-                  functionName: item.name,
-                  args: args.slice(0, item.inputs?.length || 0),
-                  account: walletClient?.account,
-                });
-                return publicClient.estimateContractGas(request);
+              contract.estimateGas[functionName] = async (...args: any[]) => {
+                try {
+                  const { request } = await publicClient.simulateContract({
+                    address,
+                    abi: [item],
+                    functionName,
+                    args: args.slice(0, item.inputs?.length || 0),
+                    account: walletClient?.account,
+                  });
+                  return publicClient.estimateContractGas(request);
+                } catch (error) {
+                  console.error(`Error estimating gas for ${functionName}:`, error);
+                  throw error;
+                }
               };
             }
           } else if (item.type === 'event') {
-            contract.events[item.name] = (options: any = {}) => {
-              return publicClient.watchContractEvent({
-                address,
-                abi: [item],
-                eventName: item.name,
-                ...options,
-              });
-            };
+            if (item.name) {
+              contract.events[item.name] = (options: any = {}) => {
+                return publicClient.watchContractEvent({
+                  address,
+                  abi: [item],
+                  eventName: item.name,
+                  ...options,
+                });
+              };
+            }
           }
         });
       }

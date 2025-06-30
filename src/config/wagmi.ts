@@ -1,4 +1,4 @@
-import { http } from 'wagmi';
+import { http, createConfig } from 'wagmi';
 import { 
   mainnet, 
   sepolia, 
@@ -14,7 +14,6 @@ import {
   baseSepolia
 } from 'wagmi/chains';
 import { injected, metaMask, walletConnect } from 'wagmi/connectors';
-import { createConfig } from 'wagmi';
 
 // Configure chains
 export const supportedChains = [
@@ -32,39 +31,45 @@ export const supportedChains = [
   baseSepolia
 ] as const;
 
+// Export chains as a const array
+export type SupportedChainId = typeof supportedChains[number]['id'];
+
 // Helper function to create the config
 export function createWagmiConfig() {
-  // Only access environment variables on the client side
-  const projectId = typeof window !== 'undefined' ? 
-    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID : '';
+  // Skip during SSR
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
-  // Configure transports for all supported chains
-  const transports = supportedChains.reduce((acc, chain) => {
-    acc[chain.id] = http();
-    return acc;
-  }, {} as Record<number, any>);
+  try {
+    const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
 
-  // Configure connectors
-  const connectors = [
-    injected(),
-    metaMask(),
-    ...(projectId ? [
-      walletConnect({
-        projectId,
-        showQrModal: true,
-      })
-    ] : []),
-  ];
+    // Configure transports for all supported chains
+    const transports = supportedChains.reduce((acc, chain) => {
+      acc[chain.id] = http();
+      return acc;
+    }, {} as Record<number, any>);
 
-  return createConfig({
-    chains: supportedChains,
-    transports,
-    connectors,
-    ssr: false, // Disable SSR to prevent issues with browser APIs
-    // Note: autoConnect is not a valid config option in the current wagmi version
-    // We'll handle connection state in the UI components
-  });
+    // Configure connectors
+    const connectors = [
+      injected(),
+      metaMask(),
+      ...(projectId ? [
+        walletConnect({
+          projectId,
+          showQrModal: true,
+        })
+      ] : []),
+    ];
+
+    return createConfig({
+      chains: supportedChains,
+      transports,
+      connectors,
+      ssr: false,
+    });
+  } catch (error) {
+    console.error('Failed to create wagmi config:', error);
+    return null;
+  }
 }
-
-// Export a default config for backward compatibility
-export const config = createWagmiConfig();

@@ -1,33 +1,55 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AppProviders } from './Providers';
+import { useEffect, useState, ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 
-export function ClientLayout({ 
-  children, 
-  className = '' 
-}: { 
-  children: React.ReactNode; 
-  className?: string 
-}) {
+// Dynamically import providers to avoid SSR issues
+const AppProviders = dynamic(
+  () => import('./Providers').then(mod => mod.AppProviders),
+  { ssr: false }
+);
+
+// Create a client-side only wrapper for the app content
+const ClientApp = ({ children }: { children: ReactNode }) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Only render the content after mounting to avoid hydration mismatches
   if (!mounted) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-      </div>
-    );
+    return null;
+  }
+
+  return <>{children}</>;
+};
+
+interface ClientLayoutProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function ClientLayout({ 
+  children, 
+  className = '' 
+}: ClientLayoutProps) {
+  // Use a state to track if we're on the client
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Don't render anything on the server
+  if (!isClient) {
+    return null;
   }
 
   return (
     <AppProviders>
-      {children}
+      <ClientApp>
+        {children}
+      </ClientApp>
     </AppProviders>
   );
 }
