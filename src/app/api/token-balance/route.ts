@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createPublicClient, http, formatEther } from 'viem';
 import { mainnet, avalanche } from 'viem/chains';
-import { erc20ABI } from 'viem/contracts/abis';
+import { erc20Abi as erc20ABI } from 'viem';
 
 const chains = {
   1: mainnet,

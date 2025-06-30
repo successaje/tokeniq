@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -210,19 +212,17 @@ export default function VaultDetailPage({ params }: { params: { vaultId: string 
         </Tabs>
       </div>
 
-      {action === 'deposit' && (
-        <VaultDepositDialog
-          vault={vault}
-          onClose={() => setAction(null)}
-        />
-      )}
+      <VaultDepositDialog
+        vault={action === 'deposit' ? vault : null}
+        open={action === 'deposit'}
+        onOpenChange={(open) => setAction(open ? 'deposit' : null)}
+      />
 
-      {action === 'withdraw' && (
-        <VaultWithdrawDialog
-          vault={vault}
-          onClose={() => setAction(null)}
-        />
-      )}
+      <VaultWithdrawDialog
+        vault={action === 'withdraw' ? vault : null}
+        open={action === 'withdraw'}
+        onOpenChange={(open) => setAction(open ? 'withdraw' : null)}
+      />
     </div>
   );
 }
