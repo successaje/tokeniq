@@ -1,7 +1,21 @@
 import type { NextConfig } from "next";
+import path from 'path';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return config;
+  },
+  experimental: {
+    serverActions: {
+      // Configure server actions options here
+      // bodySizeLimit: '2mb',
+      // allowedOrigins: ['example.com']
+    }
+  },
 };
 
 export default nextConfig;

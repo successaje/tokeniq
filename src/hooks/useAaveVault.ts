@@ -1,7 +1,25 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { parseEther, formatEther, Address, formatUnits } from 'viem';
+import { parseEther, formatEther, Address, formatUnits, PublicClient } from 'viem';
 import { useAccount } from 'wagmi';
 import { useContracts } from '@/contexts/ContractContext';
+
+// Define the ABI types for better type safety
+const aTokenABI = [
+  {
+    inputs: [{ name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'decimals',
+    outputs: [{ name: '', type: 'uint8' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
 
 interface TokenInfo {
   underlyingToken: Address;
@@ -295,25 +313,10 @@ export function useAaveVault({ onSuccess, onError }: UseAaveVaultProps = {}) {
       const aToken = await contracts.aaveVault.read.ATOKEN();
       
       // Create ERC20 contract instance for the aToken
-      const publicClient = contracts.aaveVault.client as any;
+      const publicClient = contracts.aaveVault.client as PublicClient;
       const aTokenContract = {
         address: aToken,
-        abi: [
-          {
-            inputs: [{ name: 'account', type: 'address' }],
-            name: 'balanceOf',
-            outputs: [{ name: '', type: 'uint256' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [],
-            name: 'decimals',
-            outputs: [{ name: '', type: 'uint8' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ],
+        abi: aTokenABI,
       };
 
       // Get aToken balance
