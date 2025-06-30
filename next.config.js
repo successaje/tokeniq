@@ -4,11 +4,11 @@ const path = require('path');
 const nextConfig = {
   // Enable experimental features
   experimental: {
-    serverActions: true,
+    serverActions: {}
   },
 
   // Webpack configuration
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -22,13 +22,6 @@ const nextConfig = {
       'node_modules',
     ];
 
-    // Add fallback for path module
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      path: false,
-      fs: false,
-    };
-
     return config;
   },
 
@@ -36,17 +29,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-
+  
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: true,
   },
+  
   // React configuration
   reactStrictMode: false,
+  
   // Images configuration
   images: {
     domains: ['localhost'],
   },
+  
   // Server external packages
   serverExternalPackages: [],
 };
