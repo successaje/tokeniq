@@ -18,8 +18,8 @@ const nextConfig = {
     // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': src,
-      '@components': components,
+      '@': path.resolve(__dirname, 'src'),
+      '@/*': path.resolve(__dirname, 'src/*'),
       // Add other path aliases as needed
     };
     
@@ -29,6 +29,12 @@ const nextConfig = {
       'node_modules',
       path.resolve(__dirname, 'node_modules'),
     ];
+
+    // Add fallback for path module if needed
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      path: require.resolve('path-browserify'),
+    };
 
     if (dev && !isServer) {
       // Only in development, on the client side
