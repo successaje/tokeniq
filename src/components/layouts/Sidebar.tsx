@@ -1,91 +1,238 @@
 "use client";
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  HomeIcon, 
-  ChartPieIcon, 
-  CubeIcon, 
-  CogIcon, 
-  QuestionMarkCircleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  HomeIcon,
+  ChartBarIcon,
+  DocumentTextIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+  DocumentDuplicateIcon,
+  ArrowsRightLeftIcon,
+  CurrencyDollarIcon,
+  UserCircleIcon,
+  BriefcaseIcon,
+  WalletIcon,
+  UserGroupIcon,
+  DocumentChartBarIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
-import { clsx } from 'clsx';
+import { useState, useEffect } from 'react';
+import { useDisconnect } from 'wagmi';
+import { X } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
-const navigation = [
+const mainNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Assets', href: '/assets', icon: CubeIcon },
-  { name: 'Strategies', href: '/strategies', icon: ChartPieIcon },
-  { name: 'Settings', href: '/settings', icon: CogIcon },
-  { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon },
+  { name: 'Portfolio', href: '/portfolio', icon: WalletIcon },
+  { name: 'Assets', href: '/assets', icon: BriefcaseIcon },
+  { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+  { name: 'Strategies', href: '/strategies', icon: BanknotesIcon },
 ];
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+const rwaNavigation = [
+  { name: 'RWA Management', href: '/rwa', icon: DocumentTextIcon },
+  { name: 'Tokenize', href: '/rwa/tokenize', icon: DocumentDuplicateIcon },
+  { name: 'Bridge', href: '/rwa/bridge', icon: ArrowsRightLeftIcon },
+  { name: 'Collateral', href: '/rwa/collateral', icon: CurrencyDollarIcon },
+];
+
+const settingsNavigation = [
+  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+  { name: 'Team', href: '/team', icon: UserGroupIcon },
+  { name: 'Reports', href: '/reports', icon: DocumentChartBarIcon },
+];
+
+interface SidebarProps {
+  collapsed?: boolean;
+  onCollapse?: () => void;
+  onClose?: () => void;
+  isOpen?: boolean;
+  className?: string;
+}
+
+export function Sidebar({ 
+  isOpen = true, 
+  onClose, 
+  className = '',
+  collapsed = false,
+  onCollapse
+}: SidebarProps) {
   const pathname = usePathname();
+  const { disconnect } = useDisconnect();
+  const [isRwaExpanded, setIsRwaExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
+    const isActive = pathname === item.href;
+    return (
+      <Link
+        href={item.href}
+        className={cn(
+          'group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+          isActive
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground',
+          isSubItem && 'ml-2'
+        )}
+      >
+        <item.icon className={cn(
+          "h-5 w-5 shrink-0 transition-colors",
+          isActive ? "text-primary" : "text-muted-foreground group-hover:text-accent-foreground"
+        )} />
+        {!collapsed && (
+          <span className="flex-1">{item.name}</span>
+        )}
+      </Link>
+    );
+  };
 
   return (
-    <div className={clsx(
-      'flex flex-col h-screen bg-gray-900 text-white transition-all duration-300',
-      collapsed ? 'w-20' : 'w-64'
-    )}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        <div className={clsx('flex items-center', collapsed ? 'justify-center w-full' : '')}>
-          {!collapsed && <span className="text-xl font-bold">TokenIQ X</span>}
-          {collapsed && <span className="text-xl font-bold">TX</span>}
-        </div>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded-lg hover:bg-gray-800"
-        >
-          {collapsed ? (
-            <ChevronRightIcon className="w-5 h-5" />
-          ) : (
-            <ChevronLeftIcon className="w-5 h-5" />
-          )}
-        </button>
-      </div>
-
-      <nav className="flex-1 p-4 space-y-2">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={clsx(
-                'flex items-center px-3 py-2 rounded-lg transition-colors',
-                isActive 
-                  ? 'bg-primary-600 text-white' 
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-              )}
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div className={cn(
+        'fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r bg-background transition-all duration-300',
+        !isOpen && '-translate-x-full',
+        className
+      )}>
+        {/* Mobile header */}
+        <div className="flex h-16 items-center justify-between border-b px-4">
+          <Link href="/" className="flex items-center space-x-2">
+            <Logo className="h-8 w-8" />
+            {!collapsed && <span className="text-xl font-bold">TokenIQ</span>}
+          </Link>
+          <div className="flex items-center">
+            <button
+              onClick={onClose}
+              className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+              aria-label="Close sidebar"
             >
-              <item.icon className={clsx(
-                'w-6 h-6',
-                collapsed ? 'mx-auto' : 'mr-3'
-              )} />
-              {!collapsed && <span>{item.name}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
 
-      <div className="p-4 border-t border-gray-800">
-        <div className={clsx(
-          'flex items-center rounded-lg bg-gray-800 p-3',
-          collapsed ? 'justify-center' : 'space-x-3'
-        )}>
-          <div className="w-8 h-8 rounded-full bg-primary-600" />
-          {!collapsed && (
-            <div>
-              <div className="font-medium">John Doe</div>
-              <div className="text-sm text-gray-400">Connected</div>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto">
+          <div className="space-y-1 p-2">
+            {!collapsed && (
+              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Main
+              </h2>
+            )}
+            <ul className="space-y-1">
+              {mainNavigation.map((item) => (
+                <li key={item.name}>
+                  <NavItem item={item} />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="space-y-1 p-2">
+            <div className="flex items-center justify-between">
+              {!collapsed && (
+                <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  RWA
+                </h2>
+              )}
             </div>
-          )}
+            <button
+              onClick={() => setIsRwaExpanded(!isRwaExpanded)}
+              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+            >
+              <div className="flex items-center gap-x-3">
+                <DocumentTextIcon className="h-5 w-5" />
+                {!collapsed && <span>Real World Assets</span>}
+              </div>
+              {!collapsed && (
+                <svg
+                  className={cn(
+                    'h-4 w-4 transition-transform',
+                    isRwaExpanded ? 'rotate-180' : ''
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              )}
+            </button>
+
+            {isRwaExpanded && (
+              <div className="mt-1 space-y-1 pl-4">
+                {rwaNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} isSubItem />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-border/40 p-2">
+            {!collapsed && (
+              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Settings
+              </h2>
+            )}
+            <ul className="space-y-1">
+              {settingsNavigation.map((item) => (
+                <li key={item.name}>
+                  <NavItem item={item} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        {/* Bottom section */}
+        <div className="mt-auto border-t border-border/40 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-x-2">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <UserCircleIcon className="h-5 w-5 text-primary" />
+              </div>
+              {!collapsed && (
+                <div>
+                  <p className="text-sm font-medium">User Name</p>
+                  <p className="text-xs text-muted-foreground">user@example.com</p>
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => disconnect()}
+              className="text-muted-foreground hover:text-foreground"
+              title="Sign out"
+            >
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
-} 
+}

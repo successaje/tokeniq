@@ -8,45 +8,68 @@ const config: Config = {
   ],
   darkMode: 'class',
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
       colors: {
-        primary: {
-          DEFAULT: 'hsl(183 100% 35%)',
-          foreground: 'hsl(210 40% 98%)',
-          50: 'hsl(0 0% 100%)',
-          100: 'hsl(0 0% 100%)',
-          200: 'hsl(0 0% 100%)',
-          300: 'hsl(0 0% 100%)',
-          400: 'hsl(0 0% 100%)',
-          500: 'hsl(183 100% 35%)',
-          600: 'hsl(183 100% 28%)',
-          700: 'hsl(183 100% 21%)',
-          800: 'hsl(183 100% 15%)',
-          900: 'hsl(183 100% 10%)',
-          950: 'hsl(183 100% 5%)',
-        },
-        gray: {
-          850: '#1f2937',
-        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-      },
-      spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '112': '28rem',
-        '128': '32rem',
-      },
-      fontFamily: {
-        sans: ['var(--font-inter)'],
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
       },
       borderRadius: {
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        lg: `var(--radius)`,
+        md: `calc(var(--radius) - 2px)`,
+        sm: 'calc(var(--radius) - 4px)',
       },
-      boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-      }
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+      },
     },
   },
   plugins: [],

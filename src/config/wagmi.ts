@@ -1,34 +1,75 @@
-import { createConfig, http } from 'wagmi'
-import { mainnet, sepolia } from 'viem/chains'
-import { createWeb3Modal } from '@web3modal/wagmi'
+import { http, createConfig } from 'wagmi';
+import { 
+  mainnet, 
+  sepolia, 
+  polygon, 
+  polygonMumbai, 
+  arbitrum, 
+  arbitrumGoerli,
+  avalanche,
+  avalancheFuji,
+  bsc,
+  bscTestnet,
+  base,
+  baseSepolia
+} from 'wagmi/chains';
+import { injected, metaMask, walletConnect } from 'wagmi/connectors';
 
-// 1. Get projectId at https://cloud.walletconnect.com
-export const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''
+// Configure chains
+export const supportedChains = [
+  mainnet, 
+  sepolia, 
+  polygon, 
+  polygonMumbai, 
+  arbitrum, 
+  arbitrumGoerli,
+  avalanche,
+  avalancheFuji,
+  bsc,
+  bscTestnet,
+  base,
+  baseSepolia
+] as const;
 
-if (!projectId) {
-  console.warn('WalletConnect project ID is not set. Please set NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID in your .env file')
+// Export chains as a const array
+export type SupportedChainId = typeof supportedChains[number]['id'];
+
+// Helper function to create the config
+export function createWagmiConfig() {
+  // Skip during SSR
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
+
+    // Configure transports for all supported chains
+    const transports = supportedChains.reduce((acc, chain) => {
+      acc[chain.id] = http();
+      return acc;
+    }, {} as Record<number, any>);
+
+    // Configure connectors
+    const connectors = [
+      injected(),
+      metaMask(),
+      ...(projectId ? [
+        walletConnect({
+          projectId,
+          showQrModal: true,
+        })
+      ] : []),
+    ];
+
+    return createConfig({
+      chains: supportedChains,
+      transports,
+      connectors,
+      ssr: false,
+    });
+  } catch (error) {
+    console.error('Failed to create wagmi config:', error);
+    return null;
+  }
 }
-
-// 2. Create wagmiConfig
-export const config = createConfig({
-  chains: [mainnet, sepolia],
-  transports: {
-    [mainnet.id]: http(process.env.NEXT_PUBLIC_MAINNET_RPC_URL || `https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || `https://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`)
-  },
-  ssr: true
-})
-
-// 3. Create modal
-export const web3Modal = createWeb3Modal({
-  wagmiConfig: config,
-  projectId,
-  enableAnalytics: true,
-  themeMode: 'dark',
-  themeVariables: {
-    '--w3m-color-mix': '#10B981',
-    '--w3m-color-mix-strength': 20
-  },
-  defaultChain: mainnet,
-  enableEIP6963: true,
-})

@@ -1,128 +1,138 @@
 "use client";
-import { Fragment } from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import { BellIcon, WalletIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { clsx } from 'clsx';
-import { ConnectButton } from '../Web3Modal';
 
-const networks = [
-  { id: 'ethereum', name: 'Ethereum', icon: '🔷' },
-  { id: 'polygon', name: 'Polygon', icon: '💜' },
-  { id: 'arbitrum', name: 'Arbitrum', icon: '🔵' },
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useTheme } from 'next-themes';
+import { Menu } from '@headlessui/react';
+import { CustomConnectButton } from '@/components/Web3Modal';
+import { cn } from '@/lib/utils';
+import { Menu as MenuIcon, Sun, Moon, ChevronDownIcon } from 'lucide-react';
+import { useAccount, useChainId, useConfig } from 'wagmi';
+import { Button } from '@/components/ui/button';
+
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Portfolio', href: '/portfolio' },
+  { name: 'Analytics', href: '/analytics' },
+  { name: 'Liquidity', href: '/liquidity' },
 ];
 
 export function Topbar() {
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const chainId = useChainId();
+  const config = useConfig();
+  const { isConnected } = useAccount();
+
+  const currentChain = config.chains.find(chain => chain.id === chainId);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <div className="h-16 bg-gray-900 border-b border-gray-800">
-      <div className="flex items-center justify-between h-full px-6">
-        <div className="flex items-center space-x-4">
-          <ConnectButton />
+    <header className="fixed top-0 z-50 w-full bg-background/40 backdrop-blur-lg border-b border-border/40">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="relative h-10 w-10">
+                <Image
+                  src="/tokeniq-darkmode-logo.png"
+                  alt="TokenIQ Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                TokenIQ
+              </span>
+            </Link>
 
-          <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center px-3 py-2 space-x-2 text-gray-300 rounded-lg hover:bg-gray-800">
-              <span>🔷</span>
-              <span>Ethereum</span>
-              <ChevronDownIcon className="w-4 h-4" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute left-0 w-48 mt-2 origin-top-left bg-gray-900 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1">
-                  {networks.map((network) => (
-                    <Menu.Item key={network.id}>
-                      {({ active }) => (
-                        <button
-                          className={clsx(
-                            'flex items-center w-full px-4 py-2 text-sm space-x-2',
-                            active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                          )}
-                        >
-                          <span>{network.icon}</span>
-                          <span>{network.name}</span>
-                        </button>
-                      )}
-                    </Menu.Item>
-                  ))}
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
-        </div>
+            {/* Navigation */}
+            <nav className="hidden md:flex md:gap-8">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    pathname === item.href 
+                      ? "text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-        <div className="flex items-center space-x-4">
-          <button className="relative p-2 text-gray-300 rounded-lg hover:bg-gray-800">
-            <BellIcon className="w-6 h-6" />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-primary-500 rounded-full" />
-          </button>
+          {/* Right Section */}
+          <div className="flex items-center gap-4">
+            {/* Network Selector */}
+            {isConnected && (
+              <Menu as="div" className="relative">
+                <Menu.Button className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent/50">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="hidden sm:inline-block">
+                      {currentChain?.name || 'Select Network'}
+                    </span>
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </div>
+                </Menu.Button>
+                <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-background/95 backdrop-blur shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="py-1">
+                    {config.chains.map((chain) => (
+                      <Menu.Item key={chain.id}>
+                        {({ active }) => (
+                          <button
+                            onClick={() => config.switchChain?.({ chainId: chain.id })}
+                            className={cn(
+                              active ? 'bg-accent text-accent-foreground' : 'text-foreground',
+                              'flex w-full items-center px-4 py-2 text-sm'
+                            )}
+                          >
+                            {chain.name}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </div>
+                </Menu.Items>
+              </Menu>
+            )}
 
-          <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center space-x-3 text-gray-300 rounded-lg hover:bg-gray-800">
-              <div className="w-8 h-8 rounded-full bg-primary-600" />
-              <ChevronDownIcon className="w-4 h-4" />
-            </Menu.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-gray-900 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Your Profile
-                      </a>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Settings
-                      </a>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        href="#"
-                        className={clsx(
-                          'block px-4 py-2 text-sm',
-                          active ? 'bg-gray-800 text-white' : 'text-gray-300'
-                        )}
-                      >
-                        Sign out
-                      </a>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Transition>
-          </Menu>
+            {/* Theme Toggle */}
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent/50"
+              >
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </button>
+            )}
+
+            {/* Connect Button */}
+            <div className="hidden sm:block">
+              <CustomConnectButton />
+            </div>
+
+            {/* Mobile Menu */}
+            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent/50 md:hidden">
+              <MenuIcon className="h-6 w-6" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
-} 
+}

@@ -1,0 +1,401 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
+import { useContractInstances } from '@/hooks/useContracts';
+import { useToast } from '@/components/ui/use-toast';
+import { Address, formatEther, parseEther } from 'viem';
+import { ChainConfig, CrossChainTransfer } from '@/types/crossChain';
+
+// Define the contract instances type
+type ContractInstances = ReturnType<typeof useContractInstances>;
+
+// Supported chains configuration
+export const SUPPORTED_CHAINS: Record<number, ChainConfig> = {
+  11155111: { // Ethereum Sepolia
+    id: 11155111,
+    name: 'Ethereum Sepolia',
+    chainSelector: 16015286609057818161n,
+    routerAddress: '0xD1d6EE0c5309A09Df9ca4c2936956A49cca9eb71',
+    nativeToken: 'ETH',
+    explorerUrl: 'https://sepolia.etherscan.io'
+  },
+  43113: { // Avalanche Fuji
+    id: 43113,
+    name: 'Avalanche Fuji',
+    chainSelector: 14767482510784806043n,
+    routerAddress: '0x6444f16e29Bf33a8C9da2B89E472b58Bafe41b9c',
+    nativeToken: 'AVAX',
+    explorerUrl: 'https://testnet.snowtrace.io'
+  },
+  84532: { // Base Sepolia
+    id: 84532,
+    name: 'Base Sepolia',
+    chainSelector: 10344971235874465080n,
+    routerAddress: '0x7CC324d15E5fF17c43188fB63b462B9a79dA68f6',
+    nativeToken: 'ETH',
+    explorerUrl: 'https://sepolia.basescan.org'
+  }
+};
+
+// ERC20 ABI for token interactions
+const ERC20_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+
+// Context type definition
+interface ContractContextType {
+  // Core contract instances
+  ...ContractInstances;
+  
+  // Wallet and chain info
+  address?: `0x${string}`;
+  isConnected: boolean;
+  chainId?: number;
+  
+  // Loading and error states
+  isLoading: boolean;
+  error: Error | null;
+  setError: (error: Error | null) => void;
+  
+  // Cross-chain functionality
+  supportedChains: typeof SUPPORTED_CHAINS;
+  estimateCrossChainFee: (
+    destinationChainId: number,
+    token: Address,
+    amount: bigint
+  ) => Promise<bigint>;
+  sendCrossChainTokens: (
+    destinationChainId: number,
+    token: Address,
+    amount: bigint
+  ) => Promise<boolean>;
+  getChainConfig: (chainId: number) => ChainConfig | undefined;
+  
+  // Aave Vault functions
+  aaveDeposit: (amount: bigint, tokenAddress: Address) => Promise<boolean>;
+  aaveWithdraw: (amount: bigint) => Promise<boolean>;
+  getAaveTotalValue: () => Promise<bigint | null>;
+  
+  // Treasury AI Manager functions
+  processTreasuryDecision: (
+    decisionId: string,
+    strategy: Address,
+    allocation: bigint,
+    reason: string
+  ) => Promise<boolean>;
+  performTreasuryUpkeep: (performData: string) => Promise<boolean>;
+}
+
+// Default context value
+const defaultContext: ContractContextType = {
+  // Core contract instances
+  vaultFactory: null,
+  vaultManager: null,
+  aaveVault: null,
+  crossChainRouter: null,
+  treasuryAIManager: null,
+  
+  // Wallet and chain info
+  address: undefined,
+  isConnected: false,
+  chainId: undefined,
+  
+  // Loading and error states
+  isLoading: false,
+  error: null,
+  setError: () => {},
+  
+  // Cross-chain functionality
+  supportedChains: SUPPORTED_CHAINS,
+  estimateCrossChainFee: async () => 0n,
+  sendCrossChainTokens: async () => false,
+  getChainConfig: () => undefined,
+  
+  // Aave Vault functions
+  aaveDeposit: async () => false,
+  aaveWithdraw: async () => false,
+  getAaveTotalValue: async () => null,
+  
+  // Treasury AI Manager functions
+  processTreasuryDecision: async () => false,
+  performTreasuryUpkeep: async () => false,
+};
+
+// Create the context
+const ContractContext = createContext<ContractContextType>(defaultContext);
+
+// Provider component
+export function ContractProvider({ children }: { children: React.ReactNode }) {
+  const { toast } = useToast();
+  const contracts = useContractInstances();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  
+  // State management
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isMounted, setIsMounted] = useState(true);
+
+  // Set isMounted to false when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
+  // Estimate cross-chain fee
+  const estimateCrossChainFee = useCallback(async (
+    destinationChainId: number,
+    token: Address,
+    amount: bigint
+  ): Promise<bigint> => {
+    if (!contracts.crossChainRouter?.read) {
+      throw new Error('CrossChainRouter not available');
+    }
+
+    const destinationChain = SUPPORTED_CHAINS[destinationChainId];
+    if (!destinationChain) {
+      throw new Error(`Unsupported destination chain: ${destinationChainId}`);
+    }
+
+    try {
+      const fee = await publicClient.readContract({
+        address: contracts.crossChainRouter.address,
+        abi: contracts.crossChainRouter.abi,
+        functionName: 'getFee',
+        args: [destinationChain.chainSelector, token, amount]
+      });
+      
+      return BigInt(fee.toString());
+    } catch (error) {
+      console.error('Error estimating cross-chain fee:', error);
+      throw new Error('Failed to estimate cross-chain fee');
+    }
+  }, [contracts.crossChainRouter, publicClient]);
+
+  // Send cross-chain tokens
+  const sendCrossChainTokens = useCallback(async (
+    destinationChainId: number,
+    token: Address,
+    amount: bigint
+  ): Promise<boolean> => {
+    if (!contracts.crossChainRouter?.write || !walletClient?.account?.address) {
+      throw new Error('CrossChainRouter or wallet client not available');
+    }
+
+    const destinationChain = SUPPORTED_CHAINS[destinationChainId];
+    if (!destinationChain) {
+      throw new Error(`Unsupported destination chain: ${destinationChainId}`);
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('Initiating cross-chain token transfer...', {
+        destinationChain: destinationChain.name,
+        token,
+        amount: amount.toString(),
+        from: walletClient.account.address
+      });
+
+      // 1. Approve token transfer if needed
+      const tokenContract = {
+        address: token,
+        abi: ERC20_ABI,
+      };
+
+      const allowance = await publicClient.readContract({
+        ...tokenContract,
+        functionName: 'allowance',
+        args: [walletClient.account.address, contracts.crossChainRouter.address],
+      });
+
+      if (allowance < amount) {
+        console.log('Approving token spend...');
+        const approveTx = await walletClient.writeContract({
+          ...tokenContract,
+          functionName: 'approve',
+          args: [contracts.crossChainRouter.address, amount],
+          account: walletClient.account.address,
+        });
+        
+        console.log('Waiting for approval transaction...', { txHash: approveTx });
+        await publicClient.waitForTransactionReceipt({
+          hash: approveTx,
+        });
+        console.log('Approval transaction confirmed');
+      }
+
+      // 2. Get fee estimate
+      const fee = await estimateCrossChainFee(destinationChainId, token, amount);
+      console.log('Estimated fee:', fee.toString());
+
+      // 3. Send cross-chain transfer
+      console.log('Sending cross-chain transfer...');
+      const txHash = await walletClient.writeContract({
+        address: contracts.crossChainRouter.address,
+        abi: contracts.crossChainRouter.abi,
+        functionName: 'sendTokens',
+        args: [destinationChain.chainSelector, token, amount],
+        account: walletClient.account.address,
+        value: fee,
+        gas: 500000n,
+      });
+
+      console.log('Cross-chain transfer transaction hash:', txHash);
+      
+      // Wait for the transaction to be mined
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+      });
+
+      if (receipt.status === 'success') {
+        console.log('Cross-chain transfer successful');
+        toast({
+          title: 'Transfer Successful',
+          description: 'Your cross-chain transfer has been initiated.',
+        });
+        return true;
+      } else {
+        throw new Error('Transaction reverted');
+      }
+    } catch (error: unknown) {
+      console.error('Cross-chain transfer error:', error);
+      
+      // Try to extract revert reason
+      let errorMessage = 'Failed to send cross-chain tokens';
+      const err = error as any;
+      
+      if (err?.cause?.data?.errorName) {
+        errorMessage = `Revert: ${err.cause.data.errorName} - ${err.cause.data.errorArgs?.join(', ')}`;
+      } else if (err?.message?.includes('revert')) {
+        errorMessage = err.message;
+      } else if (err?.shortMessage) {
+        errorMessage = err.shortMessage;
+      }
+      
+      const errorObj = new Error(errorMessage);
+      setError(errorObj);
+      toast({
+        title: 'Transfer Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    }
+  }, [contracts.crossChainRouter, walletClient, publicClient, isMounted, toast, estimateCrossChainFee]);
+
+  // Get chain configuration
+  const getChainConfig = useCallback((chainId: number): ChainConfig | undefined => {
+    return SUPPORTED_CHAINS[chainId];
+  }, []);
+
+  // Context value
+  const contextValue = useMemo<ContractContextType>(
+    () => ({
+      // Core contract instances
+      ...contracts,
+      
+      // Wallet and chain info
+      address,
+      isConnected,
+      chainId,
+      
+      // Loading and error states
+      isLoading,
+      error,
+      setError,
+      
+      // Cross-chain functionality
+      supportedChains: SUPPORTED_CHAINS,
+      estimateCrossChainFee,
+      sendCrossChainTokens,
+      getChainConfig,
+      
+      // Aave Vault functions (stubs - implement as needed)
+      aaveDeposit: async () => {
+        console.warn('aaveDeposit not implemented');
+        return false;
+      },
+      aaveWithdraw: async () => {
+        console.warn('aaveWithdraw not implemented');
+        return false;
+      },
+      getAaveTotalValue: async () => {
+        console.warn('getAaveTotalValue not implemented');
+        return null;
+      },
+      
+      // Treasury AI Manager functions (stubs - implement as needed)
+      processTreasuryDecision: async () => {
+        console.warn('processTreasuryDecision not implemented');
+        return false;
+      },
+      performTreasuryUpkeep: async () => {
+        console.warn('performTreasuryUpkeep not implemented');
+        return false;
+      },
+    }),
+    [
+      contracts,
+      address,
+      isConnected,
+      chainId,
+      isLoading,
+      error,
+      estimateCrossChainFee,
+      sendCrossChainTokens,
+      getChainConfig,
+    ]
+  );
+
+  return (
+    <ContractContext.Provider value={contextValue}>
+      {children}
+    </ContractContext.Provider>
+  );
+}
+
+// Hook to use the contract context
+export function useContractContext() {
+  const context = useContext(ContractContext);
+  if (context === undefined) {
+    throw new Error('useContractContext must be used within a ContractProvider');
+  }
+  return context;
+}
