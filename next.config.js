@@ -1,74 +1,63 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
-const { src, components } = require('./paths');
+
+// Create path aliases
+const createAliases = (basePath) => ({
+  '@': path.resolve(basePath, 'src'),
+  '@components': path.resolve(basePath, 'src/components'),
+  // Add more aliases as needed
+});
 
 const nextConfig = {
-  // Enable Turbopack (stable in Next.js 15)
-  turbopack: {},
-  
-  // Enable server actions (moved out of experimental in Next.js 15)
+  // Enable experimental features
   experimental: {
-    serverActions: {
-      // Configure server actions options here
-    },
+    serverActions: true,
   },
-  
+
   // Webpack configuration
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { isServer }) => {
     // Add path aliases
+    const aliases = createAliases(__dirname);
+    
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
-      '@/*': path.resolve(__dirname, 'src/*'),
-      // Add other path aliases as needed
+      ...aliases,
     };
-    
-    // Ensure proper module resolution
+
+    // Configure module resolution
     config.resolve.modules = [
-      ...(config.resolve.modules || []),
+      path.resolve(__dirname, 'src'),
       'node_modules',
-      path.resolve(__dirname, 'node_modules'),
     ];
 
-    // Add fallback for path module if needed
+    // Add fallback for path module
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      path: require.resolve('path-browserify'),
+      path: false,
+      fs: false,
     };
 
-    if (dev && !isServer) {
-      // Only in development, on the client side
-      config.watchOptions = {
-        poll: 1000,
-        ignored: ['**/node_modules/**', '**/.git/**']
-      };
-    }
     return config;
   },
-  
-  // Development server settings
-  devIndicators: {
-    autoPrerender: false,
-  },
-  
-  // Disable type checking on build
+
+  // TypeScript configuration
   typescript: {
     ignoreBuildErrors: true,
   },
-  
-  // Disable ESLint during development
+
+  // ESLint configuration
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
-  // Disable React Strict Mode if needed
+
+  // React configuration
   reactStrictMode: false,
-  
-  // Configure images if you're using next/image
+
+  // Images configuration
   images: {
     domains: ['localhost'],
   },
-  
+
   // Server external packages
   serverExternalPackages: [],
 };
