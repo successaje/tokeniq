@@ -13,11 +13,16 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, 'src'),
-      '@components': path.resolve(__dirname, 'src/components'),
+      '@/components': path.resolve(__dirname, 'src/components'),
+      '@/app': path.resolve(__dirname, 'src/app'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@/hooks': path.resolve(__dirname, 'src/hooks'),
     };
 
     // Ensure proper module resolution
     config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      path.resolve(__dirname, 'src'),
       path.resolve(__dirname, 'src'),
       'node_modules',
     ];
