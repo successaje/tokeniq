@@ -9,18 +9,12 @@ const nextConfig = {
 
   // Webpack configuration
   webpack: (config) => {
-    // Add path aliases
+    // Add path aliases - extend existing aliases instead of overriding
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, 'src'),
       '@components': path.resolve(__dirname, 'src/components'),
     };
-
-    // Configure module resolution
-    config.resolve.modules = [
-      path.resolve(__dirname, 'src'),
-      'node_modules',
-    ];
 
     return config;
   },

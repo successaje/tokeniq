@@ -905,6 +905,11 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.9.0"
 
+"@netlify/plugin-nextjs@^5.11.4":
+  version "5.11.4"
+  resolved "https://registry.npmjs.org/@netlify/plugin-nextjs/-/plugin-nextjs-5.11.4.tgz"
+  integrity sha512-hJJthlDU76wn1vuOF48GiYx7HLhSK0u9xJU7N4BSmOjc741zvI5NgfWlQwfPOydp5OOuoxPDXxbZj9EttBycPw==
+
 "@next/env@15.3.3":
   version "15.3.3"
   resolved "https://registry.npmjs.org/@next/env/-/env-15.3.3.tgz"
