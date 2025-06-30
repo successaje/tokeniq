@@ -1,13 +1,16 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
+const { src, components } = require('./paths');
 
 const nextConfig = {
-  // Basic configuration for Turbopack
+  // Enable Turbopack (stable in Next.js 15)
+  turbopack: {},
+  
+  // Enable server actions (moved out of experimental in Next.js 15)
   experimental: {
-    turbo: {},
-    // Disable server components if not needed
-    serverComponentsExternalPackages: [],
-    serverActions: true,
+    serverActions: {
+      // Configure server actions options here
+    },
   },
   
   // Webpack configuration
@@ -15,8 +18,17 @@ const nextConfig = {
     // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
+      '@': src,
+      '@components': components,
+      // Add other path aliases as needed
     };
+    
+    // Ensure proper module resolution
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      'node_modules',
+      path.resolve(__dirname, 'node_modules'),
+    ];
 
     if (dev && !isServer) {
       // Only in development, on the client side
@@ -50,6 +62,9 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  
+  // Server external packages
+  serverExternalPackages: [],
 };
 
 module.exports = nextConfig;
