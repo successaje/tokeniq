@@ -1,14 +1,23 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   // Basic configuration for Turbopack
   experimental: {
     turbo: {},
     // Disable server components if not needed
     serverComponentsExternalPackages: [],
+    serverActions: true,
   },
   
-  // Simple webpack configuration
+  // Webpack configuration
   webpack: (config, { dev, isServer }) => {
+    // Add path aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+
     if (dev && !isServer) {
       // Only in development, on the client side
       config.watchOptions = {
