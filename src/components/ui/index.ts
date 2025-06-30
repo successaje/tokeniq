@@ -23,4 +23,13 @@ export { Alert, AlertDescription, AlertTitle } from './alert';
 export { Textarea } from './textarea';
 export { Surface } from './surface';
 export { ScrollArea, ScrollBar } from './scroll-area';
-export { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './table'; 
+export { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './table';
+export { 
+  Form, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormControl, 
+  FormMessage, 
+  FormDescription 
+} from './form'; 
