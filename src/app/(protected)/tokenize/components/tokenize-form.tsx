@@ -14,10 +14,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDropzone } from 'react-dropzone';
-import { FileText, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, Upload, CheckCircle2, AlertCircle, File, X, Image as FileImage, FileText as FileTextIcon } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 type AssetType = 'invoice' | 'real-estate' | 'carbon-credit' | '';
+type UploadedFile = {
+  file: File;
+  preview: string;
+  type: 'image' | 'pdf' | 'document' | 'other';
+  size: string;
+  ipfsHash?: string;
+  status: 'uploading' | 'uploaded' | 'failed';
+};
 
 interface AssetMetadata {
   name: string;
@@ -44,6 +52,8 @@ export function TokenizeForm() {
   const [mintSuccess, setMintSuccess] = useState(false);
   const [mintError, setMintError] = useState('');
   const [progress, setProgress] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [metadata, setMetadata] = useState<AssetMetadata>({
     name: '',
     description: '',
@@ -53,30 +63,83 @@ export function TokenizeForm() {
     issueDate: new Date().toISOString().split('T')[0],
   });
 
-  const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'application/json': ['.json'],
+      'application/pdf': ['.pdf'],
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     },
-    maxFiles: 1,
+    maxSize: 10 * 1024 * 1024, // 10MB
     onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const content = JSON.parse(e.target?.result as string);
-            setMetadata(prev => ({
-              ...prev,
-              ...content,
-            }));
-          } catch (error) {
-            console.error('Error parsing metadata file:', error);
-          }
+      const newFiles = acceptedFiles.map(file => {
+        const fileType = file.type.startsWith('image/') ? 'image' : 
+                        file.type === 'application/pdf' ? 'pdf' : 
+                        file.type.includes('document') ? 'document' : 'other';
+                        
+        return {
+          file,
+          preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : '',
+          type: fileType,
+          size: formatFileSize(file.size),
+          status: 'uploading' as const
         };
-        reader.readAsText(file);
-      }
+      });
+      
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+      // Simulate IPFS upload
+      uploadFilesToIPFS(newFiles);
     },
   });
+  
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+  
+  const uploadFilesToIPFS = async (files: UploadedFile[]) => {
+    setIsUploading(true);
+    
+    // In a real implementation, you would upload to IPFS here
+    // This is a simulation that updates the status after a delay
+    const uploadPromises = files.map((file, index) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setUploadedFiles(prev => {
+            const updated = [...prev];
+            const fileIndex = updated.findIndex(f => f.file === file.file);
+            if (fileIndex > -1) {
+              updated[fileIndex] = {
+                ...updated[fileIndex],
+                status: 'uploaded',
+                ipfsHash: `QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco_${Date.now()}`
+              };
+            }
+            return updated;
+          });
+          resolve();
+        }, 1000 + (index * 500)); // Staggered uploads
+      });
+    });
+    
+    await Promise.all(uploadPromises);
+    setIsUploading(false);
+  };
+  
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => {
+      const newFiles = [...prev];
+      const removed = newFiles.splice(index, 1);
+      // Revoke the object URL to avoid memory leaks
+      if (removed[0]?.preview) {
+        URL.revokeObjectURL(removed[0].preview);
+      }
+      return newFiles;
+    });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -91,12 +154,38 @@ export function TokenizeForm() {
       setMintError('Please select an asset type');
       return;
     }
+    
+    if (uploadedFiles.length === 0) {
+      setMintError('Please upload at least one document for your asset');
+      return;
+    }
+    
+    // Check if all files are uploaded
+    const notUploaded = uploadedFiles.some(file => file.status !== 'uploaded' || !file.ipfsHash);
+    if (notUploaded) {
+      setMintError('Please wait for all files to finish uploading');
+      return;
+    }
 
     setIsMinting(true);
     setMintError('');
     setProgress(0);
 
     try {
+      // Prepare metadata with IPFS hashes
+      const assetMetadata = {
+        ...metadata,
+        documents: uploadedFiles.map(file => ({
+          name: file.file.name,
+          type: file.file.type,
+          size: file.file.size,
+          ipfsHash: file.ipfsHash,
+          url: `https://ipfs.io/ipfs/${file.ipfsHash}`
+        }))
+      };
+      
+      // In a real implementation, you would now send this metadata to your backend or smart contract
+      console.log('Asset metadata with documents:', assetMetadata);
       // Simulate minting process with progress
       await new Promise<void>((resolve) => {
         const interval = setInterval(() => {
@@ -117,6 +206,7 @@ export function TokenizeForm() {
       
       setProgress(100);
       setMintSuccess(true);
+      
       // Reset form after success
       setTimeout(() => {
         setAssetType('');
@@ -128,6 +218,13 @@ export function TokenizeForm() {
           issuer: '',
           issueDate: new Date().toISOString().split('T')[0],
         });
+        // Clean up object URLs
+        uploadedFiles.forEach(file => {
+          if (file.preview) {
+            URL.revokeObjectURL(file.preview);
+          }
+        });
+        setUploadedFiles([]);
         setMintSuccess(false);
         setProgress(0);
       }, 3000);
@@ -306,11 +403,12 @@ export function TokenizeForm() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="ETH">ETH</SelectItem>
-                        <SelectItem value="BTC">BTC</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                        <SelectItem value="NGN">NGN (₦)</SelectItem>
+                        <SelectItem value="ETH">ETH (Ξ)</SelectItem>
+                        <SelectItem value="BTC">BTC (₿)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -347,32 +445,88 @@ export function TokenizeForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Upload Metadata (Optional)</CardTitle>
+            <CardTitle>Asset Documentation</CardTitle>
             <CardDescription>
-              Upload a JSON file containing the asset metadata
+              Upload supporting documents for your asset (PDFs, images, contracts, etc.)
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors ${
                 isDragActive ? 'border-primary bg-muted/50' : 'border-border'
               }`}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} disabled={isUploading} />
               <div className="flex flex-col items-center justify-center space-y-2">
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
                   {isDragActive
-                    ? 'Drop the file here'
-                    : 'Drag & drop a JSON file, or click to select'}
+                    ? 'Drop the files here'
+                    : 'Drag & drop files, or click to select'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {acceptedFiles.length > 0
-                    ? `Selected: ${acceptedFiles[0].name}`
-                    : 'Supports .json files'}
+                  Supports PDFs, images, and documents (max 10MB each)
                 </p>
               </div>
+            </div>
+            
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Uploaded Documents</h4>
+                <div className="grid gap-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div 
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-md bg-primary/10">
+                          {file.type === 'pdf' ? (
+                            <FileText className="h-5 w-5 text-red-500" />
+                          ) : file.type === 'image' ? (
+                            <FileImage className="h-5 w-5 text-blue-500" />
+                          ) : (
+                            <FileTextIcon className="h-5 w-5 text-gray-500" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{file.file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {file.size} • {file.type.charAt(0).toUpperCase() + file.type.slice(1)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {file.status === 'uploading' && (
+                          <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                        )}
+                        {file.status === 'uploaded' && file.ipfsHash && (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(index);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">Remove file</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="text-xs text-muted-foreground">
+              <p>Upload documents that verify the ownership and details of your asset. These will be stored securely on IPFS.</p>
+              <p className="mt-1">Examples: Property deeds, invoices, certificates, contracts, etc.</p>
             </div>
           </CardContent>
         </Card>

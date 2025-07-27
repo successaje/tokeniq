@@ -381,9 +381,9 @@ export default function Home() {
             
             <motion.p 
               variants={fadeInUp}
-              className="text-xl md:text-2xl text-foreground/80 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-xl md:text-2xl text-foreground/80 mb-12 max-w-4xl mx-auto leading-relaxed"
             >
-              Unlock the full potential of your crypto portfolio with advanced analytics, cross-chain tracking, and AI-powered insights—all in one powerful platform.
+              Unlock the full potential of your Crypto portfolio and Bitcoin assets through advanced vault strategies, tokenization, and AI-driven financial automation—all in one platform.
             </motion.p>
             
             <motion.div 
@@ -460,6 +460,85 @@ export default function Home() {
               <span className="text-xs text-foreground/50">Scroll to explore</span>
             </motion.div>
             
+            {/* Value Propositions / Features Highlights */}
+            <section className="py-20 relative overflow-hidden">
+              <div className="absolute inset-0 -z-10">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-background/50 to-background/80" />
+                <div className="absolute inset-0 opacity-20" style={{
+                  backgroundImage: 'radial-gradient(circle at 25% 25%, var(--primary) 0.5px, transparent 0.5px)',
+                  backgroundSize: '20px 20px',
+                }} />
+              </div>
+              
+              <div className="container mx-auto px-6">
+                <motion.div 
+                  className="text-center mb-16"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Powering the Future of BTCfi
+                  </h2>
+                  <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
+                    Advanced DeFi solutions built on Core to maximize your Bitcoin's potential
+                  </p>
+                </motion.div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                  {[
+                    {
+                      icon: '🚀',
+                      title: 'BTC Vaults & Yield',
+                      description: 'Put your Bitcoin to work with decentralized vaults on Core. Earn yield, borrow, or tokenize your BTC assets.'
+                    },
+                    {
+                      icon: '🌉',
+                      title: 'Cross-Chain Bridge with Chainlink CCIP',
+                      description: 'Move tokens across chains securely and instantly using Chainlink CCIP and Core\'s native bridges.'
+                    },
+                    {
+                      icon: '🤖',
+                      title: 'ElizaOS: Your AI Finance Agent',
+                      description: 'Get real-time insights, strategy suggestions, and automated vault execution powered by ElizaOS.'
+                    },
+                    {
+                      icon: '📊',
+                      title: 'Portfolio & Strategy Insights',
+                      description: 'Visualize your portfolio, track performance, and discover high-yield BTCfi opportunities across chains.'
+                    },
+                    {
+                      icon: '🧩',
+                      title: 'Tokenize Real-World Assets (RWAs)',
+                      description: 'Bring your invoices, carbon credits, and RWAs on-chain as tradable assets on Core.'
+                    },
+                    {
+                      icon: '🔒',
+                      title: 'Non-Custodial & Secure',
+                      description: 'Maintain full control of your assets with non-custodial solutions secured by Core\'s Bitcoin-backed security.'
+                    }
+                  ].map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      className="group relative p-6 rounded-2xl bg-background/50 border border-border/20 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <div className="text-4xl mb-4">{feature.icon}</div>
+                      <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-foreground/70">{feature.description}</p>
+                      <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl blur-sm" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </section>
+            
             {/* Trusted by section with gradient theme */}
             <motion.div 
               className="relative mt-32 py-16 overflow-hidden"
@@ -499,10 +578,12 @@ export default function Home() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center justify-items-center">
                   {[
                     { name: 'Ethereum', logo: '/logos/ethereum.png' },
-                    { name: 'Arbitrum', logo: '/arbitrum-arb-logo.png' },
+                    { name: 'Core', logo: '/core-dao-core-logo.png' },
+                    { name: 'Bitcoin', logo: '/logos/bitcoin-btc-logo.png' },
+                    // { name: 'Arbitrum', logo: '/arbitrum-arb-logo.png' },
                     { name: 'Avalanche', logo: '/avalanche-avax-logo.png' },
                     { name: 'Polygon', logo: '/polygon-matic-logo.png' },
-                    { name: 'BNB Chain', logo: '/bnb-bnb-logo.png' },
+                    // { name: 'BNB Chain', logo: '/bnb-bnb-logo.png' },
                     { name: 'Base', logo: '/base-logo.jpeg' },
                     { name: 'USDC', logo: '/usd-coin-usdc-logo.png' },
                     { name: 'USDT', logo: '/tether-usdt-logo.png' },
@@ -534,6 +615,52 @@ export default function Home() {
               </div>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* BTCfi Education Section */}
+      <section className="relative py-20 bg-background/50">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/90" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary)/0.03),transparent_70%)]" />
+        </div>
+        
+        <div className="container px-6 mx-auto">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              What is BTCfi?
+            </h2>
+            
+            <div className="space-y-8">
+              <div className="bg-background/80 backdrop-blur-sm border border-border/20 rounded-2xl p-8 md:p-10 shadow-sm">
+                <p className="text-lg leading-relaxed text-foreground/90 mb-6">
+                  <strong className="font-semibold text-foreground">BTCfi (Bitcoin Decentralized Finance)</strong> is the emerging frontier of DeFi innovation built around Bitcoin — unlocking the full potential of your BTC assets beyond holding.
+                </p>
+                
+                <p className="text-foreground/80 leading-relaxed">
+                  With TokenIQ, BTCfi becomes smarter, faster, and more accessible. Our platform fuses powerful AI automation, cross-chain liquidity, and the Core blockchain's performance to let you do more with your Bitcoin than ever before.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { emoji: '📈', text: 'Stake & earn from smart vaults' },
+                  { emoji: '💸', text: 'Borrow stablecoins against BTC' },
+                  { emoji: '🤖', text: 'Automate strategies with ElizaOS' },
+                  { emoji: '🌍', text: 'Tokenize assets using BTC' },
+                  { emoji: '🔗', text: 'Bridge BTC across chains' }
+                ].map((item, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-background/80 backdrop-blur-sm border border-border/20 rounded-xl p-4 text-left flex items-center gap-3 hover:border-primary/30 transition-colors"
+                  >
+                    <span className="text-2xl">{item.emoji}</span>
+                    <span className="text-foreground/90">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       
@@ -809,9 +936,12 @@ export default function Home() {
             <div>
               <h4 className="font-medium mb-4">Company</h4>
               <ul className="space-y-2">
-                {['About', 'Careers', 'Legal', 'Contact'].map((item) => (
+                {['About', 'Whitepaper', 'Careers', 'Contact'].map((item) => (
                   <li key={item}>
-                    <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                    <a 
+                      href={item === 'Whitepaper' ? '/whitepaper' : '#'} 
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
                       {item}
                     </a>
                   </li>

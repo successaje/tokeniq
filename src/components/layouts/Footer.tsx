@@ -10,6 +10,7 @@ const navigation = {
   ],
   company: [
     { name: 'About', href: '#' },
+    { name: 'Whitepaper', href: '/whitepaper' },
     { name: 'Blog', href: '#' },
     { name: 'Careers', href: '#' },
     { name: 'Contact', href: '#' },

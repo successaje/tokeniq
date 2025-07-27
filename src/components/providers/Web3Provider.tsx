@@ -7,6 +7,12 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { mainnet, sepolia, avalanche, avalancheFuji, base, baseSepolia, Chain } from 'viem/chains';
+import { CORE_MAINNET, CORE_TESTNET } from '@/config/chains';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
+
+// TODO: Replace with your WalletConnect project ID from https://cloud.walletconnect.com/
+const WALLET_CONNECT_PROJECT_ID = 'YOUR_WALLET_CONNECT_PROJECT_ID';
 
 // Import chain configurations
 import { SUPPORTED_CHAINS } from '@/contexts/ContractContext';
@@ -66,7 +72,60 @@ const CHAINS = {
       default: { http: ['https://sepolia.base.org'] },
     },
   },
-};
+} as const;
+
+// Configure Web3Modal
+const projectId = WALLET_CONNECT_PROJECT_ID;
+
+// Create wagmiConfig with supported chains
+const chains = [
+  CHAINS.mainnet,
+  CHAINS.sepolia,
+  CHAINS.avalanche,
+  CHAINS.avalancheFuji,
+  CHAINS.base,
+  CHAINS.baseSepolia,
+  CORE_MAINNET,
+  CORE_TESTNET,
+] as const;
+
+// Create wagmiConfig
+const wagmiConfig = defaultWagmiConfig({
+  projectId,
+  chains,
+  ssr: true,
+  metadata: {
+    name: 'CoreIQ',
+    description: 'AI-powered asset intelligence platform',
+    url: 'https://coreiq.xyz',
+    icons: ['https://coreiq.xyz/logo.png']
+  }
+});
+
+// Create Web3Modal instance - we'll initialize this in a useEffect to avoid SSR issues
+let web3Modal: any;
+
+if (typeof window !== 'undefined') {
+  web3Modal = createWeb3Modal({
+    wagmiConfig,
+    projectId,
+    enableAnalytics: true,
+    enableOnramp: true,
+    themeMode: 'dark',
+    themeVariables: {
+      '--w3m-color-mix': '#7C3AED',
+      '--w3m-color-mix-strength': 40,
+    },
+    featuredWalletIds: [
+      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // Metamask
+      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+      '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
+      'c03dfee351b6fcc421b4494ea33b9d4b98a021f564a69b85d81de06441169a22', // OKX
+    ],
+    termsConditionsUrl: 'https://coreiq.xyz/terms',
+    privacyPolicyUrl: 'https://coreiq.xyz/privacy'
+  });
+}
 
 // Create chains array from SUPPORTED_CHAINS
 const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
@@ -80,6 +139,8 @@ const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
     case 43113: return CHAINS.avalancheFuji;
     case 8453: return CHAINS.base;
     case 84532: return CHAINS.baseSepolia;
+    case 1116: return CORE_MAINNET;
+    case 1115: return CORE_TESTNET;
     default: return CHAINS.mainnet;
   }
 });
@@ -91,7 +152,16 @@ if (supportedChains.length === 0) {
 
 // Create wagmi config
 const config = createConfig({
-  chains: supportedChains as [Chain, ...Chain[]],
+  chains: [
+    CHAINS.mainnet,
+    CHAINS.sepolia,
+    CHAINS.avalanche,
+    CHAINS.avalancheFuji,
+    CHAINS.base,
+    CHAINS.baseSepolia,
+    CORE_MAINNET,
+    CORE_TESTNET,
+  ],
   transports: {
     [mainnet.id]: http(CHAINS.mainnet.rpcUrls.default.http[0]),
     [sepolia.id]: http(CHAINS.sepolia.rpcUrls.default.http[0]),
@@ -99,33 +169,58 @@ const config = createConfig({
     [avalancheFuji.id]: http(CHAINS.avalancheFuji.rpcUrls.default.http[0]),
     [base.id]: http(CHAINS.base.rpcUrls.default.http[0]),
     [baseSepolia.id]: http(CHAINS.baseSepolia.rpcUrls.default.http[0]),
+    [CORE_MAINNET.id]: http(CORE_MAINNET.rpcUrls.default.http[0]),
+    [CORE_TESTNET.id]: http(CORE_TESTNET.rpcUrls.default.http[0]),
   },
 });
 
-// Create a client-side only wrapper component
+// ClientWeb3Provider component - only rendered on client side
 const ClientWeb3Provider = React.memo(({ children }: { children: React.ReactNode }) => {
-  // Memoize theme and config first to ensure stable references
-  const theme = React.useMemo(() => darkTheme({
-    accentColor: '#6366f1',
+  const [mounted, setMounted] = React.useState(false);
+  
+  // Use effect to handle client-side only operations
+  React.useEffect(() => {
+    setMounted(true);
+    
+    // Initialize Web3Modal on client side
+    if (typeof window !== 'undefined' && !web3Modal) {
+      web3Modal = createWeb3Modal({
+        wagmiConfig,
+        projectId,
+        enableAnalytics: true,
+        enableOnramp: true,
+        themeMode: 'dark',
+        themeVariables: {
+          '--w3m-color-mix': '#7C3AED',
+          '--w3m-color-mix-strength': 40,
+        },
+        featuredWalletIds: [
+          'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // Metamask
+          '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+          '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
+          'c03dfee351b6fcc421b4494ea33b9d4b98a021f564a69b85d81de06441169a22', // OKX
+        ],
+        termsConditionsUrl: 'https://coreiq.xyz/terms',
+        privacyPolicyUrl: 'https://coreiq.xyz/privacy'
+      });
+    }
+    
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
+  
+  // Use dark theme for RainbowKit
+  const theme = darkTheme({
+    accentColor: '#7C3AED',
     accentColorForeground: 'white',
     borderRadius: 'medium',
     fontStack: 'system',
     overlayBlur: 'small',
-  }), []);
+  });
 
-  // Create a stable config reference
-  const wagmiConfig = React.useMemo(() => config, []);
-  
-  // Track if we're on the client
-  const [isClient, setIsClient] = React.useState(false);
-
-  // Use layout effect to set client state before paint
-  React.useLayoutEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Don't render anything during SSR or before client-side hydration
-  if (!isClient) {
+  // Don't render anything until we're on the client
+  if (!mounted) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>

@@ -2,11 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { Address, Chain, parseEther, formatEther } from 'viem';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { sepolia, avalancheFuji, baseSepolia } from 'wagmi/chains';
+import { CORE_MAINNET, CORE_TESTNET } from '@/config/chains';
 import { getContract } from 'viem';
 import CrossChainRouterABI from '@/abis/CrossChainRouter.json';
 import { CONTRACT_ADDRESSES } from '@/config/contracts';
 
-export type ChainId = typeof sepolia.id | typeof avalancheFuji.id | typeof baseSepolia.id;
+export type ChainId = typeof sepolia.id | typeof avalancheFuji.id | typeof baseSepolia.id | typeof CORE_MAINNET.id | typeof CORE_TESTNET.id;
 
 export interface SupportedChain {
   id: ChainId;
@@ -19,17 +20,32 @@ export const SUPPORTED_CHAINS: Record<number, SupportedChain> = {
   [sepolia.id]: {
     id: sepolia.id,
     name: 'Ethereum Sepolia',
+    logo: '/logos/ethereum-eth-logo.png',
     explorerUrl: 'https://sepolia.etherscan.io',
   },
   [avalancheFuji.id]: {
     id: avalancheFuji.id,
     name: 'Avalanche Fuji',
+    logo: '/logos/avalanche-avax-logo.png',
     explorerUrl: 'https://testnet.snowtrace.io',
   },
   [baseSepolia.id]: {
     id: baseSepolia.id,
     name: 'Base Sepolia',
+    logo: '/logos/base-logo.png',
     explorerUrl: 'https://sepolia.basescan.org',
+  },
+  [CORE_MAINNET.id]: {
+    id: CORE_MAINNET.id,
+    name: 'Core Mainnet',
+    logo: '/logos/core-dao-core-logo.png',
+    explorerUrl: 'https://scan.coredao.org',
+  },
+  [CORE_TESTNET.id]: {
+    id: CORE_TESTNET.id,
+    name: 'Core Testnet',
+    logo: '/logos/core-dao-core-logo.png',
+    explorerUrl: 'https://scan.test.btcs.network',
   },
 };
 
@@ -46,6 +62,7 @@ export const SUPPORTED_TOKENS: Record<number, TokenInfo[]> = {
       address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // USDC on Sepolia
       symbol: 'USDC',
       decimals: 6,
+      logo: '/tokens/usdc-logo.png',
     },
   ],
   [avalancheFuji.id]: [

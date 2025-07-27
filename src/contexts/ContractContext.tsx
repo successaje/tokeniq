@@ -3,17 +3,25 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useContractInstances } from '@/hooks/useContracts';
+import { Address, Hash, Hex, Chain, formatEther, parseEther, zeroAddress } from 'viem';
 import { useToast } from '@/components/ui/use-toast';
-import { Address, Hash, Hex, formatEther, parseEther, zeroAddress } from 'viem';
 import { decodeEventLog } from 'viem/utils';
-import { ChainConfig, CrossChainTransfer } from '@/types/crossChain';
-import { VaultInfo, VaultType } from '@/types/contracts';
+import { VaultType, VaultInfo } from '@/types/vault';
+import { TokenBalance, TransactionHistory } from '@/types/tokens';
+import { FeeEstimate } from '@/types/fees';
 import ERC20_ABI from '@/abis/ERC20.json';
 
-// Constants
-const MIN_DEPOSIT = BigInt(1e6); // 1 token with 6 decimals
-
-type ContractInstances = ReturnType<typeof useContractInstances>;
+// Define ChainConfig locally to avoid import conflicts
+interface ChainConfig {
+  id: number;
+  name: string;
+  chainSelector: bigint;
+  routerAddress: Address;
+  nativeToken: string;
+  explorerUrl: string;
+  icon?: string;
+  logo?: string;
+}
 
 export const SUPPORTED_CHAINS: Record<number, ChainConfig> = {
   11155111: { // Ethereum Sepolia
@@ -48,13 +56,14 @@ export const SUPPORTED_CHAINS: Record<number, ChainConfig> = {
   }
 };
 
-type ChainConfig = {
+interface ChainConfig {
   id: number;
   name: string;
   chainSelector: bigint;
   routerAddress: Address;
   nativeToken: string;
   explorerUrl: string;
+  logo?: string;
 };
 
 interface VaultFactoryContract {
@@ -155,7 +164,7 @@ interface FeeEstimate {
   breakdown: { label: string; value: number }[];
 }
 
-interface ContractContextType {
+type ContractContextType = {
   contracts: {
     vaultFactory: VaultFactoryContract | null;
     vaultManager: VaultManagerContract | null;
@@ -163,65 +172,32 @@ interface ContractContextType {
     crossChainRouter: CrossChainRouterContract | null;
     treasuryAIManager: TreasuryAIManagerContract | null;
   };
-  publicClient: any; // TODO: Import and use the correct type from viem
-  walletClient: any; // TODO: Import and use the correct type from viem
+  publicClient: any;
+  walletClient: any;
   isLoading: boolean;
   error: Error | null;
   userVaults: VaultInfo[];
   allVaults: VaultInfo[];
   refreshVaults: () => Promise<void>;
-  createVault: (params: {
-    vaultType: VaultType;
-    name: string;
-    symbol: string;
-    asset: Address;
-  }) => Promise<Address | null>;
+  createVault: (params: { vaultType: VaultType; name: string; symbol: string; asset: Address }) => Promise<Address | null>;
   depositToVault: (vaultAddress: Address, amount: bigint) => Promise<boolean>;
   withdrawFromVault: (vaultAddress: Address, amount: bigint) => Promise<boolean>;
   getUserInfo: (vaultAddress: Address) => Promise<{ amount: bigint } | null>;
-
-  // Token Balances
   getTokenBalances: (tokens: { address: Address; symbol: string; decimals: number }[]) => Promise<TokenBalance[]>;
   getNativeBalance: (address: Address) => Promise<bigint>;
   fetchTokenBalances: (tokens: { address: Address; symbol: string; decimals: number }[]) => Promise<TokenBalance[]>;
-  
-  // Transaction History
   getTransactionHistory: (address: Address, limit?: number) => Promise<TransactionHistory[]>;
   fetchTransactionHistory: (address: Address, limit?: number) => Promise<TransactionHistory[]>;
-  
-  // Fee Estimation
-  estimateCrossChainFees: (
-    fromChainId: number,
-    toChainId: number,
-    token: Address,
-    amount: bigint
-  ) => Promise<FeeEstimate>;
-
-  // AaveVault
+  estimateCrossChainFees: (fromChainId: number, toChainId: number, token: Address, amount: bigint) => Promise<FeeEstimate>;
   aaveDeposit: (amount: bigint, tokenAddress: Address) => Promise<boolean>;
   aaveWithdraw: (amount: bigint) => Promise<boolean>;
   aaveRebalance: () => Promise<boolean>;
   getAaveTotalValue: () => Promise<bigint | null>;
-
-  // CrossChainRouter
-  supportedChains: typeof SUPPORTED_CHAINS;
-  estimateCrossChainFee: (
-    destinationChainId: number,
-    token: Address,
-    amount: bigint
-  ) => Promise<bigint>;
-  sendCrossChainTokens: (
-    destinationChainId: number,
-    token: Address,
-    amount: bigint
-  ) => Promise<boolean>;
-  getChainConfig: (chainId: number) => ChainConfig | undefined;
-
-  // TreasuryAIManager
+  sendCrossChainTokens: (destinationChainId: number, token: Address, amount: bigint) => Promise<boolean>;
   processTreasuryDecision: (decisionId: string, strategy: Address, allocation: bigint, reason: string) => Promise<boolean>;
   performTreasuryUpkeep: (performData: string) => Promise<boolean>;
-
-  supportedChains: typeof SUPPORTED_CHAINS;
+  supportedChains: Record<number, ChainConfig>;
+  estimateCrossChainFee: (destinationChainId: number, token: Address, amount: bigint) => Promise<bigint>;
   estimateCrossChainFee: (
     destinationChainId: number,
     token: Address,
@@ -281,33 +257,37 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   const { data: walletClient } = useWalletClient();
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
+  
+  // State
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isMounted, setIsMounted] = useState(true);
-
-  // Set isMounted to false when component unmounts
-  useEffect(() => {
-    return () => {
-      setIsMounted(false);
-    };
-  }, []);
+  const [isMounted, setIsMounted] = useState(false);
   const [userVaults, setUserVaults] = useState<VaultInfo[]>([]);
   const [allVaults, setAllVaults] = useState<VaultInfo[]>([]);
-  
-  // Cache for token balances and transaction history
   const [tokenBalances, setTokenBalances] = useState<Record<string, TokenBalance>>({});
   const [transactionHistory, setTransactionHistory] = useState<Record<string, TransactionHistory[]>>({});
   const [feeEstimates, setFeeEstimates] = useState<Record<string, FeeEstimate>>({});
   
-  const vaultFactory = contracts?.vaultFactory as VaultFactoryContract | undefined;
-  const vaultManager = contracts?.vaultManager as VaultManagerContract | undefined;
-  const aaveVault = contracts?.aaveVault as AaveVaultContract | undefined;
-  const crossChainRouter = contracts?.crossChainRouter as CrossChainRouterContract | undefined;
-  const treasuryAIManager = contracts?.treasuryAIManager as TreasuryAIManagerContract | undefined;
+  // Memoize contract instances
+  const { vaultFactory, vaultManager, aaveVault, crossChainRouter, treasuryAIManager } = useMemo(() => ({
+    vaultFactory: contracts?.vaultFactory as VaultFactoryContract | undefined,
+    vaultManager: contracts?.vaultManager as VaultManagerContract | undefined,
+    aaveVault: contracts?.aaveVault as AaveVaultContract | undefined,
+    crossChainRouter: contracts?.crossChainRouter as CrossChainRouterContract | undefined,
+    treasuryAIManager: contracts?.treasuryAIManager as TreasuryAIManagerContract | undefined,
+  }), [contracts]);
+
+  // Set isMounted after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
 
   // Token Balance Functions
   const getTokenBalances = useCallback(async (tokens: { address: Address; symbol: string; decimals: number }[]): Promise<TokenBalance[]> => {
-    if (!publicClient || !address) return [];
+    if (!publicClient || !address || !isMounted) return [];
     
     try {
       const balancePromises = tokens.map(async (token) => {
@@ -539,83 +519,150 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
     }
   }, [vaultFactory, publicClient, chainId, getDefaultVaultInfo, handleError]);
 
-  // Fetch all vaults created by the factory
+  // Fetch all vaults from the contract
   const fetchAllVaults = useCallback(async () => {
-    if (!vaultFactory || !publicClient || !isMounted) return [];
+    if (!vaultFactory) return [];
+    
+    try {
+      const vaultAddresses = await vaultFactory.read.getAllVaults();
+      const vaults = await Promise.all(
+        vaultAddresses.map(async (address: Address) => {
+          try {
+            const [name, symbol, asset, totalAssets, totalSupply, owner] = await Promise.all([
+              vaultFactory.read.name([address]),
+              vaultFactory.read.symbol([address]),
+              vaultFactory.read.asset([address]),
+              vaultFactory.read.totalAssets([address]),
+              vaultFactory.read.totalSupply([address]),
+              vaultFactory.read.owner([address])
+            ]);
 
+            return {
+              id: address,
+              address,
+              name,
+              symbol,
+              asset,
+              totalAssets: totalAssets.toString(),
+              totalSupply: totalSupply.toString(),
+              owner,
+              type: VaultType.STANDARD, // Default type, can be updated based on vault data
+            };
+          } catch (error) {
+            console.error(`Error fetching vault ${address}:`, error);
+            return null;
+          }
+        })
+      );
+
+      return vaults.filter((vault): vault is VaultInfo => vault !== null);
+    } catch (error) {
+      console.error('Error fetching vaults:', error);
+      return [];
+    }
+  }, [vaultFactory]);
+
+  // Refresh both user and all vaults
+  const refreshVaults = useCallback(async () => {
+    if (!isMounted) return;
+    
     try {
       setIsLoading(true);
       resetError();
-
-      // Get vault count using the public client directly
-      const vaultCount = await publicClient.readContract({
-        address: vaultFactory.address,
-        abi: Array.isArray(vaultFactory.abi) ? vaultFactory.abi : vaultFactory.abi.abi,
-        functionName: 'getVaultCount',
-        args: []
-      }) as number;
-
-      // Get all vault addresses using the public client
-      const vaultAddresses: Address[] = [];
-      const vaultABI = Array.isArray(vaultFactory.abi) ? vaultFactory.abi : vaultFactory.abi.abi;
       
-      for (let i = 0; i < Number(vaultCount); i++) {
-        try {
-          const address = await publicClient.readContract({
-            address: vaultFactory.address,
-            abi: vaultABI,
-            functionName: 'allVaults',
-            args: [i]
-          }) as Address;
-          
-          if (address && address !== '0x0000000000000000000000000000000000000000') {
-            vaultAddresses.push(address);
-          }
-        } catch (error) {
-          console.error(`Error fetching vault at index ${i}:`, error);
-        }
-      }
-
-      // Process vaults in chunks to avoid RPC timeouts
-      const CHUNK_SIZE = 5;
-      let allVaults: VaultInfo[] = [];
+      // Fetch all vaults
+      const allVaults = await fetchAllVaults();
       
-      for (let i = 0; i < vaultAddresses.length; i += CHUNK_SIZE) {
-        const chunk = vaultAddresses.slice(i, i + CHUNK_SIZE);
-        const chunkPromises = chunk.map(address => 
-          getVaultInfo(address).catch(error => {
-            console.error(`Error fetching vault ${address}:`, error);
-            return getDefaultVaultInfo(address);
-          })
-        );
-        const chunkResults = await Promise.all(chunkPromises);
-        allVaults = [...allVaults, ...chunkResults];
-      }
-
+      // Update state with the new vaults
       if (isMounted) {
         setAllVaults(allVaults);
+        
+        // Filter user's vaults if address is available
         if (address) {
-          const userVaults = allVaults.filter(vault => vault.owner === address);
+          const userVaults = allVaults.filter(
+            vault => vault.owner.toLowerCase() === address.toLowerCase()
+          );
           setUserVaults(userVaults);
         }
       }
-
-      return allVaults;
     } catch (error) {
-      console.error('Error fetching vaults:', error);
-      handleError(error, 'Failed to fetch vaults');
-      return [];
+      handleError(error, 'Failed to refresh vaults');
     } finally {
       if (isMounted) {
         setIsLoading(false);
       }
     }
-  }, [vaultFactory, publicClient, address, isMounted, getVaultInfo, getDefaultVaultInfo, resetError, handleError]);
+  }, [address, fetchAllVaults, isMounted, resetError, handleError]);
 
-  // Refresh vaults data
-  const refreshVaults = useCallback(async () => {
-    return fetchAllVaults();
-  }, [fetchAllVaults]);
+  // Fetch all vaults and update state
+  const fetchVaults = useCallback(async () => {
+    if (!vaultFactory || !vaultManager || !address || !isMounted) return;
+    
+    const loadVaults = async () => {
+      try {
+        // Get all vaults
+        const vaultAddresses = await vaultFactory.read.getAllVaults();
+        
+        // Get vault details for each vault
+        const vaultsPromises = vaultAddresses.map(async (vaultAddress) => {
+          try {
+            const [name, symbol, asset, totalAssets, totalSupply] = await Promise.all([
+              vaultFactory.read.name([vaultAddress]),
+              vaultFactory.read.symbol([vaultAddress]),
+              vaultFactory.read.asset([vaultAddress]),
+              vaultFactory.read.totalAssets([vaultAddress]),
+              vaultFactory.read.totalSupply([vaultAddress])
+            ]);
+            
+            return {
+              address: vaultAddress,
+              name,
+              symbol,
+              asset,
+              totalAssets: totalAssets.toString(),
+              totalSupply: totalSupply.toString(),
+            } as VaultInfo;
+          } catch (err) {
+            console.error(`Error fetching vault ${vaultAddress}:`, err);
+            return null;
+          }
+        });
+        
+        const allVaults = (await Promise.all(vaultsPromises)).filter(Boolean) as VaultInfo[];
+        
+        // Get user's vaults
+        const userVaultsPromises = allVaults.map(async (vault) => {
+          try {
+            const userInfo = await vaultManager.read.userInfo([vault.address, address]);
+            return userInfo.amount > 0n ? vault : null;
+          } catch (err) {
+            console.error(`Error fetching user info for vault ${vault.address}:`, err);
+            return null;
+          }
+        });
+        
+        const userVaults = (await Promise.all(userVaultsPromises)).filter(Boolean) as VaultInfo[];
+        
+        if (isMounted) {
+          setAllVaults(allVaults);
+          setUserVaults(userVaults);
+        }
+      } catch (err) {
+        console.error('Error refreshing vaults:', err);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Failed to refresh vaults'));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    // Set loading state and start loading
+    setIsLoading(true);
+    loadVaults();
+  }, [vaultFactory, vaultManager, address, isMounted]);
 
   // Vault actions
   const createVault = useCallback(async (params: {
