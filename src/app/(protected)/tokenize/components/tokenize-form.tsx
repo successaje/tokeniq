@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { uploadFiles, uploadMetadata } from '@/utils/ipfs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,10 +15,71 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDropzone } from 'react-dropzone';
-import { FileText, Upload, CheckCircle2, AlertCircle, File, X, Image as FileImage, FileText as FileTextIcon } from 'lucide-react';
+import { 
+  FileText, 
+  Upload, 
+  CheckCircle2, 
+  AlertCircle, 
+  File, 
+  X, 
+  Image as FileImage, 
+  FileText as FileTextIcon,
+  UserCheck,
+  ShieldCheck,
+  BrainCircuit,
+  Info
+} from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 
-type AssetType = 'invoice' | 'real-estate' | 'carbon-credit' | '';
+// Custom Radio Group Component
+const RadioGroup = ({ 
+  value, 
+  onChange, 
+  children 
+}: { 
+  value: string; 
+  onChange: (value: string) => void; 
+  children: React.ReactNode 
+}) => {
+  return (
+    <div className="space-y-2">
+      {children}
+    </div>
+  );
+};
+
+const RadioGroupItem = ({ 
+  value, 
+  checked, 
+  onChange, 
+  children 
+}: { 
+  value: string; 
+  checked: boolean; 
+  onChange: (value: string) => void; 
+  children: React.ReactNode 
+}) => {
+  return (
+    <div 
+      className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${
+        checked ? 'bg-primary/10' : 'hover:bg-muted/50'
+      }`}
+      onClick={() => onChange(value)}
+    >
+      <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+        checked ? 'border-primary' : 'border-muted-foreground'
+      }`}>
+        {checked && <div className="h-2 w-2 rounded-full bg-primary" />}
+      </div>
+      <label className="cursor-pointer">{children}</label>
+    </div>
+  );
+};
+
+type AssetType = 'invoice' | 'real-estate' | 'carbon-credit' | 'other' | '';
+type TokenStandard = 'ERC-721' | 'ERC-1155' | 'ERC-20';
+type VerificationMethod = 'self-attestation' | 'oracle' | 'verified-kyc' | 'ai-verification';
 type UploadedFile = {
   file: File;
   preview: string;
@@ -28,22 +90,43 @@ type UploadedFile = {
 };
 
 interface AssetMetadata {
+  // Basic Information
   name: string;
   description: string;
   value: string;
   currency: string;
-  // Common fields
+  tokenStandard: TokenStandard;
+  
+  // Asset Details
   issuer: string;
   issueDate: string;
-  // Invoice specific
-  dueDate?: string;
+  maturityDate?: string;
+  
+  // BTC Collateral
+  useBTCCollateral: boolean;
+  collateralAmount: string;
+  collateralRatio: number;
+  
+  // Verification
+  verificationMethod: VerificationMethod;
+  isVerified: boolean;
+  verificationTimestamp?: string;
+  
+  // Asset Type Specific Fields
   invoiceNumber?: string;
-  // Real estate specific
+  dueDate?: string;
   propertyType?: string;
   address?: string;
-  // Carbon credit specific
   vintageYear?: string;
   certification?: string;
+  
+  // Token Metadata
+  tokenSymbol?: string;
+  tokenDecimals?: number;
+  
+  // IPFS References
+  documentHashes: string[];
+  verificationData?: string; // IPFS hash of verification data
 }
 
 export function TokenizeForm() {
@@ -59,8 +142,15 @@ export function TokenizeForm() {
     description: '',
     value: '',
     currency: 'USD',
+    tokenStandard: 'ERC-721',
     issuer: '',
     issueDate: new Date().toISOString().split('T')[0],
+    useBTCCollateral: true,
+    collateralAmount: '',
+    collateralRatio: 1.5, // Default 150% collateralization
+    verificationMethod: 'self-attestation',
+    isVerified: false,
+    documentHashes: [],
   });
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -87,7 +177,6 @@ export function TokenizeForm() {
       });
       
       setUploadedFiles(prev => [...prev, ...newFiles]);
-      // Simulate IPFS upload
       uploadFilesToIPFS(newFiles);
     },
   });
@@ -101,34 +190,37 @@ export function TokenizeForm() {
   };
   
   const uploadFilesToIPFS = async (files: UploadedFile[]) => {
-    setIsUploading(true);
-    
-    // In a real implementation, you would upload to IPFS here
-    // This is a simulation that updates the status after a delay
-    const uploadPromises = files.map((file, index) => {
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setUploadedFiles(prev => {
-            const updated = [...prev];
-            const fileIndex = updated.findIndex(f => f.file === file.file);
-            if (fileIndex > -1) {
-              updated[fileIndex] = {
-                ...updated[fileIndex],
-                status: 'uploaded',
-                ipfsHash: `QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco_${Date.now()}`
-              };
-            }
-            return updated;
-          });
-          resolve();
-        }, 1000 + (index * 500)); // Staggered uploads
-      });
-    });
-    
-    await Promise.all(uploadPromises);
-    setIsUploading(false);
+    setUploadedFiles(prev => 
+      prev.map(file => ({
+        ...file,
+        status: 'uploading' as const
+      }))
+    );
+
+    try {
+      // Upload files to IPFS
+      const fileObjects = files.map(file => file.file);
+      const ipfsUris = await uploadFiles(fileObjects);
+      
+      // Update state with IPFS hashes
+      setUploadedFiles(prev => 
+        prev.map((file, index) => ({
+          ...file,
+          status: 'uploaded' as const,
+          ipfsHash: ipfsUris[index]
+        }))
+      );
+    } catch (error) {
+      console.error('Error uploading files to IPFS:', error);
+      setUploadedFiles(prev => 
+        prev.map(file => ({
+          ...file,
+          status: 'failed' as const
+        }))
+      );
+    }
   };
-  
+
   const removeFile = (index: number) => {
     setUploadedFiles(prev => {
       const newFiles = [...prev];
@@ -166,26 +258,55 @@ export function TokenizeForm() {
       setMintError('Please wait for all files to finish uploading');
       return;
     }
+    
+    // Validate BTC collateral if required
+    if (metadata.useBTCCollateral && (!metadata.collateralAmount || parseFloat(metadata.collateralAmount) <= 0)) {
+      setMintError('Please enter a valid BTC collateral amount');
+      return;
+    }
+    
+    // Validate token standard specific fields
+    if (metadata.tokenStandard === 'ERC-20' && (!metadata.tokenSymbol || !metadata.tokenDecimals)) {
+      setMintError('Please provide token symbol and decimals for ERC-20 tokens');
+      return;
+    }
 
     setIsMinting(true);
     setMintError('');
     setProgress(0);
 
     try {
-      // Prepare metadata with IPFS hashes
+      // Prepare final metadata with IPFS hashes and verification data
+      const documentHashes = uploadedFiles.map(file => file.ipfsHash || '');
+      
       const assetMetadata = {
         ...metadata,
-        documents: uploadedFiles.map(file => ({
-          name: file.file.name,
-          type: file.file.type,
-          size: file.file.size,
-          ipfsHash: file.ipfsHash,
-          url: `https://ipfs.io/ipfs/${file.ipfsHash}`
-        }))
+        documentHashes,
+        // Add current timestamp for verification
+        verificationTimestamp: new Date().toISOString(),
+        // In a real implementation, this would be set by the verification service
+        isVerified: metadata.verificationMethod !== 'self-attestation' ? false : true,
+        // Add token metadata if ERC-20
+        ...(metadata.tokenStandard === 'ERC-20' && {
+          tokenSymbol: metadata.tokenSymbol || '',
+          tokenDecimals: metadata.tokenDecimals || 18
+        })
       };
       
-      // In a real implementation, you would now send this metadata to your backend or smart contract
-      console.log('Asset metadata with documents:', assetMetadata);
+      // Upload metadata to IPFS
+      const metadataUri = await uploadMetadata(assetMetadata);
+      console.log('Metadata uploaded to IPFS:', metadataUri);
+      
+      // Call smart contract to mint tokens with the metadata URI
+      // TODO: Implement contract interaction
+      console.log('Minting token with metadata URI:', metadataUri);
+      
+      // Simulate verification process if not self-attestation
+      if (metadata.verificationMethod !== 'self-attestation') {
+        setMintStatus('verifying');
+        // In a real implementation, this would call a verification service
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
       // Simulate minting process with progress
       await new Promise<void>((resolve) => {
         const interval = setInterval(() => {
@@ -236,6 +357,9 @@ export function TokenizeForm() {
       setIsMinting(false);
     }
   };
+
+
+
 
   const renderAssetSpecificFields = () => {
     switch (assetType) {
@@ -336,85 +460,136 @@ export function TokenizeForm() {
               Fill in the details of the asset you want to tokenize
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="assetType">Asset Type</Label>
-              <Select
-                value={assetType}
-                onValueChange={(value: AssetType) => setAssetType(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select asset type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="invoice">Invoice</SelectItem>
-                  <SelectItem value="real-estate">Real Estate</SelectItem>
-                  <SelectItem value="carbon-credit">Carbon Credit</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {assetType && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Asset Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={metadata.name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Commercial Property, Invoice #123"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={metadata.description}
-                    onChange={handleInputChange}
-                    placeholder="Provide a detailed description of the asset"
-                    rows={3}
-                  />
-                </div>
-
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="assetType">Asset Type</Label>
+                <Select
+                  value={assetType}
+                  onValueChange={(value: AssetType) => setAssetType(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select asset type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invoice">Invoice</SelectItem>
+                    <SelectItem value="real-estate">Real Estate</SelectItem>
+                    <SelectItem value="carbon-credit">Carbon Credit</SelectItem>
+                    <SelectItem value="other">Other Asset</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tokenStandard">Token Standard</Label>
+                <Select
+                  value={metadata.tokenStandard}
+                  onValueChange={(value: TokenStandard) => 
+                    setMetadata({...metadata, tokenStandard: value})
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ERC-721">ERC-721 (Unique Assets)</SelectItem>
+                    <SelectItem value="ERC-1155">ERC-1155 (Semi-Fungible)</SelectItem>
+                    <SelectItem value="ERC-20">ERC-20 (Fungible Tokens)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {metadata.tokenStandard === 'ERC-721' ? 'Best for unique assets like real estate or invoices' : 
+                   metadata.tokenStandard === 'ERC-1155' ? 'Ideal for batches of similar items like carbon credits' :
+                   'For fungible tokens representing divisible assets'}
+                </p>
+              </div>
+              
+              {metadata.tokenStandard === 'ERC-20' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="value">Value</Label>
+                    <Label htmlFor="tokenSymbol">Token Symbol</Label>
                     <Input
-                      id="value"
-                      name="value"
-                      type="number"
-                      value={metadata.value}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
+                      id="tokenSymbol"
+                      value={metadata.tokenSymbol || ''}
+                      onChange={(e) => setMetadata({...metadata, tokenSymbol: e.target.value})}
+                      placeholder="e.g., SOLAR"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="currency">Currency</Label>
-                    <Select
-                      value={metadata.currency}
-                      onValueChange={(value) =>
-                        setMetadata({ ...metadata, currency: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="EUR">EUR (€)</SelectItem>
-                        <SelectItem value="GBP">GBP (£)</SelectItem>
-                        <SelectItem value="NGN">NGN (₦)</SelectItem>
-                        <SelectItem value="ETH">ETH (Ξ)</SelectItem>
-                        <SelectItem value="BTC">BTC (₿)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="tokenDecimals">Decimals</Label>
+                    <Input
+                      id="tokenDecimals"
+                      type="number"
+                      value={metadata.tokenDecimals || ''}
+                      onChange={(e) => setMetadata({...metadata, tokenDecimals: parseInt(e.target.value)})}
+                      placeholder="e.g., 18"
+                    />
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
+            {assetType && (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Asset Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={metadata.name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Commercial Property, Invoice #123"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      value={metadata.description}
+                      onChange={handleInputChange}
+                      placeholder="Provide a detailed description of the asset"
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="value">Asset Value</Label>
+                      <Input
+                        id="value"
+                        name="value"
+                        type="number"
+                        value={metadata.value}
+                        onChange={handleInputChange}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="currency">Currency</Label>
+                      <Select
+                        value={metadata.currency}
+                        onValueChange={(value) =>
+                          setMetadata({ ...metadata, currency: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD ($)</SelectItem>
+                          <SelectItem value="EUR">EUR (€)</SelectItem>
+                          <SelectItem value="GBP">GBP (£)</SelectItem>
+                          <SelectItem value="NGN">NGN (₦)</SelectItem>
+                          <SelectItem value="ETH">ETH (Ξ)</SelectItem>
+                          <SelectItem value="BTC">BTC (₿)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="issuer">Issuer</Label>
                     <Input
@@ -422,23 +597,193 @@ export function TokenizeForm() {
                       name="issuer"
                       value={metadata.issuer}
                       onChange={handleInputChange}
-                      placeholder="Issuer name or address"
+                      placeholder="Issuer name or wallet address"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="issueDate">Issue Date</Label>
-                    <Input
-                      id="issueDate"
-                      name="issueDate"
-                      type="date"
-                      value={metadata.issueDate}
-                      onChange={handleInputChange}
-                    />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="issueDate">Issue Date</Label>
+                      <Input
+                        id="issueDate"
+                        name="issueDate"
+                        type="date"
+                        value={metadata.issueDate}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maturityDate">Maturity Date (Optional)</Label>
+                      <Input
+                        id="maturityDate"
+                        name="maturityDate"
+                        type="date"
+                        value={metadata.maturityDate || ''}
+                        onChange={(e) => setMetadata({...metadata, maturityDate: e.target.value})}
+                      />
+                    </div>
                   </div>
                 </div>
-
+                
+                {/* BTC Collateral Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">BTC Collateral</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Secure your tokenized asset with BTC collateral for better liquidity and trust
+                      </p>
+                    </div>
+                    <Switch
+                      checked={metadata.useBTCCollateral}
+                      onCheckedChange={(checked) => 
+                        setMetadata({...metadata, useBTCCollateral: checked})
+                      }
+                    />
+                  </div>
+                  
+                  {metadata.useBTCCollateral && (
+                    <div className="space-y-4 pl-6 border-l-2 border-primary/20">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="collateralAmount">BTC Amount</Label>
+                          <div className="relative">
+                            <Input
+                              id="collateralAmount"
+                              type="number"
+                              value={metadata.collateralAmount}
+                              onChange={(e) => 
+                                setMetadata({...metadata, collateralAmount: e.target.value})
+                              }
+                              placeholder="0.00"
+                              className="pl-8"
+                            />
+                            <span className="absolute left-3 top-2.5 text-muted-foreground">₿</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Minimum: {metadata.value ? (parseFloat(metadata.value) * 1.5).toFixed(8) : '0.00'} BTC
+                            (150% of asset value)
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Collateral Ratio</Label>
+                          <Select
+                            value={metadata.collateralRatio.toString()}
+                            onValueChange={(value) => 
+                              setMetadata({...metadata, collateralRatio: parseFloat(value)})
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1.25">125% (Low Risk)</SelectItem>
+                              <SelectItem value="1.5">150% (Standard)</SelectItem>
+                              <SelectItem value="2">200% (High Security)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Higher ratio = Lower liquidation risk
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-muted/20 rounded-md text-sm">
+                        <div className="flex items-start space-x-2">
+                          <Info className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
+                          <div>
+                            <p className="font-medium">How BTC Collateral Works</p>
+                            <p className="text-muted-foreground text-xs mt-1">
+                              Your BTC is locked in a non-custodial smart contract. 
+                              It will be returned when the asset matures or you repay any loans. 
+                              If the asset value drops significantly, you may need to add more collateral 
+                              or risk liquidation.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Verification Method Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <div>
+                    <h3 className="font-medium">Verification Method</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Choose how this asset should be verified on-chain
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {/* Self-Attestation (clickable) */}
+                    <div className={`rounded-lg border p-4 ${metadata.verificationMethod === 'self-attestation' ? 'border-primary/50 ring-1 ring-primary/30' : ''}`}>
+                      <RadioGroupItem 
+                        value="self-attestation"
+                        checked={metadata.verificationMethod === 'self-attestation'}
+                        onChange={() => setMetadata(prev => ({...prev, verificationMethod: 'self-attestation'}))}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`relative p-1.5 rounded-full ${metadata.verificationMethod === 'self-attestation' ? 'bg-primary/10' : 'bg-muted'}`}>
+                            <UserCheck className="h-4 w-4" />
+                            {metadata.verificationMethod === 'self-attestation' && (
+                              <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium flex items-center justify-between">
+                              <span>Self-Attestation</span>
+                              {metadata.verificationMethod === 'self-attestation' && (
+                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Selected</span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              You verify the authenticity of this asset. Lower trust, no additional fees.
+                            </p>
+                          </div>
+                        </div>
+                      </RadioGroupItem>
+                    </div>
+                    
+                    {/* KYC Verification (disabled) */}
+                    <div className="rounded-lg border p-4 opacity-50 cursor-not-allowed">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-1.5 rounded-full bg-muted">
+                          <ShieldCheck className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="font-medium">KYC Verification</div>
+                          <p className="text-sm text-muted-foreground">
+                            Coming soon. Verified by KYC provider. Higher trust, small verification fee applies.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* AI + Oracle Verification (disabled) */}
+                    <div className="rounded-lg border p-4 opacity-50 cursor-not-allowed">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-1.5 rounded-full bg-muted">
+                          <BrainCircuit className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="font-medium">AI + Oracle Verification</div>
+                          <p className="text-sm text-muted-foreground">
+                            Coming soon. AI analyzes documents + Chainlink Oracle verification. Highest trust, moderate fee.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 {renderAssetSpecificFields()}
-              </>
+              </div>
             )}
           </CardContent>
         </Card>
