@@ -500,6 +500,7 @@
   resolved "https://registry.npmjs.org/@humanwhocodes/retry/-/retry-0.4.3.tgz"
   integrity sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==
 
+<<<<<<< HEAD
 "@img/sharp-darwin-arm64@0.34.2":
   version "0.34.2"
   resolved "https://registry.npmjs.org/@img/sharp-darwin-arm64/-/sharp-darwin-arm64-0.34.2.tgz"
@@ -736,6 +737,8 @@
     protobufjs "^7.1.2"
     rabin-rs "^2.1.0"
 
+=======
+>>>>>>> a949a514 (added the agent config)
 "@isaacs/fs-minipass@^4.0.0":
   version "4.0.1"
   resolved "https://registry.npmjs.org/@isaacs/fs-minipass/-/fs-minipass-4.0.1.tgz"
@@ -1156,10 +1159,10 @@
   dependencies:
     fast-glob "3.3.1"
 
-"@next/swc-darwin-arm64@15.3.3":
+"@next/swc-darwin-x64@15.3.3":
   version "15.3.3"
-  resolved "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-15.3.3.tgz"
-  integrity sha512-WRJERLuH+O3oYB4yZNVahSVFmtxRNjNF1I1c34tYMoJb0Pve+7/RaLAJJizyYiFhjYNGHRAE1Ri2Fd23zgDqhg==
+  resolved "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-15.3.3.tgz"
+  integrity sha512-XHdzH/yBc55lu78k/XwtuFR/ZXUTcflpRXcsu0nKmF45U96jt1tsOZhVrn5YH+paw66zOANpOnFQ9i6/j+UYvw==
 
 "@next/swc-darwin-x64@15.3.3":
   version "15.3.3"
@@ -2565,15 +2568,19 @@
     source-map-js "^1.2.1"
     tailwindcss "4.1.8"
 
+<<<<<<< HEAD
 "@tailwindcss/oxide-android-arm64@4.1.8":
   version "4.1.8"
   resolved "https://registry.npmjs.org/@tailwindcss/oxide-android-arm64/-/oxide-android-arm64-4.1.8.tgz"
   integrity sha512-Fbz7qni62uKYceWYvUjRqhGfZKwhZDQhlrJKGtnZfuNtHFqa8wmr+Wn74CTWERiW2hn3mN5gTpOoxWKk0jRxjg==
 
 "@tailwindcss/oxide-darwin-arm64@4.1.8":
+=======
+"@tailwindcss/oxide-darwin-x64@4.1.8":
+>>>>>>> a949a514 (added the agent config)
   version "4.1.8"
-  resolved "https://registry.npmjs.org/@tailwindcss/oxide-darwin-arm64/-/oxide-darwin-arm64-4.1.8.tgz"
-  integrity sha512-RdRvedGsT0vwVVDztvyXhKpsU2ark/BjgG0huo4+2BluxdXo8NDgzl77qh0T1nUxmM11eXwR8jA39ibvSTbi7A==
+  resolved "https://registry.npmjs.org/@tailwindcss/oxide-darwin-x64/-/oxide-darwin-x64-4.1.8.tgz"
+  integrity sha512-t6PgxjEMLp5Ovf7uMb2OFmb3kqzVTPPakWpBIFzppk4JE4ix0yEtbtSjPbU8+PZETpaYMtXvss2Sdkx8Vs4XRw==
 
 "@tailwindcss/oxide-darwin-x64@4.1.8":
   version "4.1.8"
@@ -3001,6 +3008,7 @@
     "@typescript-eslint/types" "8.33.1"
     eslint-visitor-keys "^4.2.0"
 
+<<<<<<< HEAD
 "@ucanto/client@^9.0.1":
   version "9.0.1"
   resolved "https://registry.npmjs.org/@ucanto/client/-/client-9.0.1.tgz"
@@ -3182,6 +3190,8 @@
   resolved "https://registry.npmjs.org/@vanilla-extract/sprinkles/-/sprinkles-1.6.3.tgz"
   integrity sha512-oCHlQeYOBIJIA2yWy2GnY5wE2A7hGHDyJplJo4lb+KEIBcJWRnDJDg8ywDwQS5VfWJrBBO3drzYZPFpWQjAMiQ==
 
+=======
+>>>>>>> a949a514 (added the agent config)
 "@wagmi/connectors@>=4", "@wagmi/connectors@5.8.5":
   version "5.8.5"
   resolved "https://registry.npmjs.org/@wagmi/connectors/-/connectors-5.8.5.tgz"
@@ -7281,6 +7291,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
+<<<<<<< HEAD
 libp2p-crypto@^0.21.0:
   version "0.21.2"
   resolved "https://registry.npmjs.org/libp2p-crypto/-/libp2p-crypto-0.21.2.tgz"
@@ -7296,9 +7307,12 @@ libp2p-crypto@^0.21.0:
     uint8arrays "^3.0.0"
 
 lightningcss-darwin-arm64@1.30.1:
+=======
+lightningcss-darwin-x64@1.30.1:
+>>>>>>> a949a514 (added the agent config)
   version "1.30.1"
-  resolved "https://registry.npmjs.org/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.30.1.tgz"
-  integrity sha512-c8JK7hyE65X1MHMN+Viq9n11RRC7hgin3HhYKhrMyaXflk5GVplZ60IxyoVtzILeKr+xAJwg6zK6sjTBJ0FKYQ==
+  resolved "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.30.1.tgz"
+  integrity sha512-k1EvjakfumAQoTfcXUcHQZhSpLlkAuEkdMBsI/ivWw9hL+7FtilQc0Cy3hrx0AAQrVtQAbMI7YjCgYgvn37PzA==
 
 lightningcss-darwin-x64@1.30.1:
   version "1.30.1"
