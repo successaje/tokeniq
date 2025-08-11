@@ -1,317 +1,39 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { uploadFiles, uploadMetadata } from '@/utils/ipfs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useDropzone } from 'react-dropzone';
-import { 
-  FileText, 
-  Upload, 
-  CheckCircle2, 
-  AlertCircle, 
-  File, 
-  X, 
-  Image as FileImage, 
-  FileText as FileTextIcon,
-  UserCheck,
-  ShieldCheck,
-  BrainCircuit,
-  Info
-} from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Custom Radio Group Component
-const RadioGroup = ({ 
-  value, 
-  onChange, 
-  children 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  children: React.ReactNode 
-}) => {
+export default function TokenizeForm() {
   return (
-    <div className="space-y-2">
-      {children}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Minimal Working Example</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>This is a minimal working example of the form.</p>
+      </CardContent>
+    </Card>
   );
-};
-
-const RadioGroupItem = ({ 
-  value, 
-  checked, 
-  onChange, 
-  children 
-}: { 
-  value: string; 
-  checked: boolean; 
-  onChange: (value: string) => void; 
-  children: React.ReactNode 
-}) => {
-  return (
-    <div 
-      className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${
-        checked ? 'bg-primary/10' : 'hover:bg-muted/50'
-      }`}
-      onClick={() => onChange(value)}
-    >
-      <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-        checked ? 'border-primary' : 'border-muted-foreground'
-      }`}>
-        {checked && <div className="h-2 w-2 rounded-full bg-primary" />}
-      </div>
-      <label className="cursor-pointer">{children}</label>
-    </div>
-  );
-};
-
-type AssetType = 'invoice' | 'real-estate' | 'carbon-credit' | 'other' | '';
-type TokenStandard = 'ERC-721' | 'ERC-1155' | 'ERC-20';
-type VerificationMethod = 'self-attestation' | 'oracle' | 'verified-kyc' | 'ai-verification';
-type UploadedFile = {
-  file: File;
-  preview: string;
-  type: 'image' | 'pdf' | 'document' | 'other';
-  size: string;
-  ipfsHash?: string;
-  status: 'uploading' | 'uploaded' | 'failed';
-};
-
-interface AssetMetadata {
-  // Basic Information
-  name: string;
-  description: string;
-  value: string;
-  currency: string;
-  tokenStandard: TokenStandard;
-  
-  // Asset Details
-  issuer: string;
-  issueDate: string;
-  maturityDate?: string;
-  
-  // BTC Collateral
-  useBTCCollateral: boolean;
-  collateralAmount: string;
-  collateralRatio: number;
-  
-  // Verification
-  verificationMethod: VerificationMethod;
-  isVerified: boolean;
-  verificationTimestamp?: string;
-  
-  // Asset Type Specific Fields
-  invoiceNumber?: string;
-  dueDate?: string;
-  propertyType?: string;
-  address?: string;
-  vintageYear?: string;
-  certification?: string;
-  
-  // Token Metadata
-  tokenSymbol?: string;
-  tokenDecimals?: number;
-  
-  // IPFS References
-  documentHashes: string[];
-  verificationData?: string; // IPFS hash of verification data
 }
-
-export function TokenizeForm() {
-  const [assetType, setAssetType] = useState<AssetType>('');
-  const [isMinting, setIsMinting] = useState(false);
-  const [mintSuccess, setMintSuccess] = useState(false);
-  const [mintError, setMintError] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [metadata, setMetadata] = useState<AssetMetadata>({
-    name: '',
-    description: '',
-    value: '',
-    currency: 'USD',
-    tokenStandard: 'ERC-721',
-    issuer: '',
-    issueDate: new Date().toISOString().split('T')[0],
-    useBTCCollateral: true,
-    collateralAmount: '',
-    collateralRatio: 1.5, // Default 150% collateralization
-    verificationMethod: 'self-attestation',
-    isVerified: false,
-    documentHashes: [],
-  });
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      'application/pdf': ['.pdf'],
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-    },
-    maxSize: 10 * 1024 * 1024, // 10MB
-    onDrop: (acceptedFiles) => {
-      const newFiles = acceptedFiles.map(file => {
-        const fileType = file.type.startsWith('image/') ? 'image' : 
-                        file.type === 'application/pdf' ? 'pdf' : 
-                        file.type.includes('document') ? 'document' : 'other';
-                        
-        return {
-          file,
-          preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : '',
-          type: fileType,
-          size: formatFileSize(file.size),
-          status: 'uploading' as const
-        };
-      });
-      
-      setUploadedFiles(prev => [...prev, ...newFiles]);
-      uploadFilesToIPFS(newFiles);
-    },
-  });
-  
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-  
-  const uploadFilesToIPFS = async (files: UploadedFile[]) => {
-    setUploadedFiles(prev => 
-      prev.map(file => ({
-        ...file,
-        status: 'uploading' as const
-      }))
-    );
-
-    try {
-      // Upload files to IPFS
-      const fileObjects = files.map(file => file.file);
-      const ipfsUris = await uploadFiles(fileObjects);
-      
-      // Update state with IPFS hashes
-      setUploadedFiles(prev => 
-        prev.map((file, index) => ({
-          ...file,
-          status: 'uploaded' as const,
-          ipfsHash: ipfsUris[index]
-        }))
-      );
-    } catch (error) {
-      console.error('Error uploading files to IPFS:', error);
-      setUploadedFiles(prev => 
-        prev.map(file => ({
-          ...file,
-          status: 'failed' as const
-        }))
-      );
-    }
-  };
-
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => {
-      const newFiles = [...prev];
-      const removed = newFiles.splice(index, 1);
-      // Revoke the object URL to avoid memory leaks
-      if (removed[0]?.preview) {
-        URL.revokeObjectURL(removed[0].preview);
-      }
-      return newFiles;
-    });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setMetadata(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleMint = async () => {
-    if (!assetType) {
-      setMintError('Please select an asset type');
-      return;
-    }
-    
-    if (uploadedFiles.length === 0) {
-      setMintError('Please upload at least one document for your asset');
-      return;
-    }
-    
-    // Check if all files are uploaded
-    const notUploaded = uploadedFiles.some(file => file.status !== 'uploaded' || !file.ipfsHash);
-    if (notUploaded) {
-      setMintError('Please wait for all files to finish uploading');
-      return;
-    }
-    
-    // Validate BTC collateral if required
-    if (metadata.useBTCCollateral && (!metadata.collateralAmount || parseFloat(metadata.collateralAmount) <= 0)) {
-      setMintError('Please enter a valid BTC collateral amount');
-      return;
-    }
-    
-    // Validate token standard specific fields
-    if (metadata.tokenStandard === 'ERC-20' && (!metadata.tokenSymbol || !metadata.tokenDecimals)) {
-      setMintError('Please provide token symbol and decimals for ERC-20 tokens');
-      return;
-    }
-
-    setIsMinting(true);
-    setMintError('');
-    setProgress(0);
-
-    try {
-      // Prepare final metadata with IPFS hashes and verification data
-      const documentHashes = uploadedFiles.map(file => file.ipfsHash || '');
-      
-      const assetMetadata = {
-        ...metadata,
-        documentHashes,
-        // Add current timestamp for verification
-        verificationTimestamp: new Date().toISOString(),
-        // In a real implementation, this would be set by the verification service
-        isVerified: metadata.verificationMethod !== 'self-attestation' ? false : true,
-        // Add token metadata if ERC-20
-        ...(metadata.tokenStandard === 'ERC-20' && {
-          tokenSymbol: metadata.tokenSymbol || '',
-          tokenDecimals: metadata.tokenDecimals || 18
-        })
-      };
-      
-      // Upload metadata to IPFS
-      const metadataUri = await uploadMetadata(assetMetadata);
-      console.log('Metadata uploaded to IPFS:', metadataUri);
-      
       // Call smart contract to mint tokens with the metadata URI
-      // TODO: Implement contract interaction
+      // TODO: Implement actual contract interaction
       console.log('Minting token with metadata URI:', metadataUri);
       
       // Simulate verification process if not self-attestation
       if (metadata.verificationMethod !== 'self-attestation') {
-        setMintStatus('verifying');
+        setMintStatus('Verifying asset...');
         // In a real implementation, this would call a verification service
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
-      // Simulate minting process with progress
+      
+      setProgress(60);
+      setMintStatus('Confirming transaction...');
+      
+      // Simulate blockchain interaction with progress
       await new Promise<void>((resolve) => {
         const interval = setInterval(() => {
           setProgress((prev) => {
-            const newProgress = prev + 10;
+            const newProgress = Math.min(prev + 5, 90);
             if (newProgress >= 90) {
               clearInterval(interval);
               resolve();
@@ -319,18 +41,21 @@ export function TokenizeForm() {
             }
             return newProgress;
           });
-        }, 300);
+        }, 500);
       });
 
-      // Simulate blockchain interaction
+      // Simulate blockchain confirmation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       setProgress(100);
+      setMintStatus('Transaction confirmed!');
       setMintSuccess(true);
       
       // Reset form after success
       setTimeout(() => {
         setAssetType('');
+        setUploadedFiles([]);
+        resetIPFSUpload();
         setMetadata({
           name: '',
           description: '',
@@ -772,9 +497,9 @@ export function TokenizeForm() {
                           <BrainCircuit className="h-4 w-4" />
                         </div>
                         <div>
-                          <div className="font-medium">AI + Oracle Verification</div>
+                          <div className="font-medium">AI + Chainlink Verification</div>
                           <p className="text-sm text-muted-foreground">
-                            Coming soon. AI analyzes documents + Chainlink Oracle verification. Highest trust, moderate fee.
+                            Coming soon. AI analyzes documents + Chainlink Proof of Reserve verification. Highest trust, moderate fee.
                           </p>
                         </div>
                       </div>
@@ -905,60 +630,51 @@ export function TokenizeForm() {
                   <span className="text-sm font-medium">
                     {metadata.value} {metadata.currency}
                   </span>
-                </div>
-              )}
             </div>
-
-            {isMinting && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Minting in progress</span>
-                  <span className="text-sm text-muted-foreground">
-                    {progress}%
-                  </span>
-                </div>
-                <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2" />
+            
+            {showUploadProgress && (
+              <div className="border-t pt-4 mt-4">
+                <UploadProgress 
+                  step={ipfsProgress.step}
+                  progress={ipfsProgress.progress}
+                  currentFile={ipfsProgress.currentFile}
+                  totalFiles={ipfsProgress.totalFiles}
+                  uploadedFiles={ipfsProgress.uploadedFiles}
+                  error={ipfsProgress.error}
+                  cid={ipfsProgress.cid}
+                  onClose={() => setShowUploadProgress(false)}
+                />
               </div>
             )}
-
+            
             {mintSuccess && (
-              <div className="rounded-md bg-green-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-green-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-green-800">
-                      Token minted successfully!
-                    </p>
-                  </div>
+              <div className="mt-4 p-4 bg-green-50 rounded-md">
+                <div className="flex items-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 mr-2" />
+                  <span className="text-green-800">Token minted successfully!</span>
                 </div>
               </div>
             )}
-
+            
             {mintError && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <AlertCircle className="h-5 w-5 text-red-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800">
-                      {mintError}
-                    </p>
-                  </div>
+              <div className="mt-4 p-4 bg-red-50 rounded-md">
+                <div className="flex items-center">
+                  <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                  <span className="text-red-800">{mintError}</span>
                 </div>
               </div>
             )}
-
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={handleMint}
-              disabled={isMinting || !assetType || !metadata.name}
-            >
-              {isMinting ? 'Minting...' : 'Mint Token'}
-            </Button>
+          </div>
+          
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isMinting}
+            onClick={handleMint}
+          >
+            {isMinting ? 'Minting...' : 'Mint Token'}
+          </Button>
           </CardContent>
         </Card>
 
