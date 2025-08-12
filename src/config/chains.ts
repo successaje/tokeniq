@@ -50,7 +50,7 @@ export const CORE_MAINNET: Chain = {
 };
 
 export const CORE_TESTNET: Chain = {
-  id: 1115,
+  id: 1114,
   name: 'Core Testnet',
   network: 'core-testnet',
   icon: "/logos/core-dao-core-logo.png",

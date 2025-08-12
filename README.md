@@ -184,3 +184,14 @@ Turn invoices into real-time capital
 Let AI manage on-chain yields
 
 Access secure, composable, and non-custodial treasury infrastructure
+
+
+TODOs: 
+- [ ] Add more features
+- [ ] Add more docs
+- [ ] Call the functions in the contracts
+- [ ] Communicate with the AI agent by Marv
+- [ ] Emmanuel works on the integration pages
+- [ ] 
+
+

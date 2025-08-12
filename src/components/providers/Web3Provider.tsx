@@ -140,7 +140,7 @@ const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
     case 8453: return CHAINS.base;
     case 84532: return CHAINS.baseSepolia;
     case 1116: return CORE_MAINNET;
-    case 1115: return CORE_TESTNET;
+    case 1114: return CORE_TESTNET;
     default: return CHAINS.mainnet;
   }
 });

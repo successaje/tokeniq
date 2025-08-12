@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { TokenizeForm } from './components/tokenize-form';
+import TokenizeForm from './components/tokenize-form-fixed';
 import { TokenizeHeader } from './components/tokenize-header';
 
 export const metadata: Metadata = {
