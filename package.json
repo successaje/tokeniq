@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "start": "next start -p 4000",
+    "dev": "next dev -p 4000",
     "build": "next build",
-    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@elizaos/core": "latest",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
@@ -52,6 +53,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.59.0",
     "recharts": "^2.15.4",
+    "socket.io-client": "^4.8.1",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "viem": "^2.31.0",
