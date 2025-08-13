@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useTokenization } from '@/hooks/useTokenization';
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -357,26 +358,79 @@ export default function TokenizeForm() {
     }
   };
 
+  // Initialize tokenization hook
+  const { tokenizeAsset, isLoading: isTokenizing, error: tokenizationError } = useTokenization();
+
   // Handle form submission (minting)
   const handleMint = async () => {
     try {
-      // TODO: Call actual minting logic from the contract
-      console.log('Minting token with metadata:', metadata);
+      console.log('Starting tokenization with metadata:', metadata);
+      setVerificationStep('minting');
+      
+      // Map token standard to asset type
+      const assetType = metadata.tokenStandard === 'ERC20' ? 'ERC20' : 
+                       metadata.tokenStandard === 'ERC721' ? 'ERC721' : 'ERC1155';
+      
+      // Common tokenization params
+      const tokenizationParams = {
+        name: metadata.name,
+        symbol: metadata.symbol,
+        assetType,
+        description: metadata.description,
+      };
+      
+      // Token standard specific params
+      if (assetType === 'ERC20') {
+        // For ERC20 Vault Token
+        Object.assign(tokenizationParams, {
+          underlyingToken: '0x...', // TODO: Get actual underlying token address
+          depositFeeBasisPoints: 10, // 0.1%
+          withdrawalFeeBasisPoints: 5, // 0.05%
+          performanceFeeBasisPoints: 200, // 2%
+        });
+      } else if (assetType === 'ERC721') {
+        // For ERC721 NFT
+        Object.assign(tokenizationParams, {
+          baseURI: `ipfs://${metadata.ipfsHash}/`,
+        });
+      } else {
+        // For ERC1155 Hybrid Asset
+        Object.assign(tokenizationParams, {
+          tokenURI: `ipfs://${metadata.ipfsHash}/metadata.json`,
+          initialSupply: BigInt(metadata.supply || '1000000'),
+        });
+      }
+      
+      console.log('Tokenization params:', tokenizationParams);
+      
+      // Call the tokenization function
+      const result = await tokenizeAsset(tokenizationParams);
+      
+      console.log('Tokenization successful!', result);
       
       toast({
-        title: 'Success',
-        description: 'Your asset has been tokenized successfully!',
+        title: 'Tokenization Successful!',
+        description: `Your ${assetType} token has been created at ${result.address}`,
       });
       
-      // Reset form
-      setVerificationStep('idle');
-      setVerificationEndTime(null);
+      // Update verification step
+      setVerificationStep('completed');
       
-    } catch (error) {
-      console.error('Minting error:', error);
+      // Reset form after a delay
+      setTimeout(() => {
+        setVerificationStep('idle');
+        setVerificationEndTime(null);
+        // Reset other form states as needed
+      }, 3000);
+      
+    } catch (error: any) {
+      console.error('Tokenization error:', error);
+      setVerificationStep('error');
+      
+      const errorMessage = error?.message || 'There was an error tokenizing your asset';
       toast({
-        title: 'Minting failed',
-        description: 'There was an error minting your token.',
+        title: 'Tokenization Failed',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
