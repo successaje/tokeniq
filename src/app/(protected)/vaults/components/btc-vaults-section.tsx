@@ -90,12 +90,37 @@ export function BtcVaultsSection() {
         return;
       }
 
-      // Check if we're on the correct network
-      if (vault.chainId && chainId !== vault.chainId) {
+      // Core Testnet chain ID
+      const CORE_TESTNET_ID = 1114; // From chains.ts
+      
+      // If we're not on Core Testnet, prompt to switch
+      if (chainId !== CORE_TESTNET_ID) {
         try {
-          await switchChain({ chainId: vault.chainId });
+          toast({
+            title: 'Switching Network',
+            description: 'Please approve the network switch to Core Testnet in your wallet',
+            duration: 4000,
+          });
+          
+          await switchChain({ chainId: CORE_TESTNET_ID });
+          
+          // Wait a moment for the network switch to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Verify the switch was successful
+          if (chainId !== CORE_TESTNET_ID) {
+            throw new Error('Failed to switch to Core Testnet. Please switch manually in your wallet.');
+          }
+          
+          toast({
+            title: 'Network Switched',
+            description: 'Successfully connected to Core Testnet',
+            variant: 'default',
+            duration: 3000,
+          });
         } catch (error) {
-          throw new Error('Failed to switch network. Please switch to the correct network in your wallet');
+          console.error('Network switch error:', error);
+          throw new Error('Failed to switch to Core Testnet. Please ensure you have Core Testnet (ID: 1114) added to your wallet.');
         }
       }
 

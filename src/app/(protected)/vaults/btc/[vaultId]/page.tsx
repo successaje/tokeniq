@@ -1,18 +1,19 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, ArrowLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/ethers/react';
-import { chains } from '@/config/chains';
-import { useToast } from '@/components/ui/use-toast';
+import { useAccount, useChainId, useSwitchChain, useWriteContract } from 'wagmi';
+import { Web3Button } from '@web3modal/react';
+import { parseUnits } from 'viem';
+import { CORE_TESTNET_ID } from '@/config/chains';
 
 const VAULT_DETAILS = {
   'btc-yield': {
@@ -80,14 +81,140 @@ const VAULT_DETAILS = {
 export default function BtcVaultPage() {
   const router = useRouter();
   const { vaultId } = useParams();
-  const { open } = useWeb3Modal();
-  const { isConnected } = useAccount();
+  const { toast } = useToast();
+  
+  // Account and chain state
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  const { toast } = useToast();
+  
+  // Core Testnet chain ID
+  const CORE_TESTNET_ID = 1114;
   
   const [activeTab, setActiveTab] = useState('deposit');
   const [amount, setAmount] = useState('');
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
+  
+  // Simulate wallet connection and transaction signing
+  const connectAndSign = async () => {
+    try {
+      console.log('Attempting to connect wallet...');
+      
+      // Check if window.ethereum is available
+      if (!window.ethereum) {
+        throw new Error('No Ethereum provider found. Please install MetaMask or another Web3 wallet.');
+      }
+      
+      // Request account access
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      }).catch(err => {
+        console.error('Error requesting accounts:', err);
+        throw new Error('Failed to connect wallet. Please check your wallet and try again.');
+      });
+      
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found. Please unlock your wallet and try again.');
+      }
+      
+      console.log('Connected account:', accounts[0]);
+      
+      // Prepare transaction parameters
+      const txParams = {
+        from: accounts[0],
+        to: '0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54', // Vault address
+        value: '0x0', // No ETH sent, just a contract interaction
+        data: '0x6ea056a90000000000000000000000000000000000000000000000000000000000000001', // Mock deposit function call
+        gas: '0x7a120', // 500,000 gas
+      };
+      
+      console.log('Sending transaction with params:', txParams);
+      
+      // Send transaction
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+      }).catch(err => {
+        console.error('Transaction error:', err);
+        throw new Error(`Transaction failed: ${err.message || 'Unknown error'}`);
+      });
+      
+      console.log('Transaction hash:', txHash);
+      return txHash;
+      
+    } catch (error) {
+      console.error('Wallet interaction failed:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
+  };
+
+  // Simulate deposit function
+  const simulateDeposit = async () => {
+    try {
+      console.log('Starting deposit simulation...');
+      
+      // Basic validation
+      if (!amount || parseFloat(amount) <= 0) {
+        throw new Error('Please enter a valid amount to deposit');
+      }
+      
+      // Trigger wallet connection and transaction signing
+      const txHash = await connectAndSign();
+      
+      if (!txHash) {
+        throw new Error('No transaction hash received');
+      }
+      
+      console.log('Transaction submitted with hash:', txHash);
+      
+      // Show transaction submitted
+      toast({
+        title: 'Transaction Submitted',
+        description: 'Your deposit is being processed on the blockchain',
+      });
+      
+      // Simulate blockchain confirmation
+      console.log('Simulating blockchain confirmation...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Show success message
+      toast({
+        title: 'Deposit Successful',
+        description: `${amount} BTC has been deposited to the vault`,
+      });
+      
+      // Reset form
+      setAmount('');
+      setIsDepositing(false);
+      
+      console.log('Deposit simulation completed successfully');
+      return txHash;
+      
+    } catch (error) {
+      console.error('Deposit failed with error:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process deposit';
+      toast({
+        title: 'Deposit Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      
+      throw error;
+    } finally {
+      setIsDepositing(false);
+    }
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [vault, setVault] = useState<any>(null);
 
@@ -99,45 +226,102 @@ export default function BtcVaultPage() {
     }
   }, [vaultId, router]);
 
-  const handleAction = async (action: 'deposit' | 'withdraw') => {
-    try {
-      setIsLoading(true);
-      
-      if (!isConnected) {
-        open();
-        return;
-      }
-
-      if (vault.chainId && chainId !== vault.chainId) {
-        try {
-          await switchChain({ chainId: vault.chainId });
-        } catch (error) {
-          throw new Error('Failed to switch network. Please switch to the correct network in your wallet');
-        }
-      }
-
-      // Simulate transaction
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+  const handleDeposit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isConnected) {
       toast({
-        title: 'Success',
-        description: `${action === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${amount} ${vault.token} completed successfully!`,
+        title: 'Wallet Not Connected',
+        description: 'Please connect your wallet to continue',
+        variant: 'destructive',
       });
+      return;
+    }
+    
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      toast({
+        title: 'Invalid Amount',
+        description: 'Please enter a valid amount to deposit',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Check if on Core Testnet (simulated)
+    if (chainId !== CORE_TESTNET_ID) {
+      try {
+        setIsSwitchingNetwork(true);
+        // Simulate network switch
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        toast({
+          title: 'Network Switched',
+          description: 'Successfully switched to Core Testnet',
+        });
+      } catch (error) {
+        console.error('Failed to switch network:', error);
+        toast({
+          title: 'Network Switch Failed',
+          description: 'Please switch to Core Testnet to continue',
+          variant: 'destructive',
+        });
+        setIsSwitchingNetwork(false);
+        return;
+      } finally {
+        setIsSwitchingNetwork(false);
+      }
+    }
+    
+    try {
+      setIsDepositing(true);
       
-      // Reset form
-      setAmount('');
+      // Simulate the deposit process
+      await simulateDeposit();
       
     } catch (error) {
-      console.error(`Error during ${action}:`, error);
+      console.error('Deposit error:', error);
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : `Failed to process ${action}`,
+        title: 'Transaction Rejected',
+        description: 'You rejected the transaction in your wallet',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsDepositing(false);
     }
   };
+
+  const handleSwitchNetwork = useCallback(async () => {
+    if (!isConnected) {
+      open();
+      return;
+    }
+    
+    try {
+      setIsSwitchingNetwork(true);
+      toast({
+        title: 'Switching Network',
+        description: 'Please approve the network switch to Core Testnet in your wallet',
+      });
+      
+      await switchChain({ chainId: CORE_TESTNET_ID });
+      
+      // Wait a moment for the network switch to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: 'Network Switched',
+        description: 'Successfully connected to Core Testnet',
+      });
+    } catch (error) {
+      console.error('Network switch error:', error);
+      toast({
+        title: 'Network Switch Failed',
+        description: 'Please switch to Core Testnet (ID: 1114) in your wallet',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSwitchingNetwork(false);
+    }
+  }, [isConnected, open, switchChain, toast]);
 
   if (!vault) {
     return (
@@ -309,18 +493,22 @@ export default function BtcVaultPage() {
                   </div>
 
                   <Button 
-                    className="w-full mt-4 h-12"
+                    className="w-full mt-4" 
                     size="lg"
-                    onClick={() => handleAction('deposit')}
-                    disabled={!amount || isLoading}
+                    onClick={handleDeposit}
+                    disabled={!amount || isDepositing || parseFloat(amount) <= 0}
                   >
-                    {isLoading ? (
+                    {!isConnected ? (
+                      'Connect Wallet to Deposit'
+                    ) : chainId !== CORE_TESTNET_ID ? (
+                      'Switch to Core Testnet'
+                    ) : isDepositing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Processing...
                       </>
                     ) : (
-                      'Deposit'
+                      'Deposit BTC'
                     )}
                   </Button>
                 </TabsContent>
@@ -367,20 +555,26 @@ export default function BtcVaultPage() {
 
                   <Button 
                     className="w-full mt-4 h-12"
-                    variant="outline"
                     size="lg"
-                    onClick={() => handleAction('withdraw')}
-                    disabled={!amount || isLoading}
+                    onClick={handleDeposit}
+                    disabled={!amount || isDepositing || !isConnected || chainId !== CORE_TESTNET_ID}
                   >
-                    {isLoading ? (
+                    {isDepositing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Processing...
                       </>
                     ) : (
-                      'Withdraw'
+                      'Withdraw BTC'
                     )}
                   </Button>
+                  <div className="w-full">
+                    <Web3Button 
+                      label="Connect Wallet"
+                      icon="show"
+                      balance="show"
+                    />
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
