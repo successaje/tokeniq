@@ -113,7 +113,7 @@ const settingsNavigation = [
   },
   { 
     name: 'Documentation', 
-    href: '/docs', 
+    href: 'https://tokeniq.gitbook.io/tokeniq-docs/', 
     icon: FileText,
     color: 'text-blue-400',
     bgColor: 'bg-blue-400/10',
