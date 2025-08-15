@@ -1,279 +1,605 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { User, Sliders, Network as NetworkIcon, Save, Mail, Shield, Activity } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { 
+  User, 
+  Shield, 
+  Bell, 
+  Zap, 
+  Settings as SettingsIcon, 
+  Brain, 
+  Link,
+  Wallet,
+  TrendingUp,
+  Globe,
+  AlertCircle,
+  Check,
+  ChevronLeft
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-type Network = {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-};
+const SettingsPage = () => {
+  const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState("account");
 
-export default function SettingsPage() {
-  const [riskLevel, setRiskLevel] = useState(3);
-  const [enabledNetworks, setEnabledNetworks] = useState<Record<string, boolean>>({
-    ethereum: true,
-    arbitrum: true,
-    optimism: false,
-    polygon: true,
-    base: false,
-  });
-
-  const networks: Network[] = [
-    { id: 'ethereum', name: 'Ethereum', icon: 'Ξ', color: 'from-indigo-500 to-blue-500' },
-    { id: 'arbitrum', name: 'Arbitrum', icon: 'A', color: 'from-blue-400 to-cyan-400' },
-    { id: 'optimism', name: 'Optimism', icon: 'O', color: 'from-red-500 to-pink-500' },
-    { id: 'polygon', name: 'Polygon', icon: 'P', color: 'from-purple-500 to-indigo-500' },
-    { id: 'base', name: 'Base', icon: 'B', color: 'from-blue-400 to-blue-600' },
-  ];
-
-  const toggleNetwork = (networkId: string) => {
-    setEnabledNetworks(prev => ({
-      ...prev,
-      [networkId]: !prev[networkId]
-    }));
+  const handleSave = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated successfully.",
+    });
   };
 
+  const sections = [
+    { id: "account", label: "Account", icon: User },
+    { id: "security", label: "Security", icon: Shield },
+    { id: "treasury", label: "Treasury Management", icon: TrendingUp },
+    { id: "ai", label: "AI Configuration", icon: Brain },
+    { id: "chains", label: "Cross-Chain", icon: Globe },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "integrations", label: "Integrations", icon: Link },
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8 max-w-4xl">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-          Account Settings
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 text-lg">Manage your preferences and security settings</p>
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Left Column */}
-        <div className="space-y-6">
-          {/* Profile Card */}
-          <Card className="border border-gray-200 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                  <User className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Profile</CardTitle>
-                  <CardDescription>Update your profile information</CardDescription>
-                </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <SettingsIcon className="h-5 w-5 text-primary" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                  Name
-                </Label>
-                <div className="relative">
-                  <Input 
-                    id="name" 
-                    defaultValue="John Doe" 
-                    className="pl-10 py-5 border-gray-300 bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
-                  />
-                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+                <p className="text-sm text-muted-foreground">
+                  Manage your TokenIQ platform preferences
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="email"
-                    type="email"
-                    defaultValue="john@example.com"
-                    className="pl-10 py-5 border-gray-300 bg-gray-50 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    disabled
-                  />
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                </div>
-                <p className="text-xs text-gray-500">Contact support to update your email</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security Card */}
-          <Card className="border border-gray-200 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                  <Shield className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Security</CardTitle>
-                  <CardDescription>Manage your account security</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Two-Factor Authentication</h4>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                  </div>
-                  <Button variant="outline" size="sm">Enable</Button>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Change Password</h4>
-                    <p className="text-sm text-muted-foreground">Update your account password</p>
-                  </div>
-                  <Button variant="outline" size="sm">Change</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Risk Preference Card */}
-          <Card className="border border-gray-200 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                  <Activity className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Risk Preference</CardTitle>
-                  <CardDescription>Configure your investment risk tolerance</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Risk Level</span>
-                  <span className={cn(
-                    'text-sm font-medium px-3 py-1 rounded-full',
-                    riskLevel <= 2 ? 'bg-green-100 text-green-800' :
-                    riskLevel <= 4 ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800',
-                    'dark:bg-opacity-30 dark:text-opacity-100',
-                    riskLevel <= 2 ? 'dark:bg-green-900/30 dark:text-green-400' :
-                    riskLevel <= 4 ? 'dark:bg-yellow-900/30 dark:text-yellow-400' :
-                    'dark:bg-red-900/30 dark:text-red-400'
-                  )}>
-                    {riskLevel === 1 && 'Very Conservative'}
-                    {riskLevel === 2 && 'Conservative'}
-                    {riskLevel === 3 && 'Moderate'}
-                    {riskLevel === 4 && 'Aggressive'}
-                    {riskLevel === 5 && 'Very Aggressive'}
-                  </span>
-                </div>
-                <div className="px-2">
-                  <Slider
-                    value={[riskLevel]}
-                    onValueChange={(value) => setRiskLevel(value[0])}
-                    min={1}
-                    max={5}
-                    step={1}
-                    className="py-6"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
-                    <span>Conservative</span>
-                    <span>Moderate</span>
-                    <span>Aggressive</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Estimated Returns</span>
-                    <span className="text-sm font-medium text-green-500">
-                      {riskLevel * 2.5}% - {riskLevel * 4.5}% APY
-                    </span>
-                  </div>
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"
-                      style={{ width: `${(riskLevel / 5) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Networks Card */}
-          <Card className="border border-gray-200 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                  <NetworkIcon className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Enabled Networks</CardTitle>
-                  <CardDescription>Select which networks to use for your transactions</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3">
-                {networks.map((network) => (
-                  <div 
-                    key={network.id} 
-                    className={cn(
-                      'flex items-center justify-between p-3 rounded-lg transition-all duration-200',
-                      enabledNetworks[network.id] 
-                        ? 'bg-purple-50 border border-purple-200 dark:bg-purple-900/20 dark:border-purple-800' 
-                        : 'hover:bg-gray-50 border border-gray-100 hover:border-gray-200 dark:hover:bg-gray-800/50 dark:border-transparent dark:hover:border-gray-700',
-                      'dark:bg-opacity-20 dark:border-opacity-20'
-                    )}
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Navigation */}
+          <div className="lg:w-64 flex-shrink-0">
+            <nav className="space-y-2">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-all ${
+                      activeSection === section.id
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-full text-white font-bold shadow-sm',
-                        `bg-gradient-to-br ${network.color}`
-                      )}>
-                        {network.icon}
+                    <Icon className="h-4 w-4" />
+                    <span className="font-medium">{section.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 space-y-6">
+            {/* Account Settings */}
+            {activeSection === "account" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      Profile Information
+                    </CardTitle>
+                    <CardDescription>
+                      Update your account details and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="company">Company Name</Label>
+                        <Input id="company" placeholder="Acme Corporation" />
                       </div>
-                      <span className="font-medium text-gray-800 dark:text-gray-200">{network.name}</span>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input id="email" type="email" placeholder="admin@acme.com" />
+                      </div>
                     </div>
-                    <Checkbox
-                      id={network.id}
-                      checked={enabledNetworks[network.id]}
-                      onCheckedChange={() => toggleNetwork(network.id)}
-                      className={cn(
-                        'h-5 w-5 rounded-md border-2',
-                        enabledNetworks[network.id] 
-                          ? 'border-purple-600 bg-purple-600 text-white' 
-                          : 'border-gray-300',
-                        'transition-colors duration-200 dark:border-gray-600'
-                      )}
-                    />
-                  </div>
-                ))}
+                    <div className="space-y-2">
+                      <Label htmlFor="wallet">Primary Wallet Address</Label>
+                      <div className="flex gap-2">
+                        <Input id="wallet" value="0x742d35Cc6C..." readOnly />
+                        <Button variant="outline" size="sm">
+                          <Wallet className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle>Plan & Usage</CardTitle>
+                    <CardDescription>
+                      Your current subscription and usage statistics
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <Badge variant="default" className="bg-primary/10 text-primary">
+                          Enterprise Plan
+                        </Badge>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Unlimited vaults, AI strategies, and cross-chain operations
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm">Upgrade</Button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-primary">$2.4M</p>
+                        <p className="text-xs text-muted-foreground">Assets Under Management</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-success">12.4%</p>
+                        <p className="text-xs text-muted-foreground">Average APY</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">47</p>
+                        <p className="text-xs text-muted-foreground">Active Strategies</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
+            )}
+
+            {/* Security Settings */}
+            {activeSection === "security" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="h-5 w-5 text-primary" />
+                      Security Preferences
+                    </CardTitle>
+                    <CardDescription>
+                      Configure security settings for your treasury operations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">Two-Factor Authentication</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Add an extra layer of security to your account
+                        </p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">Transaction Signing</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Require manual approval for large transactions
+                        </p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label className="text-base">Transaction Limits</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="daily-limit" className="text-sm">Daily Limit (USD)</Label>
+                          <Input id="daily-limit" placeholder="100,000" />
+                        </div>
+                        <div>
+                          <Label htmlFor="single-tx" className="text-sm">Single Transaction (USD)</Label>
+                          <Input id="single-tx" placeholder="50,000" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Treasury Management */}
+            {activeSection === "treasury" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      Treasury Strategy
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your automated treasury management preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <Label>Risk Tolerance</Label>
+                      <div className="space-y-3">
+                        <Slider defaultValue={[60]} max={100} step={10} className="w-full" />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Conservative</span>
+                          <span>Moderate</span>
+                          <span>Aggressive</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="min-yield">Minimum Yield Threshold</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select threshold" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="3">3% APY</SelectItem>
+                            <SelectItem value="5">5% APY</SelectItem>
+                            <SelectItem value="8">8% APY</SelectItem>
+                            <SelectItem value="12">12% APY</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="rebalance">Auto-Rebalancing</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select frequency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="manual">Manual Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle>Asset Allocation</CardTitle>
+                    <CardDescription>
+                      Define your preferred asset allocation strategy
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      { name: "Stablecoins", percentage: 40, color: "bg-blue-500" },
+                      { name: "DeFi Protocols", percentage: 30, color: "bg-primary" },
+                      { name: "RWA Tokens", percentage: 20, color: "bg-green-500" },
+                      { name: "Liquidity Pools", percentage: 10, color: "bg-yellow-500" },
+                    ].map((asset) => (
+                      <div key={asset.name} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label className="text-sm">{asset.name}</Label>
+                          <span className="text-sm text-muted-foreground">{asset.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${asset.color}`}
+                            style={{ width: `${asset.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* AI Configuration */}
+            {activeSection === "ai" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-primary" />
+                      AI Strategy Engine
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your AI-powered treasury management settings
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">AI Auto-Trading</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow AI to execute trades based on market conditions
+                        </p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label>AI Aggressiveness Level</Label>
+                      <Slider defaultValue={[40]} max={100} step={10} className="w-full" />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Conservative</span>
+                        <span>Balanced</span>
+                        <span>Aggressive</span>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Market Analysis Frequency</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select frequency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="realtime">Real-time</SelectItem>
+                            <SelectItem value="15min">Every 15 minutes</SelectItem>
+                            <SelectItem value="1hour">Hourly</SelectItem>
+                            <SelectItem value="4hour">Every 4 hours</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Strategy Optimization</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="yield">Yield Optimization</SelectItem>
+                            <SelectItem value="risk">Risk Minimization</SelectItem>
+                            <SelectItem value="balanced">Balanced Approach</SelectItem>
+                            <SelectItem value="custom">Custom Model</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Cross-Chain Settings */}
+            {activeSection === "chains" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-primary" />
+                      Cross-Chain Configuration
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your multi-chain strategy and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <Label className="text-base">Supported Networks</Label>
+                      {[
+                        { name: "Ethereum", status: "active", color: "bg-blue-500" },
+                        { name: "Avalanche", status: "active", color: "bg-red-500" },
+                        { name: "Base", status: "active", color: "bg-blue-600" },
+                        { name: "Optimism", status: "inactive", color: "bg-red-600" },
+                        { name: "Polygon", status: "inactive", color: "bg-purple-500" },
+                      ].map((network) => (
+                        <div key={network.name} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${network.color}`} />
+                            <span className="font-medium">{network.name}</span>
+                            <Badge 
+                              variant={network.status === "active" ? "default" : "secondary"}
+                              className={network.status === "active" ? "bg-success/10 text-success" : ""}
+                            >
+                              {network.status}
+                            </Badge>
+                          </div>
+                          <Switch checked={network.status === "active"} />
+                        </div>
+                      ))}
+                    </div>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label>Gas Optimization</Label>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm">Smart Gas Management</p>
+                          <p className="text-xs text-muted-foreground">
+                            Automatically optimize gas fees across chains
+                          </p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Notifications */}
+            {activeSection === "notifications" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="h-5 w-5 text-primary" />
+                      Notification Preferences
+                    </CardTitle>
+                    <CardDescription>
+                      Choose what notifications you want to receive
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {[
+                      {
+                        title: "Transaction Alerts",
+                        description: "Get notified of all treasury transactions",
+                        enabled: true,
+                      },
+                      {
+                        title: "Yield Opportunities",
+                        description: "Alert when new high-yield opportunities are found",
+                        enabled: true,
+                      },
+                      {
+                        title: "Risk Warnings",
+                        description: "Receive warnings about potential risks",
+                        enabled: true,
+                      },
+                      {
+                        title: "Portfolio Updates",
+                        description: "Daily portfolio performance summaries",
+                        enabled: false,
+                      },
+                      {
+                        title: "Market Analysis",
+                        description: "AI-generated market insights and recommendations",
+                        enabled: true,
+                      },
+                    ].map((notification) => (
+                      <div key={notification.title} className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-base">{notification.title}</Label>
+                          <p className="text-sm text-muted-foreground">
+                            {notification.description}
+                          </p>
+                        </div>
+                        <Switch defaultChecked={notification.enabled} />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Integrations */}
+            {activeSection === "integrations" && (
+              <div className="space-y-6">
+                <Card className="bg-gradient-card border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Link className="h-5 w-5 text-primary" />
+                      API & Integrations
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your API keys and third-party integrations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Zap className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">Chainlink Data Feeds</p>
+                            <p className="text-sm text-muted-foreground">Real-time price data</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-success" />
+                          <span className="text-sm text-success">Connected</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-warning/10">
+                            <AlertCircle className="h-4 w-4 text-warning" />
+                          </div>
+                          <div>
+                            <p className="font-medium">CoinGecko API</p>
+                            <p className="text-sm text-muted-foreground">Market data and analytics</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Connect</Button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Brain className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">ElizaOS AI Agent</p>
+                            <p className="text-sm text-muted-foreground">AI-powered decision making</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-success" />
+                          <span className="text-sm text-success">Active</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <Label className="text-base">API Configuration</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="api-key" className="text-sm">API Key</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              id="api-key" 
+                              type="password" 
+                              value="tk_prod_••••••••••••••••" 
+                              readOnly 
+                            />
+                            <Button variant="outline" size="sm">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="webhook" className="text-sm">Webhook URL</Label>
+                          <Input 
+                            id="webhook" 
+                            placeholder="https://your-app.com/webhooks/tokeniq" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-6">
+              <Button onClick={handleSave} className="bg-gradient-primary hover:opacity-90">
+                Save Changes
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="flex justify-end pt-4">
-        <Button 
-          className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 px-6 py-5 text-base"
-        >
-          <Save className="mr-2 h-5 w-5" />
-          Save All Changes
-        </Button>
-      </div>
-
-
     </div>
   );
-}
+};
+
+export default SettingsPage;
