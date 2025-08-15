@@ -322,7 +322,7 @@ function ElizaOSCore() {
         // Add error message
         const errorMessage: ChatMessage = {
           id: 'error',
-          content: 'I\'m having trouble connecting to the server. Please make sure ElizaOS is running on localhost:3000.',
+          content: 'I\'m having trouble connecting to the server.',
           sender: 'agent',
           timestamp: Date.now()
         };
