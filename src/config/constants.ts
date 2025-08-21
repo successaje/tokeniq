@@ -15,6 +15,7 @@ export const RPC_URLS: Record<number, string> = {
   43114: 'https://api.avax.network/ext/bc/C/rpc',
   42161: 'https://arb1.arbitrum.io/rpc',
   8453: 'https://mainnet.base.org',
+  59140: 'https://evm-rpc-testnet.sei-apis.com',
 };
 
 // Explorer URLs
@@ -28,6 +29,7 @@ export const EXPLORER_URLS: Record<number, string> = {
   43114: 'https://snowtrace.io',
   42161: 'https://arbiscan.io',
   8453: 'https://basescan.org',
+  59140: 'https://evm-rpc-testnet.sei-apis.com',
 };
 
 // Native token symbols
@@ -41,4 +43,5 @@ export const NATIVE_TOKENS: Record<number, string> = {
   43114: 'AVAX',
   42161: 'ETH',
   8453: 'ETH',
+  59140: 'SEI',
 };

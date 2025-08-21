@@ -33,6 +33,8 @@ export const SEI_TESTNET: Chain = {
   id: SEI_TESTNET_ID,
   name: 'Sei Testnet',
   network: 'sei-testnet',
+  icon: "/logos/sei-logo.png",
+  
   nativeCurrency: {
     decimals: 18,
     name: 'SEI',
@@ -134,23 +136,52 @@ export const CORE_TESTNET: Chain = {
 };
 
 export const chains: CustomChain[] = [
+  // Core Mainnet
   {
-    id: 1,
+    id: CORE_MAINNET_ID,
     name: "Core",
     network: "core",
     icon: "/logos/core-dao-core-logo.png",
-    color: "#627EEA",
+    color: "#31cb9e",
     nativeCurrency: {
       name: "Core",
       symbol: "CORE",
       decimals: 18,
     },
     rpcUrls: {
-      default: { http: ["https://core.llamarpc.com"] },
-      public: { http: ["https://core.llamarpc.com"] },
+      default: { http: ["https://rpc.coredao.org"] },
+      public: { http: ["https://rpc.coredao.org"] },
     },
     blockExplorers: {
-      default: { name: "CoreScan", url: "https://corescan.io" },
+      default: { name: "CoreScan", url: "https://scan.coredao.org" },
+    },
+  },
+  
+  // Sei Network
+  {
+    ...SEI_MAINNET,
+    icon: "/logos/sei-logo.png",
+    color: "#00e6b8",
+  },
+  
+  // Avalanche
+  {
+    id: 43114,
+    name: "Avalanche",
+    network: "avalanche",
+    icon: "/logos/avalanche-avax-logo.png",
+    color: "#E84142",
+    nativeCurrency: {
+      name: "Avalanche",
+      symbol: "AVAX",
+      decimals: 18,
+    },
+    rpcUrls: {
+      default: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
+      public: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
+    },
+    blockExplorers: {
+      default: { name: "SnowTrace", url: "https://snowtrace.io" },
     },
   },
   {
@@ -172,8 +203,9 @@ export const chains: CustomChain[] = [
       default: { name: "BlockCypher", url: "https://live.blockcypher.com" },
     },
   },
+  // Ethereum
   {
-    id: 5,
+    id: 1,
     name: "Ethereum",
     network: "ethereum",
     icon: "/logos/ethereum.png",

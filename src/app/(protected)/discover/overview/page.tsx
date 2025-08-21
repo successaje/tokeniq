@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, ArrowUpDown, ChevronDown, Plus, ArrowUpRight } from 'lucide-react';
+import { VaultsByChain } from '@/components/discover/VaultsByChain';
+import { VAULT_TYPES } from '@/config/vaults';
+import { VaultType } from '@/types/vault';
 import { Button } from '@/components/ui/button';
 import { TreasuryOverview } from '@/components/discover/TreasuryOverview';
 import { StrategyCard } from '@/components/discover/StrategyCard';
@@ -57,6 +60,13 @@ export default function DiscoverOverviewPage() {
       logoUrl: '/logos/avalanche-avax-logo.png',
       fallbackUrl: ''
     },
+    {
+      name: 'Sei Network', 
+      value: 400000, 
+      color: '#00e6b8',
+      logoUrl: '/logos/sei-logo.png',
+      fallbackUrl: ''
+    }
   ];
 
   const yieldHistoryData = [
@@ -107,6 +117,40 @@ export default function DiscoverOverviewPage() {
         totalBalance="$4,000,000" 
         assets={assets}
         chains={chains}
+      />
+      
+      <VaultsByChain 
+        vaults={Object.values(VAULT_TYPES).map(vault => ({
+          id: vault.id,
+          address: vault.vaultAddress as `0x${string}`,
+          name: vault.name,
+          symbol: vault.tokenSymbol,
+          asset: vault.tokenAddress,
+          totalAssets: '0',
+          totalSupply: '0',
+          apy: vault.apy,
+          chainId: 1, // This will be set by the useVaultsData hook
+          type: VaultType.STANDARD,
+          strategy: vault.strategy,
+          tvl: vault.tvl?.toString() || '0',
+          performanceFee: 0,
+          withdrawalFee: 0,
+          lastHarvest: 0,
+          // Additional fields for UI
+          description: vault.description,
+          risk: vault.risk,
+          minDeposit: vault.minDeposit,
+          tokenDecimals: vault.tokenDecimals,
+          tokenSymbol: vault.tokenSymbol,
+          tokenAddress: vault.tokenAddress,
+          vaultAddress: vault.vaultAddress,
+          chain: vault.chain,
+          availability: vault.available ? 'public' as const : 'private' as const,
+          tags: vault.tags || [],
+          isNew: true,
+          userBalance: 0n,
+          owner: '0x0' as `0x${string}`
+        }))} 
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

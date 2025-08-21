@@ -70,7 +70,7 @@ export default function CrossChainPage() {
   const ccipStatus = {
     status: 'operational',
     lastUpdated: new Date(),
-    supportedChains: ['Ethereum', 'Polygon', 'Avalanche', 'Arbitrum', 'Optimism'],
+    supportedChains: ['Ethereum', 'Sei', 'Polygon', 'Core', 'Avalanche', 'Arbitrum', 'Optimism'],
     avgTransferTime: '2-5 minutes',
     securityScore: '99.9%'
   };

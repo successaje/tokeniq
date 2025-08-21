@@ -87,6 +87,7 @@ function getChainName(chainId: number): string {
     1: 'Ethereum',
     56: 'BSC',
     137: 'Polygon',
+    59140: 'Sei',
     42161: 'Arbitrum',
     10: 'Optimism',
     250: 'Fantom',

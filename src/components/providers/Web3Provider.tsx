@@ -6,13 +6,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
-import { mainnet, sepolia, avalanche, avalancheFuji, base, baseSepolia, Chain } from 'viem/chains';
+import { mainnet, sepolia, avalanche, avalancheFuji, base, seiTestnet, sei, baseSepolia, Chain } from 'viem/chains';
 import { CORE_MAINNET, CORE_TESTNET } from '@/config/chains';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
 // TODO: Replace with your WalletConnect project ID from https://cloud.walletconnect.com/
-const WALLET_CONNECT_PROJECT_ID = 'YOUR_WALLET_CONNECT_PROJECT_ID';
+const WALLET_CONNECT_PROJECT_ID = '';
 
 // Import chain configurations
 import { SUPPORTED_CHAINS } from '@/contexts/ContractContext';
@@ -72,6 +72,20 @@ const CHAINS = {
       default: { http: ['https://sepolia.base.org'] },
     },
   },
+  seiTestnet: {
+    ...seiTestnet,
+    rpcUrls: {
+      ...seiTestnet.rpcUrls,
+      default: { http: ['https://sei-testnet.drpc.org'] },
+    },
+  },
+  sei: {
+    ...sei,
+    rpcUrls: {
+      ...sei.rpcUrls,
+      default: { http: ['wss://sei.drpc.org'] },
+    },
+  },
 } as const;
 
 // Configure Web3Modal
@@ -85,6 +99,8 @@ const chains = [
   CHAINS.avalancheFuji,
   CHAINS.base,
   CHAINS.baseSepolia,
+  CHAINS.seiTestnet,
+  CHAINS.sei,
   CORE_MAINNET,
   CORE_TESTNET,
 ] as const;
@@ -122,8 +138,8 @@ if (typeof window !== 'undefined') {
       '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
       'c03dfee351b6fcc421b4494ea33b9d4b98a021f564a69b85d81de06441169a22', // OKX
     ],
-    termsConditionsUrl: 'https://coreiq.xyz/terms',
-    privacyPolicyUrl: 'https://coreiq.xyz/privacy'
+    termsConditionsUrl: 'https://tokeniq.xyz/terms',
+    privacyPolicyUrl: 'https://tokeniq.xyz/privacy'
   });
 }
 
@@ -139,6 +155,8 @@ const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
     case 43113: return CHAINS.avalancheFuji;
     case 8453: return CHAINS.base;
     case 84532: return CHAINS.baseSepolia;
+    case 1328: return CHAINS.seiTestnet;
+    case 1329: return CHAINS.sei;
     case 1116: return CORE_MAINNET;
     case 1114: return CORE_TESTNET;
     default: return CHAINS.mainnet;
@@ -159,6 +177,8 @@ const config = createConfig({
     CHAINS.avalancheFuji,
     CHAINS.base,
     CHAINS.baseSepolia,
+    CHAINS.seiTestnet,
+    CHAINS.sei,
     CORE_MAINNET,
     CORE_TESTNET,
   ],
@@ -169,6 +189,8 @@ const config = createConfig({
     [avalancheFuji.id]: http(CHAINS.avalancheFuji.rpcUrls.default.http[0]),
     [base.id]: http(CHAINS.base.rpcUrls.default.http[0]),
     [baseSepolia.id]: http(CHAINS.baseSepolia.rpcUrls.default.http[0]),
+    [seiTestnet.id]: http(CHAINS.seiTestnet.rpcUrls.default.http[0]),
+    [sei.id]: http(CHAINS.sei.rpcUrls.default.http[0]),
     [CORE_MAINNET.id]: http(CORE_MAINNET.rpcUrls.default.http[0]),
     [CORE_TESTNET.id]: http(CORE_TESTNET.rpcUrls.default.http[0]),
   },

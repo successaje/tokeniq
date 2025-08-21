@@ -20,8 +20,30 @@ export interface VaultInfo {
   owner?: Address;
   type?: VaultType;
   strategy?: string;
-  tvl?: string;
+  tvl?: string | bigint;
   performanceFee?: number;
   withdrawalFee?: number;
   lastHarvest?: number;
+  
+  // Additional fields for UI and configuration
+  description?: string;
+  risk?: 'low' | 'medium' | 'high';
+  minDeposit?: bigint;
+  tokenDecimals?: number;
+  tokenSymbol?: string;
+  tokenAddress?: Address;
+  vaultAddress?: Address;
+  chain?: string;
+  availability?: 'public' | 'private' | 'whitelist';
+  tags?: string[];
+  isNew?: boolean;
+  
+  // For UI state
+  userBalance?: bigint;
+  recommendation?: {
+    vaultId: string;
+    action: 'deposit' | 'withdraw' | 'hold';
+    confidence: number;
+    reason: string;
+  };
 }

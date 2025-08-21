@@ -404,6 +404,7 @@ const SettingsPage = () => {
                       {[
                         { name: "Ethereum", status: "active", color: "bg-blue-500" },
                         { name: "Avalanche", status: "active", color: "bg-red-500" },
+                        { name: "Sei", status: "active", color: "bg-green-500" },
                         // { name}
                         { name: "Base", status: "active", color: "bg-blue-600" },
                         { name: "Optimism", status: "inactive", color: "bg-red-600" },
