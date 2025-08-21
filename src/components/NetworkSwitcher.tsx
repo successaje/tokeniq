@@ -1,8 +1,9 @@
 'use client';
 
-import { useNetwork } from '@/hooks/useNetwork';
-import { SUPPORTED_CHAINS, CHAIN_ICONS } from '@/utils/networks';
+import { useNetwork } from 'wagmi';
+import { CHAIN_ICONS } from '@/utils/networks';
 import { Button } from '@/components/ui/button';
+import { SEI_MAINNET, SEI_TESTNET } from '@/config/chains';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +12,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 
-export function NetworkSwitcher() {
-  const { chain, switchChain } = useNetwork();
+// List of supported chains
+export const SUPPORTED_CHAINS = [
+  SEI_MAINNET,
+  SEI_TESTNET,
+  // Add other chains as needed
+];
 
+export function NetworkSwitcher() {
+  const { chain, chains, switchChain } = useNetwork();
+  
   if (!chain) {
     return (
       <Button variant="outline" disabled>

@@ -577,6 +577,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center justify-items-center">
                   {[
+                    { name: 'Sei', logo: '/sei-logo.png' },
                     { name: 'Ethereum', logo: '/logos/ethereum.png' },
                     { name: 'Core', logo: '/core-dao-core-logo.png' },
                     { name: 'Bitcoin', logo: '/logos/bitcoin-btc-logo.png' },
@@ -585,8 +586,9 @@ export default function Home() {
                     { name: 'Polygon', logo: '/polygon-matic-logo.png' },
                     // { name: 'BNB Chain', logo: '/bnb-bnb-logo.png' },
                     { name: 'Base', logo: '/base-logo.jpeg' },
-                    { name: 'USDC', logo: '/usd-coin-usdc-logo.png' },
-                    { name: 'USDT', logo: '/tether-usdt-logo.png' },
+                    { name: 'Yei', logo: '/yei-logo.png' },
+                    // { name: 'USDC', logo: '/usd-coin-usdc-logo.png' },
+                    // { name: 'USDT', logo: '/tether-usdt-logo.png' },
                     { name: 'Aave', logo: '/logos/aave.png' },
                     { name: 'Chainlink', logo: '/logos/chainlink.png' },
                   ].map((item, index) => (

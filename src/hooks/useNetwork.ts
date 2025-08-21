@@ -1,7 +1,8 @@
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { SUPPORTED_CHAINS, DEFAULT_CHAIN, isFeatureSupported } from '@/utils/networks';
+import { DEFAULT_CHAIN, isFeatureSupported } from '@/utils/networks';
+import { SUPPORTED_CHAINS } from '@/config/chains';
 
 export function useNetwork() {
   const { isConnected } = useAccount();
@@ -10,7 +11,7 @@ export function useNetwork() {
   const router = useRouter();
 
   // Get the current chain from supported chains
-  const activeChain = SUPPORTED_CHAINS.find(c => c.id === chainId) || null;
+  const activeChain = Object.values(SUPPORTED_CHAINS).find(c => c.id === chainId) || null;
   
   // Check if the current chain is supported
   const isSupported = activeChain !== null;
@@ -25,7 +26,7 @@ export function useNetwork() {
 
   // Get the correct chain ID for a specific feature
   const getChainForFeature = (feature: string) => {
-    const supportedChains = SUPPORTED_CHAINS.filter((c) =>
+    const supportedChains = Object.values(SUPPORTED_CHAINS).filter((c) =>
       isFeatureSupported(feature, c.id)
     );
     return supportedChains[0]?.id || DEFAULT_CHAIN.id;
@@ -54,6 +55,6 @@ export function useNetwork() {
     isFeatureAvailable,
     getChainForFeature,
     switchChain: switchToChain,
-    supportedChains: SUPPORTED_CHAINS,
+    supportedChains: Object.values(SUPPORTED_CHAINS),
   };
 }

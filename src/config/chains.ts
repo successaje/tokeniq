@@ -1,4 +1,55 @@
-import { Chain } from "wagmi"
+import { Chain } from "wagmi";
+
+// Network IDs
+export const CORE_MAINNET_ID = 1116;
+export const CORE_TESTNET_ID = 1115;
+export const SEI_MAINNET_ID = 1329;
+export const SEI_TESTNET_ID = 1328;
+
+// Sei Network configuration
+export const SEI_MAINNET: Chain = {
+  id: SEI_MAINNET_ID,
+  name: 'Sei Network',
+  network: 'sei',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'SEI',
+    symbol: 'SEI',
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc-sei.keplr.app'] },
+    public: { http: ['https://rpc-sei.keplr.app'] },
+  },
+  blockExplorers: {
+    default: { 
+      name: 'Sei Explorer',
+      url: 'https://www.seiscan.app',
+    },
+  },
+  testnet: false,
+};
+
+export const SEI_TESTNET: Chain = {
+  id: SEI_TESTNET_ID,
+  name: 'Sei Testnet',
+  network: 'sei-testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'SEI',
+    symbol: 'SEI',
+  },
+  rpcUrls: {
+    default: { http: ['https://evm-rpc-testnet.sei-apis.com'] },
+    public: { http: ['https://evm-rpc-testnet.sei-apis.com'] },
+  },
+  blockExplorers: {
+    default: { 
+      name: 'Sei Testnet Explorer',
+      url: 'https://testnet.seitrace.com',
+    },
+  },
+  testnet: true,
+};
 
 interface CustomChain extends Omit<Chain, 'id'> {
   id: number;
@@ -6,12 +57,8 @@ interface CustomChain extends Omit<Chain, 'id'> {
   color?: string;
 }
 
-// Core Blockchain Mainnet and Testnet configurations
-// Core Network IDs
-export const CORE_MAINNET_ID = 1116;
-export const CORE_TESTNET_ID = 1115;
-
 export const SUPPORTED_CHAINS = {
+  // Core chains
   core: {
     id: CORE_MAINNET_ID,
     name: 'Core Mainnet',
@@ -23,6 +70,18 @@ export const SUPPORTED_CHAINS = {
     name: 'Core Testnet',
     logo: '/logos/core-dao-core-logo.png',
     color: '#31cb9e',
+  },
+  
+  // Sei chains
+  sei: {
+    ...SEI_MAINNET,
+    logo: '/logos/sei-logo.png',
+    color: '#00e6b8',
+  },
+  'sei-testnet': {
+    ...SEI_TESTNET,
+    logo: '/logos/sei-logo.png',
+    color: '#00e6b8',
   },
 };
 
@@ -48,6 +107,8 @@ export const CORE_MAINNET: Chain = {
   },
   testnet: false,
 };
+
+
 
 export const CORE_TESTNET: Chain = {
   id: 1114,
