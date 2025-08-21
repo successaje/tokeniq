@@ -291,10 +291,127 @@ export default function Home() {
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Development Status Tag */}
+        <div className="absolute top-6 right-6 z-20">
+          <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-full border border-yellow-200 dark:border-yellow-800/50 shadow-sm">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+            </span>
+            <span className="text-sm font-medium">🚧 Currently in Development</span>
+          </div>
+        </div>
+
         {/* Animated background elements */}
         <div className="absolute inset-0 -z-10">
           {/* Gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background/90 to-primary/5" />
+          
+          {/* Animated floating assets */}
+          <motion.div 
+            className="absolute top-1/4 left-1/4 w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-300 shadow-lg"
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 15, 0],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          >
+            <span className="absolute inset-0 flex items-center justify-center text-2xl">₿</span>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute top-1/3 right-1/4 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-300 shadow-lg"
+            animate={{
+              y: [0, -15, 0],
+              x: [0, 10, 0],
+              rotate: [0, -10, 0],
+            }}
+            transition={{
+              duration: 6,
+              delay: 0.5,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          >
+            <span className="absolute inset-0 flex items-center justify-center text-xl">Ξ</span>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute bottom-1/4 left-1/3 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-300 shadow-lg"
+            animate={{
+              y: [0, 15, 0],
+              x: [0, -10, 0],
+              rotate: [0, 10, 0],
+            }}
+            transition={{
+              duration: 7,
+              delay: 1,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          >
+            <span className="absolute inset-0 flex items-center justify-center text-lg">Ⓢ</span>
+          </motion.div>
+          
+          {/* AI Brain / Vault Animation */}
+          <motion.div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-10"
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.1, 0.15, 0.1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          >
+            <div className="absolute inset-0 rounded-full border-2 border-primary/30" />
+          </motion.div>
+          
+          <motion.div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10"
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.1, 0.12, 0.1],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          >
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+          </motion.div>
+          
+          <motion.div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-gradient-to-br from-primary/5 to-primary/20"
+            animate={{
+              scale: [1, 1.05, 1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg className="w-16 h-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+          </motion.div>
           
           {/* Animated grid pattern */}
           <div className="absolute inset-0 opacity-10" style={{
