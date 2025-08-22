@@ -24,9 +24,24 @@ const VaultWithdrawDialog = dynamic(
 
 import { VaultInfo } from '@/types/contracts';
 
-interface Vault extends VaultInfo {
+interface Vault extends Omit<VaultInfo, 'symbol' | 'asset' | 'totalAssets' | 'totalSupply' | 'chainId'> {
   risk: 'low' | 'medium' | 'high';
   strategy: string; // For display purposes only
+  description: string;
+  apy: number;
+  tvl: bigint;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  tokenAddress: Address;
+  tags: string[];
+  available: boolean;
+  minDeposit: bigint;
+  chain: string;
+  symbol?: string; // Keep optional for compatibility
+  asset?: Address; // Keep optional for compatibility
+  totalAssets?: bigint; // Keep optional for compatibility
+  totalSupply?: bigint; // Keep optional for compatibility
+  chainId?: number; // Keep optional for compatibility
 }
 
 export function VaultList() {
@@ -40,21 +55,75 @@ export function VaultList() {
 
   // Transform contract vaults to UI format
   useEffect(() => {
-    if (safeAllVaults && safeAllVaults.length > 0) {
-      try {
-        const formattedVaults: Vault[] = safeAllVaults.map((vault, index) => ({
-          ...vault,
-          id: vault.address || `vault-${index}`,
-          name: vault.name || 'Unnamed Vault',
-          risk: 'medium' as const, // Default risk level
-          strategy: 'Yield Strategy', // Default strategy name
-        }));
-        setVaults(formattedVaults);
-      } catch (err) {
-        console.error('Error formatting vaults:', err);
-        setVaults([]);
+    // Add Yei Finance vaults from config
+    const yeiVaults: Vault[] = [
+      {
+        id: 'btc-fi-vault',
+        name: 'BTCFi Yield Vault',
+        description: '60% Yei Lending Pool + 40% Yei Staking Pool',
+        chain: 'Ethereum',
+        available: true,
+        apy: 12.8,
+        tvl: 5000000n * 10n**18n, // $5M TVL in wei
+        minDeposit: 1000000000n, // 0.01 WBTC in wei (8 decimals)
+        tokenDecimals: 8,
+        tokenSymbol: 'WBTC',
+        tokenAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+        address: '0x0000000000000000000000000000000000000001', // YEI_LENDING_POOL
+        risk: 'medium',
+        strategy: 'Yei Finance BTCFi Strategy',
+        tags: ['Bitcoin', 'Yield', 'Lending', 'Staking'],
+        totalAssets: 0n,
+        totalSupply: 0n,
+        chainId: 1
+      },
+      {
+        id: 'stablecoin-vault',
+        name: 'Stablecoin Yield Vault',
+        description: 'Yield optimized stablecoin strategy via Yei money market',
+        chain: 'Ethereum',
+        available: true,
+        apy: 8.9,
+        tvl: 3000000n * 10n**18n, // $3M TVL in wei
+        minDeposit: 100000000n, // 100 USDC in wei (6 decimals)
+        tokenDecimals: 6,
+        tokenSymbol: 'USDC',
+        tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        address: '0x0000000000000000000000000000000000000002', // YEI_MONEY_MARKET
+        risk: 'low',
+        strategy: 'Yei Finance Money Market',
+        tags: ['Stablecoin', 'Yield', 'Money Market'],
+        totalAssets: 0n,
+        totalSupply: 0n,
+        chainId: 1
       }
-    } else {
+    ] as Vault[];
+
+    try {
+      const formattedVaults = [
+        ...(safeAllVaults?.map((vault) => ({
+          ...vault,
+          id: vault.address,
+          name: vault.name,
+          risk: 'medium' as const,
+          strategy: 'Yield Strategy',
+          description: '',
+          chain: 'Ethereum',
+          available: true,
+          apy: vault.apy || 0,
+          tvl: vault.totalAssets || 0n,
+          minDeposit: 0n,
+          tokenDecimals: 18,
+          tokenSymbol: 'TOKEN',
+          tokenAddress: vault.asset || '0x0',
+          tags: []
+        })) || []),
+        ...yeiVaults
+      ] as Vault[];
+      
+      setVaults(formattedVaults);
+    } catch (err) {
+      console.error('Error formatting vaults:', err);
       setVaults([]);
     }
   }, [safeAllVaults]);
@@ -118,7 +187,7 @@ export function VaultList() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Aave Vault Card */}
-        <Card className="flex flex-col border-2 border-violet-500/20 hover:border-violet-500/40 transition-colors">
+        <Card className="flex flex-col border-2 border-violet-500/20 hover:border-violet-500/40 transition-colors mb-6">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl flex items-center gap-2">
@@ -152,42 +221,47 @@ export function VaultList() {
           </CardFooter>
         </Card>
 
-        {/* Dynamic Vaults */}
-        {vaults.length > 0 && vaults.map((vault) => (
-            <Card key={vault.id} className="flex flex-col">
+        {/* All Vaults */}
+        {vaults.map((vault) => (
+            <Card key={vault.id} className="flex flex-col border-2 border-blue-500/20 hover:border-blue-500/40 transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{vault.name}</CardTitle>
-                  <Badge className={getRiskColor(vault.risk)}>{vault.risk}</Badge>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    {vault.name}
+                  </CardTitle>
+                  <Badge className={getRiskColor(vault.risk)}>{vault.risk} Risk</Badge>
                 </div>
-                <div className="text-sm text-muted-foreground">{vault.strategy}</div>
+                <div className="text-sm text-muted-foreground">{vault.description || vault.strategy}</div>
               </CardHeader>
               <CardContent className="flex-1 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">APY</span>
-                  <span className="font-medium">{vault.apy.toFixed(2)}%</span>
+                  <span className="font-medium">
+                    {vault.apy ? `${vault.apy.toFixed(2)}%` : 'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">TVL</span>
                   <span className="font-medium">
-                    {vault.totalAssets ? (
-                      `${parseFloat(formatEther(vault.totalAssets)).toLocaleString(undefined, {
+                    {vault.tvl ? (
+                      `$${(Number(vault.tvl) / 10**18).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                      })} ETH`
+                      })}`
                     ) : 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Asset</span>
                   <span className="font-medium truncate max-w-[120px]">
-                    {vault.asset}
+                    {vault.tokenSymbol || 'N/A'}
                   </span>
                 </div>
               </CardContent>
               <CardFooter className="flex space-x-2">
                 <Button 
-                  className="flex-1" 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700" 
                   onClick={() => {
                     setSelectedVault(vault);
                     setAction('deposit');

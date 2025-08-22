@@ -1,14 +1,14 @@
 import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VaultInfo, VaultType } from '@/types/vault';
+import { VaultInfo } from '@/types/vault';
 import { useVaultActions } from '@/hooks/useVaultActions';
-import { formatEther, formatUnits, parseUnits, type Address } from 'viem';
+import { formatEther, formatUnits, parseUnits } from 'viem';
 import { useAccount, useBalance, useChainId } from 'wagmi';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
@@ -49,163 +49,55 @@ export function VaultCard({ vault, userShares = 0n, onActionSuccess, className =
     const supply = typeof vault.totalSupply === 'string' 
       ? BigInt(vault.totalSupply) 
       : vault.totalSupply;
+      
     const balance = typeof vaultTokenBalance.value === 'string'
       ? BigInt(vaultTokenBalance.value)
       : vaultTokenBalance.value;
       
-    return (Number(balance) / Number(supply)) * 100;
+    return Number((balance * 10000n) / supply) / 100; // 2 decimal places
   }, [vault.totalSupply, vaultTokenBalance]);
-  
-  // Format APY with color coding based on value
-  const formattedApy = useMemo(() => {
-    if (!vault.apy) return 'N/A';
-    const color = vault.apy > 10 ? 'text-green-500' : vault.apy > 5 ? 'text-yellow-500' : 'text-red-500';
-    return <span className={`font-semibold ${color}`}>{vault.apy.toFixed(2)}%</span>;
-  }, [vault.apy]);
-  
-  // Format TVL
-  const formattedTvl = useMemo(() => {
-    if (!vault.tvl) return '$0';
-    const value = typeof vault.tvl === 'string' ? BigInt(vault.tvl) : vault.tvl;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Number(value) / 1e18);
-  }, [vault.tvl]);
 
-  const handleAction = async (action: 'deposit' | 'withdraw' | 'rebalance') => {
-    if (!vault.vaultAddress || !amount) return;
+  const handleAction = async (action: 'deposit' | 'withdraw' | 'harvest' | 'rebalance') => {
+    if (!address || !amount) return;
     
     try {
       setIsApproving(true);
+      await executeAction({
+        action,
+        vaultAddress: vault.address,
+        amount: parseUnits(amount, vault.tokenDecimals),
+        tokenAddress: vault.tokenAddress,
+      });
       
-      if (action === 'rebalance') {
-        await executeAction('rebalance', vault.vaultAddress);
-      } else {
-        await executeAction(
-          action, 
-          vault.vaultAddress, 
-          amount, 
-          vault.tokenDecimals || 18,
-          action === 'deposit' ? vault.tokenAddress : undefined
-        );
+      if (onActionSuccess) {
+        onActionSuccess();
       }
-      
-      setAmount('');
-      onActionSuccess?.();
     } catch (error) {
-      console.error(`Error in ${action}:`, error);
-      // TODO: Add toast notification for error
+      console.error(`Failed to ${action}:`, error);
     } finally {
       setIsApproving(false);
     }
   };
-  
-  // Set max amount for deposit/withdraw
-  const setMaxAmount = () => {
-    if (activeTab === 'deposit' && tokenBalance) {
-      // Leave a small amount for gas
-      const balance = tokenBalance.value - parseEther('0.01');
-      if (balance > 0n) {
-        setAmount(formatUnits(balance, tokenBalance.decimals));
-      } else {
-        setAmount('0');
-      }
-    } else if (activeTab === 'withdraw' && vaultTokenBalance) {
-      setAmount(formatUnits(vaultTokenBalance.value, vaultTokenBalance.decimals));
-    }
-  };
-  
-  // Format risk level with color
-  const getRiskBadge = (risk: string) => {
-    switch (risk?.toLowerCase()) {
-      case 'high':
-        return <Badge variant="destructive">High Risk</Badge>;
-      case 'medium':
-        return <Badge variant="warning">Medium Risk</Badge>;
+
+  const getRiskBadge = (risk?: 'low' | 'medium' | 'high') => {
+    switch (risk) {
       case 'low':
+        return <Badge variant="outline" className="border-green-500 text-green-500">Low Risk</Badge>;
+      case 'high':
+        return <Badge variant="outline" className="border-red-500 text-red-500">High Risk</Badge>;
+      case 'medium':
       default:
-        return <Badge variant="success">Low Risk</Badge>;
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">Medium Risk</Badge>;
     }
   };
 
-  const setMaxAmount = () => {
-    if (activeTab === 'deposit' && tokenBalance) {
-      setAmount(formatUnits(tokenBalance.value, tokenBalance.decimals));
-    } else if (activeTab === 'withdraw' && userShares) {
-      setAmount(formatUnits(userShares, vault.tokenDecimals || 18));
-    } else if (activeTab === 'withdraw' && userShares) {
-      setAmount(formatEther(userShares));
-    }
-  };
-
-  if (vault.availability === 'private') {
+  if (!vault) {
     return (
-      <Card className="opacity-70">
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>{vault.name}</CardTitle>
-              <CardDescription>{vault.description}</CardDescription>
-            </div>
-            <Badge variant="outline" className="text-muted-foreground">Coming Soon</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-muted-foreground">This vault is not yet available</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // If vault is not available, show disabled state
-  if (!vault.available) {
-    return (
-      <Card className={cn("opacity-70", className)}>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <CardTitle>{vault.name}</CardTitle>
-            <Badge variant="outline">{vault.chain}</Badge>
-          </div>
-          <CardDescription>{vault.description}</CardDescription>
-          <div className="flex gap-2 mt-2">
-            {vault.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-muted-foreground">This vault is not yet available</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // If vault is not available, show disabled state
-  if (!vault.available) {
-    return (
-      <Card className={cn("opacity-70", className)}>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <CardTitle>{vault.name}</CardTitle>
-            <Badge variant="outline">{vault.chain}</Badge>
-          </div>
-          <CardDescription>{vault.description}</CardDescription>
-          <div className="flex gap-2 mt-2">
-            {vault.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-muted-foreground">This vault is not yet available</p>
-        </CardContent>
+      <Card className={cn("p-6 text-center", className)}>
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p>Loading vault information...</p>
+        </div>
       </Card>
     );
   }
@@ -217,11 +109,6 @@ export function VaultCard({ vault, userShares = 0n, onActionSuccess, className =
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <CardTitle className="text-xl font-bold">{vault.name}</CardTitle>
-              {vault.isNew && (
-                <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                  New
-                </Badge>
-              )}
             </div>
             <CardDescription className="line-clamp-2">{vault.description}</CardDescription>
           </div>
@@ -232,110 +119,152 @@ export function VaultCard({ vault, userShares = 0n, onActionSuccess, className =
             {getRiskBadge(vault.risk)}
           </div>
         </div>
-        
-        <div className="flex flex-wrap gap-2 mt-3">
-          {vault.tags?.map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-          <div>
-            <p className="text-sm text-muted-foreground">APY</p>
-            <p className="text-lg font-semibold">{formattedApy}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">TVL</p>
-            <p className="text-lg font-semibold">{formattedTvl}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Min. Deposit</p>
-            <p className="text-lg font-semibold">
-              {vault.minDeposit ? formatUnits(vault.minDeposit, vault.tokenDecimals) : '0'} {vault.tokenSymbol}
-            </p>
-          </div>
-        </div>
-        
-        {vaultTokenBalance && vaultTokenBalance.value > 0n && (
-          <div className="mt-3 space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Your position</span>
-              <span className="font-medium">
-                {formatUnits(vaultTokenBalance.value, vaultTokenBalance.decimals)} {vault.tokenSymbol}
-              </span>
-            </div>
-            <Progress value={userSharePercentage} className="h-2" />
-            <div className="text-xs text-right text-muted-foreground">
-              {userSharePercentage.toFixed(2)}% of pool
-            </div>
-          </div>
-        )}
       </CardHeader>
-      <CardContent className="text-center py-8">
-        <p className="text-muted-foreground">This vault is not yet available</p>
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.0"
-                  min="0"
-                  step="any"
-                />
-                <Button variant="outline" onClick={setMaxAmount}>Max</Button>
+      
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="deposit">Deposit</TabsTrigger>
+            <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="deposit" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="deposit-amount">Amount to deposit</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="deposit-amount"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder={`0.00 ${vault.tokenSymbol}`}
+                    className="pr-16"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {vault.tokenSymbol}
+                  </div>
+                </div>
+                <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                  <span>Balance: {tokenBalance ? formatUnits(tokenBalance.value, tokenBalance.decimals) : '0.00'}</span>
+                  <button 
+                    type="button" 
+                    className="text-primary hover:underline"
+                    onClick={() => {
+                      if (tokenBalance) {
+                        setAmount(formatUnits(tokenBalance.value, tokenBalance.decimals));
+                      }
+                    }}
+                  >
+                    Max
+                  </button>
+                </div>
               </div>
+              
+              <Button 
+                className="w-full" 
+                onClick={() => handleAction('deposit')}
+                disabled={!amount || isApproving || loading[`deposit-${vault.address}`]}
+              >
+                {isApproving || loading[`deposit-${vault.address}`] ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Deposit'
+                )}
+              </Button>
             </div>
-            <Button 
-              className="w-full" 
-              onClick={() => handleAction('deposit')}
-              disabled={!amount || parseFloat(amount) <= 0 || loading[`deposit-${vault.vaultAddress}`]}
-            >
-              {loading[`deposit-${vault.vaultAddress}`] ? 'Processing...' : 'Deposit'}
-            </Button>
           </TabsContent>
           
-          <TabsContent value="withdraw" className="mt-4 space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="withdraw-amount">Amount (Shares)</Label>
-                <span className="text-sm text-muted-foreground">
-                  Your shares: {formatEther(userShares)}
-                </span>
+          <TabsContent value="withdraw" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="withdraw-amount">Amount to withdraw</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="withdraw-amount"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder={`0.00 ${vault.tokenSymbol}`}
+                    className="pr-16"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {vault.tokenSymbol}
+                  </div>
+                </div>
+                <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                  <span>Balance: {vaultTokenBalance ? formatUnits(vaultTokenBalance.value, vaultTokenBalance.decimals) : '0.00'}</span>
+                  <button 
+                    type="button" 
+                    className="text-primary hover:underline"
+                    onClick={() => {
+                      if (vaultTokenBalance) {
+                        setAmount(formatUnits(vaultTokenBalance.value, vaultTokenBalance.decimals));
+                      }
+                    }}
+                  >
+                    Max
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Input
-                  id="withdraw-amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.0"
-                  min="0"
-                  step="any"
-                />
-                <Button variant="outline" onClick={setMaxAmount}>Max</Button>
-              </div>
+              
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => handleAction('withdraw')}
+                disabled={!amount || isApproving || loading[`withdraw-${vault.address}`]}
+              >
+                {isApproving || loading[`withdraw-${vault.address}`] ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Withdraw'
+                )}
+              </Button>
             </div>
-            <Button 
-              className="w-full" 
-              variant="outline"
-              onClick={() => handleAction('withdraw')}
-              disabled={!amount || parseFloat(amount) <= 0 || loading[`withdraw-${vault.vaultAddress}`]}
-            >
-              {loading[`withdraw-${vault.vaultAddress}`] ? 'Processing...' : 'Withdraw'}
-            </Button>
           </TabsContent>
         </Tabs>
+        
+        {/* Vault stats */}
+        <div className="mt-6 space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">APY</span>
+            <span className="font-medium">{vault.apy?.toFixed(2) ?? '0.00'}%</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Your Share</span>
+            <span className="font-medium">{userSharePercentage.toFixed(2)}%</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">TVL</span>
+            <span className="font-medium">
+              {vault.tvl ? `$${formatEther(typeof vault.tvl === 'string' ? BigInt(vault.tvl) : vault.tvl)}` : '$0.00'}
+            </span>
+          </div>
+        </div>
       </CardContent>
       
       <CardFooter className="flex justify-between border-t pt-4">
-        <div className="text-sm text-muted-foreground">
-          Min. deposit: {vault.minDeposit ? formatEther(vault.minDeposit) : 'N/A'} {vault.tokenSymbol}
-        </div>
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => handleAction('rebalance')}
-          disabled={loading[`rebalance-${vault.vaultAddress}`]}
+          onClick={() => handleAction('harvest')}
+          disabled={loading[`harvest-${vault.address}`]}
         >
-          {loading[`rebalance-${vault.vaultAddress}`] ? 'Rebalancing...' : 'Rebalance'}
+          {loading[`harvest-${vault.address}`] ? 'Harvesting...' : 'Harvest'}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleAction('rebalance')}
+          disabled={loading[`rebalance-${vault.address}`]}
+        >
+          {loading[`rebalance-${vault.address}`] ? 'Rebalancing...' : 'Rebalance'}
         </Button>
       </CardFooter>
     </Card>

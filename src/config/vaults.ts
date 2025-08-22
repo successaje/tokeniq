@@ -23,6 +23,13 @@ export interface VaultType {
   tags?: string[];
 }
 
+// Yei Finance Contract Addresses (placeholders for now))
+const YEI_CONTRACTS = {
+  LENDING_POOL: '0x0000000000000000000000000000000000000001',
+  STAKING_POOL: '0x0000000000000000000000000000000000000002',
+  MONEY_MARKET: '0x0000000000000000000000000000000000000003',
+} as const;
+
 export const VAULT_TYPES: Record<string, VaultType> = {
   // Sei Network Vaults
   seiUsdcVault: {
@@ -98,6 +105,43 @@ export const VAULT_TYPES: Record<string, VaultType> = {
     strategy: 'Cross-Chain Yield Aggregator',
     risk: 'high',
     tags: ['Multi-Chain', 'Yield Aggregator']
+  },
+  
+  // Yei Finance Vaults
+  btcFiVault: {
+    id: 'btc-fi-vault',
+    name: 'BTCFi Yield Vault',
+    description: '60% Yei Lending Pool + 40% Yei Staking Pool',
+    chain: 'Ethereum',
+    available: true,
+    apy: 12.8,
+    tvl: parseEther('5000000'), // $5M TVL
+    minDeposit: parseEther('0.01'), // 0.01 WBTC
+    tokenDecimals: 8,
+    tokenSymbol: 'WBTC',
+    tokenAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // Mainnet WBTC
+    vaultAddress: YEI_CONTRACTS.LENDING_POOL as Address,
+    strategy: 'Yei Finance BTCFi Strategy',
+    risk: 'medium',
+    tags: ['Bitcoin', 'Yield', 'Lending', 'Staking']
+  },
+  
+  stablecoinVault: {
+    id: 'stablecoin-vault',
+    name: 'Stablecoin Yield Vault',
+    description: 'Yield optimized stablecoin strategy via Yei money market',
+    chain: 'Ethereum',
+    available: true,
+    apy: 8.9,
+    tvl: parseEther('3000000'), // $3M TVL
+    minDeposit: parseEther('100'), // 100 USDC
+    tokenDecimals: 6,
+    tokenSymbol: 'USDC',
+    tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Mainnet USDC
+    vaultAddress: YEI_CONTRACTS.MONEY_MARKET as Address,
+    strategy: 'Yei Finance Money Market',
+    risk: 'low',
+    tags: ['Stablecoin', 'Yield', 'Money Market']
   }
 } as const;
 
