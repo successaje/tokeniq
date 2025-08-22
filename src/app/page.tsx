@@ -577,6 +577,97 @@ export default function Home() {
               <span className="text-xs text-foreground/50">Scroll to explore</span>
             </motion.div>
             
+            {/* How It Works Section */}
+            <section className="py-20 bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
+              <div className="container mx-auto px-6">
+                <motion.div 
+                  className="text-center mb-16"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+                    How It Works
+                  </h2>
+                  <p className="text-xl text-foreground/70 max-w-3xl mx-auto mb-12">
+                    A seamless workflow to maximize your crypto assets with AI-powered automation
+                  </p>
+                </motion.div>
+
+                <div className="relative max-w-4xl mx-auto">
+                  {/* Connecting line */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/20 via-purple-500/40 to-pink-500/20 -z-10" />
+                  
+                  {/* Steps */}
+                  <div className="space-y-16">
+                    {/* Step 1 */}
+                    <div className="flex flex-col md:flex-row items-center gap-8 group">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                        <WalletIcon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="text-center md:text-left">
+                        <h3 className="text-xl font-semibold mb-2">1. Connect Your Wallet</h3>
+                        <p className="text-foreground/70">Securely link your Web3 wallet to access the TokenIQ platform</p>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="flex flex-col md:flex-row-reverse items-center gap-8 group">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                      <div className="text-center md:text-right">
+                        <h3 className="text-xl font-semibold mb-2">2. Deposit into ERC-4626 Vaults</h3>
+                        <p className="text-foreground/70">Earn yield through automated strategies with industry-standard vaults</p>
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="flex flex-col md:flex-row items-center gap-8 group">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                        <CpuChipIcon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="text-center md:text-left">
+                        <h3 className="text-xl font-semibold mb-2">3. AI Treasury Management</h3>
+                        <p className="text-foreground/70">Our AI agent optimizes your portfolio across multiple chains and protocols</p>
+                      </div>
+                    </div>
+
+                    {/* Step 4 */}
+                    <div className="flex flex-col md:flex-row-reverse items-center gap-8 group">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h3m0 0v3m0-3l-4 4-4-4m0 12l4-4 4 4m-4-4v3m0 0h3m-3 0h-3" />
+                        </svg>
+                      </div>
+                      <div className="text-center md:text-right">
+                        <h3 className="text-xl font-semibold mb-2">4. Tokenize & Trade</h3>
+                        <p className="text-foreground/70">Convert positions into liquid tokens and trade them on secondary markets</p>
+                      </div>
+                    </div>
+
+                    {/* Step 5 */}
+                    <div className="flex flex-col md:flex-row items-center gap-8 group">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                        <ArrowsRightLeftIcon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="text-center md:text-left">
+                        <h3 className="text-xl font-semibold mb-2">5. Cross-Chain with CCIP</h3>
+                        <p className="text-foreground/70">Seamlessly move assets across blockchains with secure cross-chain messaging</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-10" />
+            </section>
+
             {/* Value Propositions / Features Highlights */}
             <section className="py-20 relative overflow-hidden">
               <div className="absolute inset-0 -z-10">
@@ -1073,17 +1164,52 @@ export default function Home() {
               &copy; {new Date().getFullYear()} TokenIQ. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              {['twitter', 'github', 'discord', 'telegram'].map((social) => (
-                <a 
-                  key={social} 
-                  href="#" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={social}
-                >
-                  <span className="sr-only">{social}</span>
-                  <div className="w-5 h-5" />
-                </a>
-              ))}
+              <a 
+                href="https://x.com/TokenIQLabs" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Twitter"
+              >
+                <span className="sr-only">Twitter</span>
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                </svg>
+              </a>
+              <a 
+                href="https://github.com/successaje/tokeniq" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="GitHub"
+              >
+                <span className="sr-only">GitHub</span>
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                </svg>
+              </a>
+              <a 
+                href="https://linkedin.com/company/tokeniqlabs" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="LinkedIn"
+              >
+                <span className="sr-only">LinkedIn</span>
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+              <a 
+                href="mailto:successaje7@gmail.com" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Email"
+              >
+                <span className="sr-only">Email</span>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </a>
             </div>
           </div>
         </div>

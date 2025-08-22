@@ -99,6 +99,15 @@ const mainNavigation = [
     bgColor: 'bg-rose-500/10',
     hoverColor: 'hover:bg-rose-500/20',
     isNew: true
+  },
+  { 
+    name: 'Payments', 
+    href: '/payments', 
+    icon: Wallet,
+    color: 'text-green-500',
+    bgColor: 'bg-green-500/10',
+    hoverColor: 'hover:bg-green-500/20',
+    isNew: true
   }
 ];
 

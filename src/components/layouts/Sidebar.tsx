@@ -26,24 +26,25 @@ import { X } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 
 const mainNavigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Portfolio', href: '/portfolio', icon: WalletIcon },
-  { name: 'Assets', href: '/assets', icon: BriefcaseIcon },
-  { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-  { name: 'Strategies', href: '/strategies', icon: BanknotesIcon },
+  { name: 'Dashboard', href: '/protected/dashboard', icon: HomeIcon },
+  { name: 'Portfolio', href: '/protected/portfolio', icon: WalletIcon },
+  { name: 'Assets', href: '/protected/assets', icon: BriefcaseIcon },
+  { name: 'Analytics', href: '/protected/analytics', icon: ChartBarIcon },
+  { name: 'Strategies', href: '/protected/strategies', icon: BanknotesIcon },
+  { name: 'Payments', href: '/protected/payments', icon: CurrencyDollarIcon },
 ];
 
 const rwaNavigation = [
-  { name: 'RWA Management', href: '/rwa', icon: DocumentTextIcon },
-  { name: 'Tokenize', href: '/rwa/tokenize', icon: DocumentDuplicateIcon },
-  { name: 'Bridge', href: '/rwa/bridge', icon: ArrowsRightLeftIcon },
-  { name: 'Collateral', href: '/rwa/collateral', icon: CurrencyDollarIcon },
+  { name: 'RWA Management', href: '/protected/rwa', icon: DocumentTextIcon },
+  { name: 'Tokenize', href: '/protected/rwa/tokenize', icon: DocumentDuplicateIcon },
+  { name: 'Bridge', href: '/protected/bridge', icon: ArrowsRightLeftIcon },
+  { name: 'Collateral', href: '/protected/rwa/collateral', icon: CurrencyDollarIcon },
 ];
 
 const settingsNavigation = [
-  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
-  { name: 'Team', href: '/team', icon: UserGroupIcon },
-  { name: 'Reports', href: '/reports', icon: DocumentChartBarIcon },
+  { name: 'Settings', href: '/protected/settings', icon: Cog6ToothIcon },
+  { name: 'Team', href: '/protected/team', icon: UserGroupIcon },
+  { name: 'Reports', href: '/protected/reports', icon: DocumentChartBarIcon },
 ];
 
 interface SidebarProps {

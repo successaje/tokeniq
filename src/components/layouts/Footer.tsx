@@ -21,10 +21,10 @@ const navigation = {
     { name: 'Security', href: '#' },
   ],
   social: [
-    { name: 'Twitter', href: '#', icon: Twitter },
-    { name: 'GitHub', href: '#', icon: Github },
-    { name: 'LinkedIn', href: '#', icon: Linkedin },
-    { name: 'Email', href: '#', icon: Mail },
+    { name: 'Twitter', href: 'https://x.com/TokenIQLabs', icon: Twitter },
+    { name: 'GitHub', href: 'https://github.com/successaje/tokeniq', icon: Github },
+    { name: 'LinkedIn', href: 'https://linkedin.com/company/tokeniqlabs', icon: Linkedin },
+    { name: 'Email', href: 'mailto:successaje7@gmail.com', icon: Mail },
   ],
 }
 
