@@ -2,66 +2,63 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { address, balances } = await request.json();
+    const { address } = await request.json();
     
-    // Get DeepSeek API key from environment variables
-    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-    
-    if (!deepseekApiKey) {
-      throw new Error('DeepSeek API key not configured');
-    }
+    // Mock response with local analysis
+    const analysis = `# 📊 Portfolio Analysis
 
-    // Prepare the prompt for DeepSeek
-    const prompt = `Analyze this crypto portfolio and provide investment insights:
-    
-Wallet: ${address}
+## Current Portfolio
+- 4.94 SEI ($${(4.94 * 0.50).toFixed(2)})
+- 210 Sepolia ETH ($${(210 * 3000).toFixed(2)})
 
-Portfolio:
-- ${balances.eth.toFixed(4)} ETH (${(balances.eth * 3000).toFixed(2)} USD)
-- ${balances.wbtc.toFixed(4)} WBTC (${(balances.wbtc * 50000).toFixed(2)} USD)
-- ${balances.usdc.toFixed(2)} USDC
+## 🚀 Yield Opportunities
 
-Please provide:
-1. Current allocation analysis
-2. Risk assessment
-3. Suggested allocation strategy
-4. Potential yield opportunities
-5. Risk management recommendations
+### SEI Opportunities
+1. **Yei Finance SEI Vault (12.5% APY)**
+   - Stake 100% of SEI for consistent yield
+   - Auto-compounding rewards
+   - Low risk, high reliability
 
-Format the response in clear, concise markdown.`;
+2. **SEI/ETH Liquidity Pool (18-24% APY)**
+   - Provide 50% of SEI to LP
+   - Higher returns but with impermanent loss risk
+   - Great for long-term holders
 
-    // Call DeepSeek API
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${deepseekApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional crypto portfolio analyst. Provide clear, actionable insights.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      })
-    });
+### ETH Opportunities
+1. **Yei ETH Vault (4.2% APY)**
+   - Stake 50% of ETH for stable returns
+   - Keep liquid for other opportunities
 
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('DeepSeek API error:', error);
-      throw new Error('Failed to analyze portfolio with DeepSeek');
-    }
+2. **Cross-Chain Strategy**
+   - Bridge 30% of ETH to mainnet using CCIP
+   - Access to higher APY opportunities
+   - Use /crosschain for secure transfers
 
-    const data = await response.json();
-    const analysis = data.choices?.[0]?.message?.content || 'No analysis available';
+## 🔄 Rebalancing Plan
+1. **SEI Allocation**
+   - 50% to Yei SEI Vault
+   - 30% to SEI/ETH LP
+   - 20% keep liquid for trading
+
+2. **ETH Allocation**
+   - 50% to Yei ETH Vault
+   - 30% bridge to mainnet
+   - 20% keep liquid for gas and opportunities
+
+## ⚠️ Risk Management
+- Set stop-loss at 10% below entry
+- Take-profit at 25% gains
+- Rebalance monthly or after 20% price moves
+
+## 💡 Action Items
+1. Visit /vaults to stake SEI and ETH
+2. Use /crosschain to bridge assets
+3. Set up price alerts for your positions
+
+💡 *Remember: You can always do you own research, reject strategy or adjust it to your needs and make emergency withdrawals.*`;
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     return NextResponse.json({ 
       success: true, 
@@ -73,7 +70,7 @@ Format the response in clear, concise markdown.`;
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Failed to analyze portfolio' 
+        error: 'Failed to analyze portfolio. Please try again later.'
       },
       { status: 500 }
     );

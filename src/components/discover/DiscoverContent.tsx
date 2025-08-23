@@ -376,7 +376,7 @@ const PerformanceMetrics = ({ vaults }: { vaults: any[] }) => {
             <CardDescription>Assets by blockchain</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {chains.map((chain) => {
+            {chains.map((chain, index) => {
               const chainVaults = vaults.filter(v => v.chainId === chain.id);
               const chainValue = chainVaults.reduce((sum, vault) => {
                 return sum + ((Number(vault.userBalance) / 1e18) * (Number(vault.tvl) / 1e18));
@@ -384,7 +384,7 @@ const PerformanceMetrics = ({ vaults }: { vaults: any[] }) => {
               const percentage = totalValue > 0 ? (chainValue / totalValue) * 100 : 0;
               
               return (
-                <div key={chain.id} className="space-y-2">
+                <div key={`${chain.id}-${index}`} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center">
                       <div className="relative h-4 w-4 mr-2 flex-shrink-0">

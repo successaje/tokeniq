@@ -47,6 +47,70 @@
 
 ---
 
+## 🌊 Integration with Sei Network  
+
+We have successfully deployed our core TokenIQ contracts on the **Sei Testnet**, enabling next-generation DeFi automation, vaults, and tokenization on top of Sei’s sub-second finality and parallelized execution.  
+
+### ✅ Deployed Contracts on Sei  
+
+- **ERC20VaultToken** — [0xCaFF129Ec344A98Da8C9a4091a239DF158Cf31A5](https://testnet.seistream.app/contracts/0xCaFF129Ec344A98Da8C9a4091a239DF158Cf31A5)  
+  - Implements **ERC-4626 vault standard**, forming the backbone of our BTCFi vaults.  
+  - Enables seamless deposits, withdrawals, and yield strategies natively on Sei.  
+
+- **WBTC (sWBTC)** — [0xc9C0Fb76a50eAb570665977703cC8f7185c082b5](https://testnet.seistream.app/contracts/0xc9C0Fb76a50eAb570665977703cC8f7185c082b5)  
+  - Wrapped BTC representation on Sei.  
+  - Used as collateral for vault deposits, tokenized assets, and lending.  
+
+- **ERC721CollateralNFT** — [0x8e827a12C78dED9459268eb05cce2C5d709FE6AF](https://testnet.seistream.app/contracts/0x8e827a12C78dED9459268eb05cce2C5d709FE6AF)  
+  - Implementation: [0x1a983C4e0B9f57B5b34b6C753Ab13828ad21969F](https://testnet.seistream.app/contracts/0x1a983C4e0B9f57B5b34b6C753Ab13828ad21969F#code)  
+  - Collateralized NFTs for tokenized assets (e.g., real estate, invoices, carbon credits).  
+  - Assets can be verified (via Chainlink Proof-of-Reserve) and then minted as ERC-721 tokens.  
+
+- **ERC1155HybridAsset** — [0xd6D6fBc6c0ebbB07411acB0EDad6373db389aC13](https://testnet.seistream.app/contracts/0xd6D6fBc6c0ebbB07411acB0EDad6373db389aC13)  
+  - Implementation: [0x9EFb119c507CEa769b4277D6eC42274096579ce9](https://testnet.seistream.app/contracts/0x9EFb119c507CEa769b4277D6eC42274096579ce9#code)  
+  - Hybrid **ERC-1155 template** for multi-class tokenized assets.  
+  - Enables fractionalized ownership and bundled collateralization.  
+
+- **AssetFactory** — [0x7b65E735F1b43102f672Dc04B6E33a424a955c13](https://testnet.seistream.app/contracts/0x7b65E735F1b43102f672Dc04B6E33a424a955c13)  
+  - Implementation: [0xa2B39823120Ea8e7a1f2E3E6864596644eE96689](https://testnet.seistream.app/contracts/0xa2B39823120Ea8e7a1f2E3E6864596644eE96689#code)  
+  - Factory for deploying new ERC20, ERC721, and ERC1155 tokenized asset templates.  
+  - Acts as the **entrypoint** for asset creation, ensuring modularity and reusability.  
+
+---
+
+### 🔗 How TokenIQ Uses Sei  
+
+1. **High-Speed Vault Operations**  
+   - By deploying ERC-4626-compliant vaults (ERC20VaultToken) directly on Sei, we leverage **sub-400ms block times** to execute fast deposits, withdrawals, and automated AI-driven reallocations.  
+
+2. **Cross-Chain Liquidity with CCIP**  
+   - Assets like sWBTC can be bridged across chains using **Chainlink CCIP** for global liquidity, with Sei acting as the settlement layer.  
+
+3. **Tokenization of Real-World Assets**  
+   - ERC721CollateralNFT and ERC1155HybridAsset provide frameworks for **verifiable, on-chain tokenization**.  
+   - Documents are uploaded → parsed into IPFS → verified (exploring Chainlink Proof-of-Reserve).  
+   - Once verified, the assets are minted on Sei as NFTs or hybrid tokens.  
+
+4. **Composable Asset Factory**  
+   - AssetFactory allows other protocols to easily spin up new vaults and tokenized assets on Sei.  
+   - Supports seamless integration with **Yei Finance money markets** and programmable payment agents.  
+
+5. **AI-Driven Automation**  
+   - Contracts are designed to be managed by our **AI Treasury Agent (ElizaOS)**, which monitors balances, spending behavior, and vault yields, then rebalances positions on Sei automatically.  
+   - Emergency withdrawals ensure **user funds remain under user control**.  
+
+---
+
+### 🚀 Why Sei?  
+
+- **Ultra-fast finality** → DeFi vaults and AI-driven agents require low-latency execution.  
+- **Parallelized execution** → Perfect for scaling multiple vault strategies and tokenization workflows.  
+- **Native liquidity ecosystem** → Integration with Yei Finance for programmable payments and DeFi lending markets.  
+
+By deploying on Sei, TokenIQ unlocks a **high-performance, AI-driven treasury management layer** where vaults, tokenized assets, and payments converge.  
+
+
+
 ## 📁 Contract Structure
 ```
 contracts/

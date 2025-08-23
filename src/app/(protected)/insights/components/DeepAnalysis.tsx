@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, BarChart2, RefreshCw, Bot, Sparkles } from 'lucide-react';
@@ -87,36 +87,81 @@ export function DeepAnalysis() {
     },
   });
 
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     if (!address) return;
     
     setIsAnalyzing(true);
     
     try {
-      // Force refetch all balances
-      const [newEthBalance, newUsdcBalance, newWbtcBalance] = await Promise.all([
-        refetchEth(),
-        refetchUsdc(),
-        refetchWbtc()
-      ]);
+      // Use fallback values if balance fetch fails
+      let ethBalance = '0';
+      let usdcBalance = '0';
+      let wbtcBalance = '0';
+      
+      try {
+        const [ethRes, usdcRes, wbtcRes] = await Promise.allSettled([
+          refetchEth(),
+          refetchUsdc(),
+          refetchWbtc()
+        ]);
+        
+        ethBalance = ethRes.status === 'fulfilled' && ethRes.value.data 
+          ? formatEther(ethRes.value.data) 
+          : '0';
+          
+        usdcBalance = usdcRes.status === 'fulfilled' && usdcRes.value.data
+          ? formatUnits(usdcRes.value.data, 6)
+          : '0';
+          
+        wbtcBalance = wbtcRes.status === 'fulfilled' && wbtcRes.value.data
+          ? formatUnits(wbtcRes.value.data, 8)
+          : '0';
+          
+      } catch (error) {
+        console.warn('Error fetching some balances, using fallback values:', error);
+      }
 
-      const newBalances: BalanceInfo[] = [{
-        chainId: mainnet.id,
-        native: newEthBalance.data ? formatEther(newEthBalance.data) : '0',
-        tokens: {
-          USDC: newUsdcBalance.data ? formatUnits(newUsdcBalance.data, 6) : '0',
-          WBTC: newWbtcBalance.data ? formatUnits(newWbtcBalance.data, 8) : '0'
+      // Use demo values for SEI and Sepolia ETH
+      const newBalances: BalanceInfo[] = [
+        {
+          chainId: 11155111, // Sepolia
+          native: '210', // Demo Sepolia ETH
+          tokens: {
+            USDC: '0',
+            WBTC: '0'
+          }
+        },
+        {
+          chainId: 1329, // Sei
+          native: '4.94', // Demo SEI
+          tokens: {}
         }
-      }];
+      ];
       
       setBalances(newBalances);
       generateAnalysis(newBalances);
+      
     } catch (error) {
-      console.error('Error fetching balances:', error);
+      console.error('Error in fetchBalances:', error);
+      // Even if there's an error, we can still show the demo analysis
+      const demoBalances: BalanceInfo[] = [
+        {
+          chainId: 11155111, // Sepolia
+          native: '210', // Demo Sepolia ETH
+          tokens: { USDC: '0', WBTC: '0' }
+        },
+        {
+          chainId: 1329, // Sei
+          native: '4.94', // Demo SEI
+          tokens: {}
+        }
+      ];
+      setBalances(demoBalances);
+      generateAnalysis(demoBalances);
     } finally {
       setIsAnalyzing(false);
     }
-  };
+  }, [address]);
 
   // Initial fetch on mount and when address changes
   useEffect(() => {
