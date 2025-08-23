@@ -47,6 +47,11 @@
 
 ---
 
+## 📜 Smart Contracts
+
+### Contract Repository
+- [TokenIQ Contracts](https://github.com/TokenIQ-X/tokeniq-contracts) - Source code for all smart contracts
+
 ## 🌊 Integration with Sei Network  
 
 We have successfully deployed our core TokenIQ contracts on the **Sei Testnet**, enabling next-generation DeFi automation, vaults, and tokenization on top of Sei’s sub-second finality and parallelized execution.  
@@ -108,8 +113,6 @@ We have successfully deployed our core TokenIQ contracts on the **Sei Testnet**,
 - **Native liquidity ecosystem** → Integration with Yei Finance for programmable payments and DeFi lending markets.  
 
 By deploying on Sei, TokenIQ unlocks a **high-performance, AI-driven treasury management layer** where vaults, tokenized assets, and payments converge.  
-
-
 
 ## 📁 Contract Structure
 ```
