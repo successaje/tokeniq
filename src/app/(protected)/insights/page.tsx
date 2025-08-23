@@ -12,6 +12,8 @@ import { ChatButton } from './components/ChatButton';
 import { InsightCard } from './components/InsightCard';
 import { RiskLevel } from './components/RiskLevel';
 import { ElizaOSBadge } from './components/ElizaOSBadge';
+import { NewsTicker } from './components/NewsTicker';
+import { DeepAnalysis } from './components/DeepAnalysis';
 import { theme } from './theme';
 
 const marketData = {
@@ -33,39 +35,56 @@ const strategyData = {
   title: "ElizaOS Strategy Copilot",
   recommendation: [
     { 
-      asset: "Aave on Avalanche", 
-      percentage: 60, 
-      currentApy: 5.1,
-      reason: "Current APY: 5.1%, Low volatility",
-      riskLevel: 0.2,
-      icon: Bullish
+      asset: "Yei Finance BTCFi Vault", 
+      percentage: 35, 
+      currentApy: 12.8,
+      reason: "High yield BTCFi strategy with lending and staking components",
+      riskLevel: 0.4,
+      icon: TrendingUp
     },
     { 
-      asset: "Lido ETH staking", 
-      percentage: 30, 
-      currentApy: 4.8,
-      reason: "High liquidity, Solid track record",
-      riskLevel: 0.15,
+      asset: "Sei Network Liquid Staking", 
+      percentage: 25, 
+      currentApy: 9.2,
+      reason: "High-performance L1 staking with liquidity",
+      riskLevel: 0.3,
+      icon: BarChart2
+    },
+    { 
+      asset: "Yei Stablecoin Vault", 
+      percentage: 20, 
+      currentApy: 8.9,
+      reason: "Stablecoin yield strategy on Yei money market",
+      riskLevel: 0.2,
       icon: Shield
     },
     { 
+      asset: "Sei DeFi Index", 
+      percentage: 15, 
+      currentApy: 18.5,
+      reason: "Diversified DeFi exposure on Sei Network",
+      riskLevel: 0.5,
+      icon: Sparkles
+    },
+    { 
       asset: "Base reserve", 
-      percentage: 10, 
+      percentage: 5, 
       currentApy: 0.05,
       reason: "Emergency liquidity buffer",
       riskLevel: 0.05,
       icon: CircleDollarSign
     }
   ],
-  riskLevel: 0.6,
-  rebalanceIn: "3 days",
+  riskLevel: 0.45,
+  rebalanceIn: "5 days",
   marketTrend: 'Bullish',
-  volatility: 0.035,
+  volatility: 0.042,
   reasoning: [
-    "Based on current market conditions and historical data analysis",
-    "Aave on Avalanche shows consistent performance with low risk",
-    "Lido ETH provides good returns with liquidity options",
-    "Base reserve ensures liquidity for unexpected market movements"
+    "Yei Finance's BTCFi vault offers superior risk-adjusted returns in the current market",
+    "Sei Network's high throughput and low fees provide an optimal environment for DeFi strategies",
+    "Diversification across yield sources reduces overall portfolio risk",
+    "Stablecoin allocation provides stability during market volatility",
+    "Sei's parallelized order book enables efficient yield optimization"
   ]
 };
 
@@ -89,6 +108,16 @@ export default function InsightsPage() {
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <div className="container mx-auto px-4">
+        {/* News Ticker */}
+        <div className="mt-6 mb-8">
+          <NewsTicker />
+        </div>
+        
+        {/* Deep Analysis */}
+        <div className="mb-8">
+          <DeepAnalysis />
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 py-8">
           {/* Left Section - Strategies */}
           <div className="space-y-6">
@@ -111,28 +140,44 @@ export default function InsightsPage() {
             </div>
             <div className="space-y-4">
               <StrategyCard
-                title="Aave ETH Lending - Avalanche"
-                allocation="50%"
+                title="Yei Finance BTCFi Vault"
+                allocation="35%"
                 rebalanceDate="3 days"
-                onClick={() => console.log('Accept strategy')}
-                onEdit={() => console.log('Edit strategy')}
-                onSchedule={() => console.log('Schedule strategy')}
+                onClick={() => console.log('Accept Yei BTCFi strategy')}
+                onEdit={() => console.log('Edit Yei BTCFi strategy')}
+                onSchedule={() => console.log('Schedule Yei BTCFi strategy')}
               />
               <StrategyCard
-                title="Lido ETH Staking - Base"
-                allocation="30%"
+                title="Sei Network Liquid Staking"
+                allocation="25%"
                 rebalanceDate="5 days"
-                onClick={() => console.log('Accept strategy')}
-                onEdit={() => console.log('Edit strategy')}
-                onSchedule={() => console.log('Schedule strategy')}
+                onClick={() => console.log('Accept Sei Staking strategy')}
+                onEdit={() => console.log('Edit Sei Staking strategy')}
+                onSchedule={() => console.log('Schedule Sei Staking strategy')}
               />
               <StrategyCard
-                title="USDC Reserve - Ethereum"
+                title="Yei Stablecoin Vault"
                 allocation="20%"
                 rebalanceDate="7 days"
-                onClick={() => console.log('Accept strategy')}
-                onEdit={() => console.log('Edit strategy')}
-                onSchedule={() => console.log('Schedule strategy')}
+                onClick={() => console.log('Accept Yei Stablecoin strategy')}
+                onEdit={() => console.log('Edit Yei Stablecoin strategy')}
+                onSchedule={() => console.log('Schedule Yei Stablecoin strategy')}
+              />
+              <StrategyCard
+                title="Sei DeFi Index"
+                allocation="15%"
+                rebalanceDate="7 days"
+                onClick={() => console.log('Accept Sei DeFi strategy')}
+                onEdit={() => console.log('Edit Sei DeFi strategy')}
+                onSchedule={() => console.log('Schedule Sei DeFi strategy')}
+              />
+              <StrategyCard
+                title="Base Reserve"
+                allocation="5%"
+                rebalanceDate="7 days"
+                onClick={() => console.log('Accept Base Reserve strategy')}
+                onEdit={() => console.log('Edit Base Reserve strategy')}
+                onSchedule={() => console.log('Schedule Base Reserve strategy')}
               />
             </div>
           </div>

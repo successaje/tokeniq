@@ -11,8 +11,12 @@ import { CORE_MAINNET, CORE_TESTNET } from '@/config/chains';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
-// TODO: Replace with your WalletConnect project ID from https://cloud.walletconnect.com/
-const WALLET_CONNECT_PROJECT_ID = '';
+// Get WalletConnect project ID from environment variables
+const WALLET_CONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
+
+if (!WALLET_CONNECT_PROJECT_ID) {
+  console.warn('WalletConnect project ID is not set. Please add NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID to your environment variables.');
+}
 
 // Import chain configurations
 import { SUPPORTED_CHAINS } from '@/contexts/ContractContext';
