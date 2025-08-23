@@ -42,7 +42,7 @@
 | **Frontend** | Next.js, TailwindCSS, TypeScript, shadcn/ui, Framer Motion |
 | **Backend / Smart Contracts** | Solidity, Hardhat, Chainlink CCIP, Automation, Data Feeds |
 | **AI Integration** | ElizaOS, OpenAI/Anthropic (for market intelligence & NLP) |
-| **Deployment Targets** | Ethereum, Avalanche, Base, Optimism, Polygon (modular EVM support) |
+| **Deployment Targets** | Ethereum, Sei, Avalanche, Core (modular EVM support) |
 | **Token Standards** | ERC-20, ERC-721, ERC-3643 (for RWA compliance) |
 
 ---
