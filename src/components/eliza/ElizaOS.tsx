@@ -63,64 +63,9 @@ export function ElizaOS() {
   const [insightQueue, setInsightQueue] = useState<Insight[]>([]);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Initialize with a welcome message
+  // Initialize insights system
   useEffect(() => {
-    const config: ElizaConfig = {
-      agentId: process.env.NEXT_PUBLIC_AGENT_ID || 'your-agent-id',
-      worldId: process.env.NEXT_PUBLIC_WORLD_ID || '00000000-0000-0000-0000-000000000000',
-      serverUrl: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
-      appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4000',
-    };
-    
-    console.log('ElizaOS Config:', config);
-    
-    const api = new ElizaAPI(config);
-    setElizaAPI(api);
-
-    const initializeConnection = async () => {
-      setConnectionStatus('connecting');
-      try {
-        await api.initializeConnection();
-        
-        // Set up message listener
-        api.onMessage((message) => {
-          console.log('Received message in UI:', message);
-          setChatMessages(prev => [...prev, message]);
-        });
-
-        setConnectionStatus('connected');
-        
-        // Add welcome message
-        const welcomeMessage: ChatMessage = {
-          id: 'welcome',
-          content: `Hello! I'm ${character.name}. How can I help you with your tokenized assets today?`,
-          sender: 'agent',
-          timestamp: Date.now()
-        };
-        setChatMessages([welcomeMessage]);
-      } catch (error) {
-        console.error('Failed to initialize connection:', error);
-        setConnectionStatus('disconnected');
-        
-        // Add error message
-        const errorMessage: ChatMessage = {
-          id: 'error',
-          content: 'I\'m having trouble connecting to the server.',
-          sender: 'agent',
-          timestamp: Date.now()
-        };
-        setChatMessages([errorMessage]);
-      }
-    };
-
-    initializeConnection();
-
-    // Cleanup on unmount
-    return () => {
-      if (api) {
-        api.disconnect();
-      }
-    };
+    console.log('ElizaOS initialized - insights system ready');
   }, []);
 
   // Simulate receiving new insights
