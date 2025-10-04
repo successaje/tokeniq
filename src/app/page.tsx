@@ -787,7 +787,8 @@ export default function Home() {
                   {[
                     { name: 'Sei', logo: '/sei-logo.png' },
                     { name: 'Ethereum', logo: '/logos/ethereum.png' },
-                    { name: 'Core', logo: '/core-dao-core-logo.png' },
+                    { name: 'Creditcoin', logo: '/logos/creditcoin-logo.png' },
+                    // { name: 'Core', logo: '/core-dao-core-logo.png' },
                     { name: 'Bitcoin', logo: '/logos/bitcoin-btc-logo.png' },
                     // { name: 'Arbitrum', logo: '/arbitrum-arb-logo.png' },
                     { name: 'Avalanche', logo: '/avalanche-avax-logo.png' },

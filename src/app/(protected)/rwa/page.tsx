@@ -25,7 +25,8 @@ const MOCK_RWA_ASSETS = [
     status: 'active',
     tokenId: '0x1234...5678',
     collateralized: true,
-    chain: 'Ethereum',
+    chain: 'Creditcoin',
+    creditScore: 850,
   },
   {
     id: '2',
@@ -35,7 +36,8 @@ const MOCK_RWA_ASSETS = [
     status: 'active',
     tokenId: '0x8765...4321',
     collateralized: false,
-    chain: 'Polygon',
+    chain: 'Creditcoin',
+    creditScore: 720,
   },
   {
     id: '3',
@@ -45,7 +47,19 @@ const MOCK_RWA_ASSETS = [
     status: 'pending',
     tokenId: '0x9876...5432',
     collateralized: false,
-    chain: 'Arbitrum',
+    chain: 'Creditcoin',
+    creditScore: 680,
+  },
+  {
+    id: '4',
+    type: 'real-estate',
+    name: 'Commercial Property',
+    value: 500000,
+    status: 'active',
+    tokenId: '0xabcd...efgh',
+    collateralized: true,
+    chain: 'Creditcoin',
+    creditScore: 920,
   },
 ];
 
@@ -195,6 +209,59 @@ export default function RWADashboardPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </Card>
+
+      {/* Creditcoin Integration Section */}
+      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+        <div className="p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <span className="text-purple-600 font-bold text-lg">🟣</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-purple-800">Creditcoin RWA Integration</h2>
+              <p className="text-purple-600 text-sm">Enhanced tokenization with credit scoring and compliance</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white/50 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-800 mb-2">Credit Scoring</h3>
+              <p className="text-sm text-gray-600">Automated credit assessment for all tokenized assets</p>
+              <div className="mt-2 flex items-center space-x-2">
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">850+ Score</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Verified</span>
+              </div>
+            </div>
+            
+            <div className="bg-white/50 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-800 mb-2">Compliance Automation</h3>
+              <p className="text-sm text-gray-600">Built-in regulatory compliance for RWA tokenization</p>
+              <div className="mt-2 flex items-center space-x-2">
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">KYC/AML</span>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">SEC Ready</span>
+              </div>
+            </div>
+            
+            <div className="bg-white/50 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-800 mb-2">Cross-Chain Native</h3>
+              <p className="text-sm text-gray-600">Seamless asset movement across Creditcoin ecosystem</p>
+              <div className="mt-2 flex items-center space-x-2">
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">No Bridges</span>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Instant</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              Tokenize on Creditcoin
+            </Button>
+            <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-100">
+              Learn More
+            </Button>
           </div>
         </div>
       </Card>

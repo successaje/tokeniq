@@ -9,7 +9,8 @@ import { useContracts } from '@/contexts/ContractContext';
 import { formatEther } from 'viem';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Building2, FileText, BarChart3 } from 'lucide-react';
+import { VAULT_TYPES, VAULT_TYPE_IDS } from '@/config/vaults';
 
 // Dynamically import dialogs with no SSR to avoid hydration issues
 const VaultDepositDialog = dynamic(
@@ -55,49 +56,27 @@ export function VaultList() {
 
   // Transform contract vaults to UI format
   useEffect(() => {
-    // Add Yei Finance vaults from config
-    const yeiVaults: Vault[] = [
-      {
-        id: 'btc-fi-vault',
-        name: 'BTCFi Yield Vault',
-        description: '60% Yei Lending Pool + 40% Yei Staking Pool',
-        chain: 'Ethereum',
-        available: true,
-        apy: 12.8,
-        tvl: 5000000n * 10n**18n, // $5M TVL in wei
-        minDeposit: 1000000000n, // 0.01 WBTC in wei (8 decimals)
-        tokenDecimals: 8,
-        tokenSymbol: 'WBTC',
-        tokenAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-        address: '0x0000000000000000000000000000000000000001', // YEI_LENDING_POOL
-        risk: 'medium',
-        strategy: 'Yei Finance BTCFi Strategy',
-        tags: ['Bitcoin', 'Yield', 'Lending', 'Staking'],
-        totalAssets: 0n,
-        totalSupply: 0n,
-        chainId: 1
-      },
-      {
-        id: 'stablecoin-vault',
-        name: 'Stablecoin Yield Vault',
-        description: 'Yield optimized stablecoin strategy via Yei money market',
-        chain: 'Ethereum',
-        available: true,
-        apy: 8.9,
-        tvl: 3000000n * 10n**18n, // $3M TVL in wei
-        minDeposit: 100000000n, // 100 USDC in wei (6 decimals)
-        tokenDecimals: 6,
-        tokenSymbol: 'USDC',
-        tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        address: '0x0000000000000000000000000000000000000002', // YEI_MONEY_MARKET
-        risk: 'low',
-        strategy: 'Yei Finance Money Market',
-        tags: ['Stablecoin', 'Yield', 'Money Market'],
-        totalAssets: 0n,
-        totalSupply: 0n,
-        chainId: 1
-      }
-    ] as Vault[];
+    // Add vaults from config including Creditcoin RWA vaults
+    const configVaults: Vault[] = Object.values(VAULT_TYPES).map(vaultType => ({
+      id: vaultType.id,
+      name: vaultType.name,
+      description: vaultType.description,
+      chain: vaultType.chain,
+      available: vaultType.available,
+      apy: vaultType.apy || 0,
+      tvl: vaultType.tvl || 0n,
+      minDeposit: vaultType.minDeposit || 0n,
+      tokenDecimals: vaultType.tokenDecimals,
+      tokenSymbol: vaultType.tokenSymbol,
+      tokenAddress: vaultType.tokenAddress,
+      address: vaultType.vaultAddress || '0x0000000000000000000000000000000000000000',
+      risk: vaultType.risk,
+      strategy: vaultType.strategy,
+      tags: vaultType.tags || [],
+      totalAssets: 0n,
+      totalSupply: 0n,
+      chainId: 1
+    })) as Vault[];
 
     try {
       const formattedVaults = [

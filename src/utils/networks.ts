@@ -38,6 +38,16 @@ export const CHAIN_ICONS: Record<number, string> = {
   [SEI_TESTNET.id]: '🔹', // Using blue diamond for Sei Testnet
 };
 
+// Creditcoin chain configurations
+const CREDITCOIN_MAINNET_ID = 102030;
+const CREDITCOIN_TESTNET_ID = 102031;
+
+CHAIN_NAMES[CREDITCOIN_MAINNET_ID] = 'Creditcoin';
+CHAIN_NAMES[CREDITCOIN_TESTNET_ID] = 'Creditcoin Testnet';
+
+CHAIN_ICONS[CREDITCOIN_MAINNET_ID] = '🟣';
+CHAIN_ICONS[CREDITCOIN_TESTNET_ID] = '🟪';
+
 export const DEFAULT_CHAIN = avalancheFuji;
 
 // Map of feature to supported chain IDs
@@ -55,6 +65,11 @@ export const FEATURE_SUPPORT: Record<string, number[]> = {
   ],
   btcVaults: [CORE_MAINNET.id, CORE_TESTNET.id, SEI_MAINNET.id, SEI_TESTNET.id],
 };
+
+// Extend feature support to include Creditcoin
+FEATURE_SUPPORT.vaults.push(CREDITCOIN_MAINNET_ID, CREDITCOIN_TESTNET_ID);
+FEATURE_SUPPORT.crossChain.push(CREDITCOIN_MAINNET_ID, CREDITCOIN_TESTNET_ID);
+FEATURE_SUPPORT.rwa = [CREDITCOIN_MAINNET_ID, CREDITCOIN_TESTNET_ID, sepolia.id, avalancheFuji.id];
 
 export function isFeatureSupported(feature: string, chainId?: number): boolean {
   if (!chainId) return false;

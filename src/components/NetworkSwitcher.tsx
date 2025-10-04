@@ -4,6 +4,7 @@ import { useNetwork } from 'wagmi';
 import { CHAIN_ICONS } from '@/utils/networks';
 import { Button } from '@/components/ui/button';
 import { SEI_MAINNET, SEI_TESTNET } from '@/config/chains';
+import { supportedChains } from '@/config/wagmi';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 
-// List of supported chains
-export const SUPPORTED_CHAINS = [
-  SEI_MAINNET,
-  SEI_TESTNET,
-  // Add other chains as needed
-];
+// List of supported chains - use wagmi supported chains to include Creditcoin
+export const SUPPORTED_CHAINS = supportedChains;
 
 export function NetworkSwitcher() {
   const { chain, chains, switchChain } = useNetwork();

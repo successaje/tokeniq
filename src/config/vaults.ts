@@ -142,6 +142,79 @@ export const VAULT_TYPES: Record<string, VaultType> = {
     strategy: 'Yei Finance Money Market',
     risk: 'low',
     tags: ['Stablecoin', 'Yield', 'Money Market']
+  },
+
+  // Creditcoin RWA Vaults
+  creditcoinRWA: {
+    id: 'creditcoin-rwa-vault',
+    name: 'Creditcoin RWA Vault',
+    description: 'Tokenized real-world assets with credit scoring and compliance automation',
+    chain: 'Creditcoin',
+    available: true,
+    apy: 11.2,
+    tvl: parseEther('7500000'), // $7.5M TVL
+    minDeposit: parseEther('1000'), // 1000 CTC
+    tokenDecimals: 18,
+    tokenSymbol: 'CTC',
+    tokenAddress: '0x0000000000000000000000000000000000000000', // TBD - CTC token
+    vaultAddress: '0x0000000000000000000000000000000000000000', // TBD - RWA Vault
+    strategy: 'Creditcoin RWA Tokenization',
+    risk: 'medium',
+    tags: ['RWA', 'Creditcoin', 'Tokenization', 'Compliance']
+  },
+
+  creditcoinRealEstate: {
+    id: 'creditcoin-real-estate-vault',
+    name: 'Real Estate RWA Vault',
+    description: 'Tokenized commercial and residential real estate with automated valuation',
+    chain: 'Creditcoin',
+    available: true,
+    apy: 8.5,
+    tvl: parseEther('12000000'), // $12M TVL
+    minDeposit: parseEther('5000'), // 5000 CTC
+    tokenDecimals: 18,
+    tokenSymbol: 'CTC',
+    tokenAddress: '0x0000000000000000000000000000000000000000', // TBD - CTC token
+    vaultAddress: '0x0000000000000000000000000000000000000000', // TBD - Real Estate Vault
+    strategy: 'Real Estate Tokenization',
+    risk: 'low',
+    tags: ['Real Estate', 'RWA', 'Creditcoin', 'Property']
+  },
+
+  creditcoinInvoice: {
+    id: 'creditcoin-invoice-vault',
+    name: 'Invoice Factoring Vault',
+    description: 'Tokenized invoices with automated credit scoring and payment tracking',
+    chain: 'Creditcoin',
+    available: true,
+    apy: 15.3,
+    tvl: parseEther('4500000'), // $4.5M TVL
+    minDeposit: parseEther('500'), // 500 CTC
+    tokenDecimals: 18,
+    tokenSymbol: 'CTC',
+    tokenAddress: '0x0000000000000000000000000000000000000000', // TBD - CTC token
+    vaultAddress: '0x0000000000000000000000000000000000000000', // TBD - Invoice Vault
+    strategy: 'Invoice Factoring & Tokenization',
+    risk: 'high',
+    tags: ['Invoices', 'Factoring', 'Creditcoin', 'Business']
+  },
+
+  creditcoinCommodity: {
+    id: 'creditcoin-commodity-vault',
+    name: 'Commodity RWA Vault',
+    description: 'Tokenized commodities with price oracles and storage verification',
+    chain: 'Creditcoin',
+    available: true,
+    apy: 9.7,
+    tvl: parseEther('6000000'), // $6M TVL
+    minDeposit: parseEther('2000'), // 2000 CTC
+    tokenDecimals: 18,
+    tokenSymbol: 'CTC',
+    tokenAddress: '0x0000000000000000000000000000000000000000', // TBD - CTC token
+    vaultAddress: '0x0000000000000000000000000000000000000000', // TBD - Commodity Vault
+    strategy: 'Commodity Tokenization',
+    risk: 'medium',
+    tags: ['Commodities', 'RWA', 'Creditcoin', 'Precious Metals']
   }
 } as const;
 

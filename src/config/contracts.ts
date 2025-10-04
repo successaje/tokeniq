@@ -2,6 +2,10 @@ import { Address } from 'viem';
 import { sepolia, avalancheFuji, baseSepolia } from 'wagmi/chains';
 import { SEI_TESTNET_ID } from './chains';
 
+// Creditcoin chain IDs
+const CREDITCOIN_MAINNET_ID = 102030;
+const CREDITCOIN_TESTNET_ID = 102031;
+
 export const CONTRACT_ADDRESSES = {
   // Main Contracts
   vaultManager: '0xF673F508104876c72C8724728f81d50E01649b40' as Address, // Fuji
@@ -25,7 +29,35 @@ export const CONTRACT_ADDRESSES = {
     [sepolia.id]: '0xD1d6EE0c5309A09Df9ca4c2936956A49cca9eb71' as Address,
     [avalancheFuji.id]: '0x6444f16e29Bf33a8C9da2B89E472b58Bafe41b9c' as Address,
     [baseSepolia.id]: '0x7CC324d15E5fF17c43188fB63b462B9a79dA68f6' as Address,
-    [SEI_TESTNET_ID]: '0x59F5222c5d77f8D3F56e34Ff7E75A05d2cF3a98A' as Address, 
+    [SEI_TESTNET_ID]: '0x59F5222c5d77f8D3F56e34Ff7E75A05d2cF3a98A' as Address,
+    [CREDITCOIN_MAINNET_ID]: '0x0000000000000000000000000000000000000000' as Address, // TBD
+    [CREDITCOIN_TESTNET_ID]: '0x0000000000000000000000000000000000000000' as Address, // TBD
+  },
+  
+  // Creditcoin RWA Contracts (placeholder addresses)
+  creditcoinRWA: {
+    [CREDITCOIN_MAINNET_ID]: {
+      rwaTokenFactory: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      creditScoringOracle: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      complianceManager: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      rwaVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      realEstateVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      invoiceVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      commodityVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      liquidityPool: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      collateralManager: '0x0000000000000000000000000000000000000000' as Address, // TBD
+    },
+    [CREDITCOIN_TESTNET_ID]: {
+      rwaTokenFactory: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      creditScoringOracle: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      complianceManager: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      rwaVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      realEstateVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      invoiceVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      commodityVault: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      liquidityPool: '0x0000000000000000000000000000000000000000' as Address, // TBD
+      collateralManager: '0x0000000000000000000000000000000000000000' as Address, // TBD
+    },
   },
 } as const;
 
