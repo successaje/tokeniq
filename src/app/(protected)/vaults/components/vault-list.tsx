@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContracts } from '@/contexts/ContractContext';
-import { formatEther } from 'viem';
+import { formatEther, Address } from 'viem';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { TrendingUp, Building2, FileText, BarChart3 } from 'lucide-react';
@@ -97,7 +97,7 @@ export function VaultList() {
           tokenAddress: vault.asset || '0x0',
           tags: []
         })) || []),
-        ...yeiVaults
+        ...configVaults
       ] as Vault[];
       
       setVaults(formattedVaults);
@@ -118,6 +118,33 @@ export function VaultList() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getVaultIcon = (vault: Vault) => {
+    // Creditcoin RWA vaults
+    if (vault.id.includes('creditcoin-rwa')) {
+      return <Building2 className="h-5 w-5 text-purple-500" />;
+    }
+    if (vault.id.includes('real-estate')) {
+      return <Building2 className="h-5 w-5 text-blue-500" />;
+    }
+    if (vault.id.includes('invoice')) {
+      return <FileText className="h-5 w-5 text-green-500" />;
+    }
+    if (vault.id.includes('commodity')) {
+      return <BarChart3 className="h-5 w-5 text-orange-500" />;
+    }
+    // Default icon for other vaults
+    return <TrendingUp className="h-5 w-5 text-blue-500" />;
+  };
+
+  const getVaultBorderColor = (vault: Vault) => {
+    // Creditcoin RWA vaults
+    if (vault.id.includes('creditcoin')) {
+      return 'border-purple-500/20 hover:border-purple-500/40';
+    }
+    // Default border for other vaults
+    return 'border-blue-500/20 hover:border-blue-500/40';
   };
 
   if (isLoading) {
@@ -202,11 +229,11 @@ export function VaultList() {
 
         {/* All Vaults */}
         {vaults.map((vault) => (
-            <Card key={vault.id} className="flex flex-col border-2 border-blue-500/20 hover:border-blue-500/40 transition-colors">
+            <Card key={vault.id} className={`flex flex-col border-2 ${getVaultBorderColor(vault)} transition-colors`}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    {getVaultIcon(vault)}
                     {vault.name}
                   </CardTitle>
                   <Badge className={getRiskColor(vault.risk)}>{vault.risk} Risk</Badge>
@@ -240,7 +267,7 @@ export function VaultList() {
               </CardContent>
               <CardFooter className="flex space-x-2">
                 <Button 
-                  className="flex-1 bg-blue-600 hover:bg-blue-700" 
+                  className={`flex-1 ${vault.id.includes('creditcoin') ? 'bg-purple-600 hover:bg-purple-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                   onClick={() => {
                     setSelectedVault(vault);
                     setAction('deposit');
@@ -250,7 +277,7 @@ export function VaultList() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1"
+                  className={`flex-1 ${vault.id.includes('creditcoin') ? 'border-purple-300 text-purple-700 hover:bg-purple-100' : ''}`}
                   onClick={() => {
                     setSelectedVault(vault);
                     setAction('withdraw');
