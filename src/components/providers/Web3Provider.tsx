@@ -7,7 +7,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { mainnet, sepolia, avalanche, avalancheFuji, base, seiTestnet, sei, baseSepolia, Chain } from 'viem/chains';
-import { CORE_MAINNET, CORE_TESTNET } from '@/config/chains';
+import { CREDITCOIN_MAINNET, CREDITCOIN_TESTNET } from '@/config/chains';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
@@ -105,8 +105,8 @@ const chains = [
   CHAINS.baseSepolia,
   CHAINS.seiTestnet,
   CHAINS.sei,
-  CORE_MAINNET,
-  CORE_TESTNET,
+  CREDITCOIN_MAINNET,
+  CREDITCOIN_TESTNET,
 ] as const;
 
 // Create wagmiConfig
@@ -161,8 +161,8 @@ const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
     case 84532: return CHAINS.baseSepolia;
     case 1328: return CHAINS.seiTestnet;
     case 1329: return CHAINS.sei;
-    case 1116: return CORE_MAINNET;
-    case 1114: return CORE_TESTNET;
+    case 102030: return CREDITCOIN_MAINNET;
+    case 102031: return CREDITCOIN_TESTNET;
     default: return CHAINS.mainnet;
   }
 });
@@ -183,8 +183,8 @@ const config = createConfig({
     CHAINS.baseSepolia,
     CHAINS.seiTestnet,
     CHAINS.sei,
-    CORE_MAINNET,
-    CORE_TESTNET,
+    CREDITCOIN_MAINNET,
+    CREDITCOIN_TESTNET,
   ],
   transports: {
     [mainnet.id]: http(CHAINS.mainnet.rpcUrls.default.http[0]),
@@ -195,8 +195,8 @@ const config = createConfig({
     [baseSepolia.id]: http(CHAINS.baseSepolia.rpcUrls.default.http[0]),
     [seiTestnet.id]: http(CHAINS.seiTestnet.rpcUrls.default.http[0]),
     [sei.id]: http(CHAINS.sei.rpcUrls.default.http[0]),
-    [CORE_MAINNET.id]: http(CORE_MAINNET.rpcUrls.default.http[0]),
-    [CORE_TESTNET.id]: http(CORE_TESTNET.rpcUrls.default.http[0]),
+    [CREDITCOIN_MAINNET.id]: http(CREDITCOIN_MAINNET.rpcUrls.default.http[0]),
+    [CREDITCOIN_TESTNET.id]: http(CREDITCOIN_TESTNET.rpcUrls.default.http[0]),
   },
 });
 

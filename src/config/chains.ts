@@ -1,10 +1,10 @@
 import { Chain } from "wagmi";
 
 // Network IDs
-export const CORE_MAINNET_ID = 1116;
-export const CORE_TESTNET_ID = 1115;
 export const SEI_MAINNET_ID = 1329;
 export const SEI_TESTNET_ID = 1328;
+export const CREDITCOIN_MAINNET_ID = 102030;
+export const CREDITCOIN_TESTNET_ID = 102031;
 
 // Sei Network configuration
 export const SEI_MAINNET: Chain = {
@@ -60,20 +60,6 @@ interface CustomChain extends Omit<Chain, 'id'> {
 }
 
 export const SUPPORTED_CHAINS = {
-  // Core chains
-  core: {
-    id: CORE_MAINNET_ID,
-    name: 'Core Mainnet',
-    logo: '/logos/core-dao-core-logo.png',
-    color: '#31cb9e',
-  },
-  'core-testnet': {
-    id: CORE_TESTNET_ID,
-    name: 'Core Testnet',
-    logo: '/logos/core-dao-core-logo.png',
-    color: '#31cb9e',
-  },
-  
   // Sei chains
   sei: {
     ...SEI_MAINNET,
@@ -85,75 +71,109 @@ export const SUPPORTED_CHAINS = {
     logo: '/logos/sei-logo.png',
     color: '#00e6b8',
   },
+  
+  // Creditcoin chains
+  creditcoin: {
+    id: CREDITCOIN_MAINNET_ID,
+    name: 'Creditcoin',
+    logo: '/logos/creditcoin-logo.png',
+    color: '#8B5CF6',
+  },
+  'creditcoin-testnet': {
+    id: CREDITCOIN_TESTNET_ID,
+    name: 'Creditcoin Testnet',
+    logo: '/logos/creditcoin-logo.png',
+    color: '#8B5CF6',
+  },
 };
 
-export const CORE_MAINNET: Chain = {
-  id: 1116,
-  name: 'Core Mainnet',
-  network: 'core',
-  icon: "/logos/core-dao-core-logo.png",
+// Creditcoin Network configuration
+export const CREDITCOIN_MAINNET: Chain = {
+  id: CREDITCOIN_MAINNET_ID,
+  name: 'Creditcoin',
+  network: 'creditcoin',
+  icon: "/logos/creditcoin-logo.png",
   nativeCurrency: {
     decimals: 18,
-    name: 'Core',
-    symbol: 'CORE',
+    name: 'Creditcoin',
+    symbol: 'CTC',
   },
   rpcUrls: {
-    default: { http: ['https://rpc.coredao.org'] },
-    public: { http: ['https://rpc.coredao.org'] },
+    default: { http: ['https://mainnet3.creditcoin.network'] },
+    public: { http: ['https://mainnet3.creditcoin.network'] },
   },
   blockExplorers: {
     default: { 
-      name: 'CoreScan',
-      url: 'https://scan.coredao.org',
+      name: 'Creditcoin Explorer',
+      url: 'https://explorer.creditcoin.network',
     },
   },
   testnet: false,
 };
 
-
-
-export const CORE_TESTNET: Chain = {
-  id: 1114,
-  name: 'Core Testnet',
-  network: 'core-testnet',
-  icon: "/logos/core-dao-core-logo.png",
+export const CREDITCOIN_TESTNET: Chain = {
+  id: CREDITCOIN_TESTNET_ID,
+  name: 'Creditcoin Testnet',
+  network: 'creditcoin-testnet',
+  icon: "/logos/creditcoin-logo.png",
   nativeCurrency: {
     decimals: 18,
-    name: 'tCORE',
-    symbol: 'tCORE',
+    name: 'Creditcoin Testnet',
+    symbol: 'tCTC',
   },
   rpcUrls: {
-    default: { http: ['https://rpc.test.btcs.network'] },
-    public: { http: ['https://rpc.test.btcs.network'] },
+    default: { http: ['https://rpc.cc3-testnet.creditcoin.network'] },
+    public: { http: ['https://rpc.cc3-testnet.creditcoin.network'] },
   },
   blockExplorers: {
     default: { 
-      name: 'CoreScan Testnet',
-      url: 'https://scan.test.btcs.network',
+      name: 'Creditcoin Testnet Explorer',
+      url: 'https://explorer.cc3-testnet.creditcoin.network',
     },
   },
   testnet: true,
 };
 
 export const chains: CustomChain[] = [
-  // Core Mainnet
+  // Creditcoin Mainnet
   {
-    id: CORE_MAINNET_ID,
-    name: "Core",
-    network: "core",
-    icon: "/logos/core-dao-core-logo.png",
-    color: "#31cb9e",
+    id: CREDITCOIN_MAINNET_ID,
+    name: "Creditcoin",
+    network: "creditcoin",
+    icon: "/logos/creditcoin-logo.png",
+    color: "#8B5CF6",
     nativeCurrency: {
-      name: "Core",
-      symbol: "CORE",
+      name: "Creditcoin",
+      symbol: "CTC",
       decimals: 18,
     },
     rpcUrls: {
-      default: { http: ["https://rpc.coredao.org"] },
-      public: { http: ["https://rpc.coredao.org"] },
+      default: { http: ["https://mainnet3.creditcoin.network"] },
+      public: { http: ["https://mainnet3.creditcoin.network"] },
     },
     blockExplorers: {
-      default: { name: "CoreScan", url: "https://scan.coredao.org" },
+      default: { name: "Creditcoin Explorer", url: "https://explorer.creditcoin.network" },
+    },
+  },
+  
+  // Creditcoin Testnet
+  {
+    id: CREDITCOIN_TESTNET_ID,
+    name: "Creditcoin Testnet",
+    network: "creditcoin-testnet",
+    icon: "/logos/creditcoin-logo.png",
+    color: "#8B5CF6",
+    nativeCurrency: {
+      name: "Creditcoin Testnet",
+      symbol: "tCTC",
+      decimals: 18,
+    },
+    rpcUrls: {
+      default: { http: ["https://rpc.cc3-testnet.creditcoin.network"] },
+      public: { http: ["https://rpc.cc3-testnet.creditcoin.network"] },
+    },
+    blockExplorers: {
+      default: { name: "Creditcoin Testnet Explorer", url: "https://explorer.cc3-testnet.creditcoin.network" },
     },
   },
   

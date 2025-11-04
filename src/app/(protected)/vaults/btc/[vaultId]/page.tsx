@@ -13,7 +13,7 @@ import { Loader2, ArrowLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { useAccount, useChainId, useSwitchChain, useWriteContract } from 'wagmi';
 import { Web3Button } from '@web3modal/react';
 import { parseUnits } from 'viem';
-import { CORE_TESTNET_ID } from '@/config/chains';
+import { SEI_TESTNET_ID } from '@/config/chains';
 
 const VAULT_DETAILS = {
   'btc-yield': {
@@ -88,8 +88,8 @@ export default function BtcVaultPage() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   
-  // Core Testnet chain ID
-  const CORE_TESTNET_ID = 1114;
+  // Sei Testnet chain ID
+  const SEI_TESTNET_CHAIN_ID = SEI_TESTNET_ID;
   
   const [activeTab, setActiveTab] = useState('deposit');
   const [amount, setAmount] = useState('');
@@ -247,8 +247,8 @@ export default function BtcVaultPage() {
       return;
     }
     
-    // Check if on Core Testnet (simulated)
-    if (chainId !== CORE_TESTNET_ID) {
+    // Check if on Sei Testnet (simulated)
+    if (chainId !== SEI_TESTNET_CHAIN_ID) {
       try {
         setIsSwitchingNetwork(true);
         // Simulate network switch
@@ -299,10 +299,10 @@ export default function BtcVaultPage() {
       setIsSwitchingNetwork(true);
       toast({
         title: 'Switching Network',
-        description: 'Please approve the network switch to Core Testnet in your wallet',
+        description: 'Please approve the network switch to Sei Testnet in your wallet',
       });
       
-      await switchChain({ chainId: CORE_TESTNET_ID });
+      await switchChain({ chainId: SEI_TESTNET_CHAIN_ID });
       
       // Wait a moment for the network switch to complete
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -500,8 +500,8 @@ export default function BtcVaultPage() {
                   >
                     {!isConnected ? (
                       'Connect Wallet to Deposit'
-                    ) : chainId !== CORE_TESTNET_ID ? (
-                      'Switch to Core Testnet'
+                    ) : chainId !== SEI_TESTNET_CHAIN_ID ? (
+                      'Switch to Sei Testnet'
                     ) : isDepositing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -557,7 +557,7 @@ export default function BtcVaultPage() {
                     className="w-full mt-4 h-12"
                     size="lg"
                     onClick={handleDeposit}
-                    disabled={!amount || isDepositing || !isConnected || chainId !== CORE_TESTNET_ID}
+                    disabled={!amount || isDepositing || !isConnected || chainId !== SEI_TESTNET_CHAIN_ID}
                   >
                     {isDepositing ? (
                       <>
