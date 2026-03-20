@@ -7,7 +7,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 export function Navbar() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith('/dashboard');
-  
+
   // Don't render the navbar on dashboard routes
   if (isDashboard) {
     return null;
@@ -53,7 +53,11 @@ export function Navbar() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             {/* Search bar could go here */}
           </div>
-          <nav className="flex items-center">
+          <nav className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-medium">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="whitespace-nowrap">Polkadot Hub (EVM)</span>
+            </div>
             <ThemeToggle />
           </nav>
         </div>

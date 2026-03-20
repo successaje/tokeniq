@@ -54,7 +54,15 @@ export function useContractInstances() {
                     functionName,
                     args: args.slice(0, item.inputs?.length || 0),
                   });
-                } catch (error) {
+                } catch (error: any) {
+                  // Handle RPC method not available errors gracefully
+                  if (error?.message?.includes('does not exist/is not available') || 
+                      error?.code === -32601 ||
+                      error?.message?.includes('HTTP request failed')) {
+                    console.warn(`RPC method not available for ${functionName} on ${address}:`, error.message);
+                    // Return null or undefined for optional read calls
+                    return null;
+                  }
                   console.error(`Error in ${functionName} read call:`, error);
                   throw error;
                 }

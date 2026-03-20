@@ -3,69 +3,63 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Surface } from '@/components/ui/surface';
 import { TokenTable } from './TokenTable';
 import { ActivityFeed } from './ActivityFeed';
+import { StrategyCard } from './StrategyCard';
+import { TransactionHistory } from './TransactionHistory';
 
 export function PortfolioOverview() {
-  // Mock data - replace with real data fetching
-  const portfolioValue = 12543.67;
+  // Mock data with current crypto prices (as of Jan 2025)
+  // SEI: ~$0.48, BTC: ~$62,000, ETH: ~$3,400, USDC/USDT: $1.00
   const portfolioChange = 2.45;
   const tokens = [
     { 
-      name: 'Ethereum', 
-      symbol: 'ETH', 
-      balance: 2.5, 
-      value: 7500.00, 
-      price: 3000.00, 
-      change24h: 1.2,
-      allocation: 60.5 
-    },
-    { 
-      name: 'Bitcoin', 
-      symbol: 'BTC', 
-      balance: 0.25, 
-      value: 1500.00, 
-      price: 60000.00, 
-      change24h: -0.8,
-      allocation: 12.0 
-    },
-    { 
-      name: 'Solana', 
-      symbol: 'SOL', 
-      balance: 50, 
-      value: 750.00, 
-      price: 15.00, 
-      change24h: 5.2,
-      allocation: 6.0 
+      name: 'Sei', 
+      symbol: 'SEI', 
+      balance: 25000, // 25,000 SEI at $0.48 = $12,000
+      value: 12000.00, 
+      price: 0.64, 
+      change24h: 3.2,
+      allocation: 40.0 
     },
     { 
       name: 'USDC', 
       symbol: 'USDC', 
-      balance: 2000, 
-      value: 2000.00, 
+      balance: 10000, 
+      value: 10000.00, 
       price: 1.00, 
       change24h: 0.0,
-      allocation: 16.0 
+      allocation: 33.3 
     },
     { 
-      name: 'Aave', 
-      symbol: 'AAVE', 
-      balance: 5, 
-      value: 450.00, 
-      price: 90.00, 
-      change24h: -2.1,
-      allocation: 3.6 
+      name: 'USDT', 
+      symbol: 'USDT', 
+      balance: 3000, 
+      value: 3000.00, 
+      price: 1.00, 
+      change24h: 0.0,
+      allocation: 10.0 
     },
     { 
-      name: 'Uniswap', 
-      symbol: 'UNI', 
-      balance: 30, 
-      value: 345.00, 
-      price: 11.50, 
-      change24h: 1.8,
-      allocation: 2.8 
+      name: 'Bitcoin', 
+      symbol: 'BTC', 
+      balance: 0.048387, // ~0.0484 BTC at $62,000 = $3,000
+      value: 3000.00, 
+      price: 105340.00, 
+      change24h: -0.8,
+      allocation: 10.0 
+    },
+    { 
+      name: 'Ethereum', 
+      symbol: 'ETH', 
+      balance: 0.588235, // ~0.588 ETH at $3,400 = $2,000
+      value: 2000.00, 
+      price: 3528.00, 
+      change24h: 1.2,
+      allocation: 6.7 
     },
   ];
 
   const totalValue = tokens.reduce((sum, token) => sum + token.value, 0);
+  const portfolioValue = totalValue;
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -179,7 +173,7 @@ export function PortfolioOverview() {
               </CardHeader>
               <CardContent className="p-0 pt-1">
                 <div className="text-2xl font-bold bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
-                  SOL
+                  SEI
                 </div>
                 <div className="mt-1.5 inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500">
                   <svg className="-ml-0.5 mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 12 12">
@@ -225,6 +219,31 @@ export function PortfolioOverview() {
         </div>
       </div>
 
+      {/* Strategy Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <StrategyCard
+          strategy="conservative"
+          apy={8.5}
+          risk="Low"
+          platform="Sei Network"
+          fundsAllocated={22000}
+        />
+        <StrategyCard
+          strategy="balanced"
+          apy={10.2}
+          risk="Medium"
+          platform="Sei Network"
+          fundsAllocated={4000}
+        />
+        <StrategyCard
+          strategy="growth"
+          apy={12.8}
+          risk="High"
+          platform="Sei Network"
+          fundsAllocated={4000}
+        />
+      </div>
+
       {/* Main Content Tabs */}
       <div className="relative overflow-hidden rounded-xl border border-muted/20 bg-gradient-to-br from-card/50 to-card/80 shadow-sm transition-all duration-300 hover:shadow-md">
         <Tabs defaultValue="tokens" className="w-full">
@@ -258,7 +277,8 @@ export function PortfolioOverview() {
             </TabsContent>
             
             <TabsContent value="activity" className="m-0">
-              <div className="p-6 pt-4">
+              <div className="p-6 pt-4 space-y-6">
+                <TransactionHistory />
                 <ActivityFeed />
               </div>
             </TabsContent>

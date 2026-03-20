@@ -1,6 +1,8 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { WalletModal } from '@/components/ui/wallet-modal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +26,10 @@ import {
   Clock,
   AlertCircle,
   ChevronRight,
-  ExternalLink
+  ChevronDown,
+  ExternalLink,
+  Sparkles,
+  CheckCircle2
 } from 'lucide-react';
 import { useVaultsData } from '@/hooks/useVaultsData';
 import { formatEther } from 'viem';
@@ -89,6 +94,320 @@ const generatePerformanceData = (days = 30) => {
   }
   
   return data;
+};
+
+// Sei Network Section Component
+const SeiNetworkSection = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
+  const [allocationComplete, setAllocationComplete] = useState(false);
+  const [allocationProgress, setAllocationProgress] = useState(0);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mock data for Spending vs Savings chart
+  const spendingVsSavingsData = [
+    { name: 'Jan', spending: 12000, savings: 8000 },
+    { name: 'Feb', spending: 15000, savings: 10000 },
+    { name: 'Mar', spending: 18000, savings: 12000 },
+    { name: 'Apr', spending: 14000, savings: 15000 },
+    { name: 'May', spending: 16000, savings: 18000 },
+    { name: 'Jun', spending: 20000, savings: 22000 },
+  ];
+
+  const handleActivate = () => {
+    // Open wallet modal first
+    setWalletModalOpen(true);
+  };
+
+  const handleWalletConfirm = () => {
+    // After wallet confirmation, start allocation
+    setIsActivating(true);
+    setAllocationProgress(0);
+    setAllocationComplete(false);
+
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Simulate allocation progress
+    const interval = setInterval(() => {
+      setAllocationProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setAllocationComplete(true);
+          setTimeout(() => {
+            setIsActivating(false);
+          }, 2000);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+
+    // Store interval reference
+    intervalRef.current = interval;
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  // Mock allocation data for animation
+  const allocationItems = [
+    { name: 'Sei', amount: 18000, percentage: 40, color: '#8B5CF6' },
+    { name: 'USDC', amount: 15000, percentage: 33.3, color: '#2775CA' },
+    { name: 'Bitcoin', amount: 12000, percentage: 26.7, color: '#F7931A' },
+  ];
+
+  return (
+    <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-50" />
+      
+      <CardHeader className="relative">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between hover:opacity-80 transition-opacity"
+        >
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+            <div className="text-left">
+              <CardTitle className="text-2xl">AI-Powered Capital Optimization</CardTitle>
+              <CardDescription>Click to expand and view analysis</CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="text-xs">
+              Powered by AI
+            </Badge>
+            <ChevronDown 
+              className={cn(
+                "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                isExpanded && "transform rotate-180"
+              )} 
+            />
+          </div>
+        </button>
+      </CardHeader>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <CardContent className="relative space-y-6">
+        {/* Chart Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Spending vs. Savings</h3>
+            <Badge variant="outline" className="text-xs">
+              AI Analysis
+            </Badge>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsBarChart data={spendingVsSavingsData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                />
+                <RechartsTooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-background border rounded-lg shadow-lg p-3">
+                          <p className="font-medium">{payload[0].payload.name}</p>
+                          <p className="text-sm text-blue-500">
+                            Spending: ${payload[0].value?.toLocaleString()}
+                          </p>
+                          <p className="text-sm text-green-500">
+                            Savings: ${payload[1].value?.toLocaleString()}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="spending" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="savings" fill="#10b981" radius={[8, 8, 0, 0]} />
+                <Legend />
+              </RechartsBarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Idle Capital Detection */}
+        <div className="rounded-lg border-2 border-amber-500/30 bg-amber-500/10 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              <div>
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                  Idle Capital Detected
+                </p>
+                <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
+                  $45,000
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleActivate}
+              disabled={isActivating}
+              size="lg"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+            >
+              {isActivating ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Activating...
+                </>
+              ) : allocationComplete ? (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Activated
+                </>
+              ) : (
+                <>
+                  <Zap className="mr-2 h-4 w-4" />
+                  Activate TokenIQ Intelligence
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Wallet Modal */}
+        <WalletModal
+          open={walletModalOpen}
+          onOpenChange={setWalletModalOpen}
+          title="Activate TokenIQ Intelligence"
+          description="Confirm the transaction to activate AI-powered capital optimization"
+          onConfirm={handleWalletConfirm}
+          transactionType="activation"
+        />
+
+        {/* AI Allocation Animation */}
+        <AnimatePresence>
+          {isActivating && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4 rounded-lg border bg-muted/50 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                  <h3 className="text-lg font-semibold">Allocating funds to Sei yield pools...</h3>
+                </div>
+                <span className="text-sm font-medium text-primary">{allocationProgress}%</span>
+              </div>
+              
+              <Progress value={allocationProgress} className="h-2" />
+              
+              {allocationProgress === 100 && (
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="font-medium">Done!</span>
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {allocationItems.map((item, index) => (
+                  <motion.div
+                    key={item.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ 
+                      opacity: allocationProgress >= (index + 1) * 33 ? 1 : 0.5,
+                      y: allocationProgress >= (index + 1) * 33 ? 0 : 20,
+                    }}
+                    transition={{ delay: index * 0.2 }}
+                    className="rounded-lg border bg-background p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="font-medium">{item.name}</span>
+                      </div>
+                      {allocationProgress >= (index + 1) * 33 && (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Amount</span>
+                        <span className="font-medium">${item.amount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Allocation</span>
+                        <span className="font-medium">{item.percentage}%</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ 
+                              width: allocationProgress >= (index + 1) * 33 ? `${item.percentage}%` : '0%' 
+                            }}
+                            transition={{ duration: 0.5 }}
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {allocationComplete && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="rounded-lg bg-green-500/10 border border-green-500/30 p-4 text-center"
+                >
+                  <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <p className="font-semibold text-green-900 dark:text-green-100">
+                    Allocation Complete!
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    Your capital has been optimized across multiple assets
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
 };
 
 // Performance metrics component
@@ -659,12 +978,14 @@ export function DiscoverContent() {
 
   return (
     <TooltipProvider>
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="w-full space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Discover Vaults</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Discover Vaults
+            </h1>
             <p className="text-muted-foreground text-sm sm:text-base">
-              Explore and manage your DeFi vaults across multiple chains
+              Explore and manage your DeFi vaults on Sei Network
             </p>
           </div>
           <Button 
@@ -677,6 +998,9 @@ export function DiscoverContent() {
         </div>
 
         <div className="space-y-8">
+          {/* Sei Network Section */}
+          <SeiNetworkSection />
+          
           <PerformanceMetrics vaults={vaults} />
 
           <Tabs defaultValue="all" className="w-full">

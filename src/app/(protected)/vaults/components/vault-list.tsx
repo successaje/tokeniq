@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContracts } from '@/contexts/ContractContext';
 import { formatEther, Address } from 'viem';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { TrendingUp, Building2, FileText, BarChart3 } from 'lucide-react';
+import { TrendingUp, Building2, FileText, BarChart3, Sparkles } from 'lucide-react';
 import { VAULT_TYPES, VAULT_TYPE_IDS } from '@/config/vaults';
 
 // Dynamically import dialogs with no SSR to avoid hydration issues
@@ -183,70 +184,178 @@ export function VaultList() {
     );
   }
 
+  // Sort vaults to prioritize Sei Network vaults
+  const sortedVaults = [...vaults].sort((a, b) => {
+    const aIsSei = a.chain === 'Sei' || a.chain.toLowerCase().includes('sei');
+    const bIsSei = b.chain === 'Sei' || b.chain.toLowerCase().includes('sei');
+    
+    if (aIsSei && !bIsSei) return -1;
+    if (!aIsSei && bIsSei) return 1;
+    
+    // If both are Sei or both are not, sort by APY (descending)
+    return (b.apy || 0) - (a.apy || 0);
+  });
+
+  // Separate Sei vaults from others
+  const seiVaults = sortedVaults.filter(v => v.chain === 'Sei' || v.chain.toLowerCase().includes('sei'));
+  const otherVaults = sortedVaults.filter(v => v.chain !== 'Sei' && !v.chain.toLowerCase().includes('sei'));
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">
-          {vaults.length > 0 ? 'Available Vaults' : 'No Vaults Found'}
-        </h2>
-      </div>
+      {/* Sei Network Vaults Section */}
+      {seiVaults.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <h2 className="text-2xl font-bold tracking-tight">
+                Sei Network Vaults
+              </h2>
+            </div>
+            <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+              {seiVaults.length} Active
+            </Badge>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {seiVaults.map((vault) => (
+              <Card 
+                key={vault.id} 
+                className={cn(
+                  "flex flex-col border-2 border-purple-500/30 hover:border-purple-500/50 transition-all",
+                  "bg-gradient-to-br from-purple-500/5 to-indigo-500/5"
+                )}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      {getVaultIcon(vault)}
+                      {vault.name}
+                    </CardTitle>
+                    <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                      Sei
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground">{vault.description || vault.strategy}</div>
+                </CardHeader>
+                <CardContent className="flex-1 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">APY</span>
+                    <span className="font-medium text-green-600 dark:text-green-400">
+                      {vault.apy ? `${vault.apy.toFixed(2)}%` : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">TVL</span>
+                    <span className="font-medium">
+                      {vault.tvl ? `$${formatEther(typeof vault.tvl === 'string' ? BigInt(vault.tvl) : vault.tvl)}` : '$0.00'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Asset</span>
+                    <span className="font-medium">{vault.tokenSymbol}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Risk</span>
+                    <Badge className={getRiskColor(vault.risk)}>{vault.risk} Risk</Badge>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex gap-2">
+                  <Button 
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    onClick={() => {
+                      setSelectedVault(vault);
+                      setAction('deposit');
+                    }}
+                  >
+                    Deposit
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setSelectedVault(vault);
+                      setAction('withdraw');
+                    }}
+                  >
+                    Withdraw
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Aave Vault Card */}
-        <Card className="flex flex-col border-2 border-violet-500/20 hover:border-violet-500/40 transition-colors mb-6">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-violet-500" />
-                Aave Vault
-              </CardTitle>
-              <Badge className="bg-violet-100 text-violet-800">Low Risk</Badge>
-            </div>
-            <div className="text-sm text-muted-foreground">Aave Lending Strategy</div>
-          </CardHeader>
-          <CardContent className="flex-1 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">APY</span>
-              <span className="font-medium">3.25%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">TVL</span>
-              <span className="font-medium">$1.2M</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Asset</span>
-              <span className="font-medium">USDC, DAI, USDT</span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Link href="/vaults/aave-vault" className="w-full">
-              <Button className="w-full bg-violet-600 hover:bg-violet-700">
-                View Vault
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-
-        {/* All Vaults */}
-        {vaults.map((vault) => (
-            <Card key={vault.id} className={`flex flex-col border-2 ${getVaultBorderColor(vault)} transition-colors`}>
+      {/* Other Vaults Section */}
+      {otherVaults.length > 0 && (
+        <div className="space-y-4 mt-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Other Network Vaults
+            </h2>
+            <Badge variant="outline">
+              {otherVaults.length} Available
+            </Badge>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Aave Vault Card */}
+            <Card className="flex flex-col border-2 border-violet-500/20 hover:border-violet-500/40 transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl flex items-center gap-2">
-                    {getVaultIcon(vault)}
-                    {vault.name}
+                    <TrendingUp className="h-5 w-5 text-violet-500" />
+                    Aave Vault
                   </CardTitle>
-                  <Badge className={getRiskColor(vault.risk)}>{vault.risk} Risk</Badge>
+                  <Badge className="bg-violet-100 text-violet-800">Low Risk</Badge>
                 </div>
-                <div className="text-sm text-muted-foreground">{vault.description || vault.strategy}</div>
+                <div className="text-sm text-muted-foreground">Aave Lending Strategy</div>
               </CardHeader>
               <CardContent className="flex-1 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">APY</span>
-                  <span className="font-medium">
-                    {vault.apy ? `${vault.apy.toFixed(2)}%` : 'N/A'}
-                  </span>
+                  <span className="font-medium">3.25%</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">TVL</span>
+                  <span className="font-medium">$1.2M</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Asset</span>
+                  <span className="font-medium">USDC, DAI, USDT</span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Link href="/vaults/aave-vault" className="w-full">
+                  <Button className="w-full bg-violet-600 hover:bg-violet-700">
+                    View Vault
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            {/* Other Vaults */}
+            {otherVaults.map((vault) => (
+              <Card key={vault.id} className={`flex flex-col border-2 ${getVaultBorderColor(vault)} transition-colors`}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      {getVaultIcon(vault)}
+                      {vault.name}
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{vault.chain}</Badge>
+                      <Badge className={getRiskColor(vault.risk)}>{vault.risk} Risk</Badge>
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">{vault.description || vault.strategy}</div>
+                </CardHeader>
+                <CardContent className="flex-1 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">APY</span>
+                    <span className="font-medium">
+                      {vault.apy ? `${vault.apy.toFixed(2)}%` : 'N/A'}
+                    </span>
+                  </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">TVL</span>
                   <span className="font-medium">
@@ -287,8 +396,11 @@ export function VaultList() {
                 </Button>
               </CardFooter>
             </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {vaults.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No vaults available</p>

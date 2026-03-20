@@ -32,7 +32,7 @@ export function useVaultsData() {
     if (!address || !contracts?.vaultManager) return BigInt(0);
     
     try {
-      const balance = await contracts.vaultManager.read.userInfo([vaultAddress, address]);
+      const balance = await contracts.vaultManager.read.userInfo(vaultAddress, address);
       return balance || BigInt(0);
     } catch (err) {
       console.error(`Error fetching user balance for vault ${vaultAddress}:`, err);
@@ -45,7 +45,7 @@ export function useVaultsData() {
     if (!contracts?.aaveVault) return BigInt(0);
     
     try {
-      const tvl = await contracts.aaveVault.read.getTotalValue([vaultAddress]);
+      const tvl = await contracts.aaveVault.read.getTotalValue(vaultAddress);
       return tvl || BigInt(0);
     } catch (err) {
       console.error(`Error fetching TVL for vault ${vaultAddress}:`, err);
@@ -58,14 +58,31 @@ export function useVaultsData() {
     if (!contracts?.treasuryAIManager) return null;
     
     try {
-      const decision = await contracts.treasuryAIManager.read.getLatestDecision([vaultAddress]);
+      const decision = await contracts.treasuryAIManager.read.getLatestDecision(vaultAddress);
+      
+      // Handle case where RPC returns null (method not available)
+      if (!decision || decision === null) {
+        return null;
+      }
+      
       return {
         vaultId: vaultAddress,
         action: decision.action, // 'deposit' | 'withdraw' | 'hold'
         confidence: Number(decision.confidence) / 100, // Assuming confidence is 0-100
         reason: decision.reason || 'No specific reason provided'
       };
-    } catch (err) {
+    } catch (err: any) {
+      // Silently handle errors - these are optional features
+      if (err && (
+        (err.message && (
+          err.message.includes('does not exist/is not available') ||
+          err.message.includes('HTTP request failed')
+        )) ||
+        err.code === -32601
+      )) {
+        // RPC method not available - this is expected for some chains
+        return null;
+      }
       console.error(`Error fetching AI recommendations for vault ${vaultAddress}:`, err);
       return null;
     }

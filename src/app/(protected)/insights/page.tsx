@@ -15,6 +15,8 @@ import { ElizaOSBadge } from './components/ElizaOSBadge';
 import { NewsTicker } from './components/NewsTicker';
 import { DeepAnalysis } from './components/DeepAnalysis';
 import { theme } from './theme';
+import { useOllamaAI } from '@/hooks/useOllamaAI';
+import { Loader2 } from 'lucide-react';
 
 const marketData = {
   currentTrend: 'Bullish',
@@ -34,41 +36,41 @@ const marketData = {
 const strategyData = {
   title: "ElizaOS Strategy Copilot",
   recommendation: [
-    { 
-      asset: "Yei Finance BTCFi Vault", 
-      percentage: 35, 
+    {
+      asset: "Yei Finance BTCFi Vault",
+      percentage: 35,
       currentApy: 12.8,
       reason: "High yield BTCFi strategy with lending and staking components",
       riskLevel: 0.4,
       icon: TrendingUp
     },
-    { 
-      asset: "Sei Network Liquid Staking", 
-      percentage: 25, 
+    {
+      asset: "Sei Network Liquid Staking",
+      percentage: 25,
       currentApy: 9.2,
       reason: "High-performance L1 staking with liquidity",
       riskLevel: 0.3,
       icon: BarChart2
     },
-    { 
-      asset: "Yei Stablecoin Vault", 
-      percentage: 20, 
+    {
+      asset: "Yei Stablecoin Vault",
+      percentage: 20,
       currentApy: 8.9,
       reason: "Stablecoin yield strategy on Yei money market",
       riskLevel: 0.2,
       icon: Shield
     },
-    { 
-      asset: "Sei DeFi Index", 
-      percentage: 15, 
+    {
+      asset: "Sei DeFi Index",
+      percentage: 15,
       currentApy: 18.5,
       reason: "Diversified DeFi exposure on Sei Network",
       riskLevel: 0.5,
       icon: Sparkles
     },
-    { 
-      asset: "Base reserve", 
-      percentage: 5, 
+    {
+      asset: "Base reserve",
+      percentage: 5,
       currentApy: 0.05,
       reason: "Emergency liquidity buffer",
       riskLevel: 0.05,
@@ -91,7 +93,9 @@ const strategyData = {
 export default function InsightsPage() {
   const [showReasoningModal, setShowReasoningModal] = useState(false);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [aiReasoning, setAiReasoning] = useState<string>('');
   const { address } = useAccount();
+  const { explainStrategy, isLoading: isOllamaLoading } = useOllamaAI();
 
   const riskColors = {
     Low: 'bg-emerald-500/20 text-emerald-500',
@@ -112,12 +116,40 @@ export default function InsightsPage() {
         <div className="mt-6 mb-8">
           <NewsTicker />
         </div>
-        
+
         {/* Deep Analysis */}
         <div className="mb-8">
           <DeepAnalysis />
         </div>
-        
+
+        {/* AI Insights Card */}
+        <div className="mb-8">
+          <Card className={cn(
+            "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20",
+            theme.animations.fade
+          )}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-lg bg-primary/20 p-3">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">AI Insights</h3>
+                    <p className="text-sm text-muted-foreground">Projected Annual Yield</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    +$3,200
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Based on current allocations</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 py-8">
           {/* Left Section - Strategies */}
           <div className="space-y-6">
@@ -126,8 +158,8 @@ export default function InsightsPage() {
                 "text-2xl font-bold text-foreground",
                 theme.animations.slideLeft
               )}>Strategies</h2>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 className={cn(
                   theme.transitions.smooth,
@@ -184,7 +216,7 @@ export default function InsightsPage() {
 
           {/* Right Section - ElizaOS Insight Panel */}
           <div className="space-y-6">
-            <Card 
+            <Card
               className={cn(
                 "h-full",
                 theme.animations.fade,
@@ -195,7 +227,7 @@ export default function InsightsPage() {
                 "flex flex-col gap-4",
                 theme.transitions.smooth
               )}>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <CardTitle className={cn(
                     "text-xl font-bold",
                     theme.animations.slideUp
@@ -203,6 +235,13 @@ export default function InsightsPage() {
                   <ElizaOSBadge className={cn(
                     theme.animations.hoverScale
                   )} />
+                  <div className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary border border-primary/20",
+                    theme.animations.hoverScale
+                  )}>
+                    <Sparkles className="h-3 w-3" />
+                    Powered by Sei Intelligence Layer
+                  </div>
                 </div>
                 <p className={cn(
                   "text-sm text-muted-foreground",
@@ -274,8 +313,96 @@ export default function InsightsPage() {
                   theme.animations.fade
                 )}>
                   <h3 className="text-lg font-semibold mb-4">🧠 Reason Box</h3>
-                  <div className="text-sm text-muted-foreground">
-                    Aave yields on Avalanche are outperforming Curve and Compound by 0.7%. Base gas fees are low this week. Holding some USDC provides buffer liquidity.
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p>Allocating capital across Polkadot parachains for yield optimization. Using XCM to distribute funds efficiently. Maintaining cross-chain liquidity buffer.</p>
+
+                    {showReasoningModal && (
+                      <div className="mt-4 space-y-3 pt-4 border-t">
+                        {/* AI-Generated Reasoning */}
+                        {aiReasoning && (
+                          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 mb-4">
+                            <div className="flex items-start gap-2 mb-2">
+                              <Sparkles className="h-4 w-4 text-primary mt-0.5" />
+                              <p className="font-medium text-foreground">AI Analysis:</p>
+                            </div>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">{aiReasoning}</p>
+                          </div>
+                        )}
+
+                        {/* Detailed Metrics */}
+                        <div className="flex items-start gap-2">
+                          <TrendingUp className="h-4 w-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-foreground">Spending trendline:</p>
+                            <p className="text-muted-foreground">You spend 62% of monthly income</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <BarChart2 className="h-4 w-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-foreground">Savings rate:</p>
+                            <p className="text-muted-foreground">Monthly savings rate: 38% (above 30% target)</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <CircleDollarSign className="h-4 w-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-foreground">Idle capital:</p>
+                            <p className="text-muted-foreground">$45,000 idle USDC detected (15% of portfolio)</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Shield className="h-4 w-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-foreground">Risk exposure:</p>
+                            <p className="text-muted-foreground">Portfolio risk level: Moderate (45% volatility)</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Clock className="h-4 w-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="font-medium text-foreground">Yield efficiency:</p>
+                            <p className="text-muted-foreground">Current yield: 8.5% APY, potential: 12.8% APY</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recommendations */}
+                <div className={cn(
+                  theme.transitions.smooth,
+                  theme.animations.fade
+                )}>
+                  <h3 className="text-lg font-semibold mb-4">💡 Recommendations</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-lg border bg-amber-500/10 border-amber-500/20 p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">
+                            Reduce idle USDC by 10% to improve liquidity.
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Reallocate $4,500 to yield-generating strategies
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border bg-blue-500/10 border-blue-500/20 p-3">
+                      <div className="flex items-start gap-2">
+                        <TrendingUp className="h-4 w-4 text-blue-500 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">
+                            Increase Sei Network allocation by 5% for higher yield potential.
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Sei Network offers 12.8% APY with low gas fees
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -329,13 +456,40 @@ export default function InsightsPage() {
                       theme.transitions.smooth,
                       theme.animations.hoverScale
                     )}
-                    onClick={() => console.log('Explain reasoning')}
+                    onClick={async () => {
+                      if (!showReasoningModal) {
+                        // Generate AI reasoning when expanding
+                        const reasoning = await explainStrategy(
+                          'ElizaOS Treasury Copilot Strategy',
+                          {
+                            allocation: 50,
+                            apy: 8.5,
+                            risk: 'Moderate',
+                          }
+                        );
+                        setAiReasoning(reasoning);
+                      }
+                      setShowReasoningModal(!showReasoningModal);
+                    }}
+                    disabled={isOllamaLoading}
                   >
-                    <Info className={cn(
-                      "h-4 w-4 mr-2",
-                      theme.animations.pulse
-                    )} />
-                    Explain Reasoning
+                    {isOllamaLoading ? (
+                      <>
+                        <Loader2 className={cn(
+                          "h-4 w-4 mr-2 animate-spin",
+                          theme.animations.pulse
+                        )} />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Info className={cn(
+                          "h-4 w-4 mr-2",
+                          theme.animations.pulse
+                        )} />
+                        Explain Reasoning
+                      </>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -360,7 +514,7 @@ export default function InsightsPage() {
       </div>
 
       {/* Floating Chat Button */}
-      <ChatButton 
+      <ChatButton
         className={cn(
           theme.transitions.smooth,
           theme.animations.float

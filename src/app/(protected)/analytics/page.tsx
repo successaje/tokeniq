@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Button, Card } from '@/components/ui';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles } from 'lucide-react';
 import { 
   ChartBarIcon,
   ArrowTrendingUpIcon,
@@ -102,14 +104,19 @@ export default function AnalyticsPage() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-          <p className="text-muted-foreground">
-            Platform performance and metrics
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-muted-foreground mt-1">
+            Platform performance and metrics on Sei Network
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
+          <Badge variant="outline" className="text-sm">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Powered by Sei Intelligence Layer
+          </Badge>
+          <div className="flex gap-2">
           <Button
             variant="outline"
             className="flex items-center"
@@ -123,6 +130,7 @@ export default function AnalyticsPage() {
             <DocumentTextIcon className="h-5 w-5 mr-2" />
             Export Report
           </Button>
+          </div>
         </div>
       </div>
 
@@ -131,7 +139,7 @@ export default function AnalyticsPage() {
         <Card className="bg-card hover:bg-accent/50 transition-colors">
           <div className="p-6">
             <h2 className="text-lg font-semibold mb-2 text-card-foreground">Total Value Locked</h2>
-            <p className="text-3xl font-bold text-foreground">$4.5M</p>
+            <p className="text-3xl font-bold text-foreground">$280.43M</p>
             <div className="flex items-center text-emerald-500 text-sm">
               <ArrowUpIcon className="h-4 w-4 mr-1" />
               +12.5% (30d)

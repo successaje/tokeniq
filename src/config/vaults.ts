@@ -49,6 +49,78 @@ export const VAULT_TYPES: Record<string, VaultType> = {
     risk: 'low',
     tags: ['Stablecoin', 'Sei', 'Yield']
   },
+
+  seiHighYield: {
+    id: 'sei-high-yield',
+    name: 'Sei High Yield Pool',
+    description: 'Maximum yield through Sei Network liquid staking and DeFi strategies',
+    chain: 'Sei',
+    available: true,
+    apy: 12.8,
+    tvl: parseEther('1200000'), // $1.2M TVL
+    minDeposit: parseEther('100'), // $100 minimum
+    tokenDecimals: 18,
+    tokenSymbol: 'SEI',
+    tokenAddress: '0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54',
+    vaultAddress: '0x02406b6d17E743deA7fBbfAE8A15c82e4481E168',
+    strategy: 'Liquid Staking + DeFi',
+    risk: 'medium',
+    tags: ['High Yield', 'Sei', 'Liquid Staking']
+  },
+
+  seiStablecoinVault: {
+    id: 'sei-stablecoin-vault',
+    name: 'Sei Stablecoin Vault',
+    description: 'Optimized stablecoin yield strategy on Sei Network',
+    chain: 'Sei',
+    available: true,
+    apy: 9.5,
+    tvl: parseEther('800000'), // $800k TVL
+    minDeposit: parseEther('50'), // $50 minimum
+    tokenDecimals: 18,
+    tokenSymbol: 'USDC',
+    tokenAddress: '0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54',
+    vaultAddress: '0x02406b6d17E743deA7fBbfAE8A15c82e4481E168',
+    strategy: 'Stablecoin Yield',
+    risk: 'low',
+    tags: ['Stablecoin', 'Sei', 'Low Risk']
+  },
+
+  seiEthVault: {
+    id: 'sei-eth-vault',
+    name: 'Sei ETH Yield',
+    description: 'Ethereum yield opportunities on Sei Network',
+    chain: 'Sei',
+    available: true,
+    apy: 10.2,
+    tvl: parseEther('600000'), // $600k TVL
+    minDeposit: parseEther('0.1'), // 0.1 ETH
+    tokenDecimals: 18,
+    tokenSymbol: 'ETH',
+    tokenAddress: '0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54',
+    vaultAddress: '0x02406b6d17E743deA7fBbfAE8A15c82e4481E168',
+    strategy: 'ETH Yield Strategy',
+    risk: 'medium',
+    tags: ['ETH', 'Sei', 'Yield']
+  },
+
+  seiBtcVault: {
+    id: 'sei-btc-vault',
+    name: 'Sei Bitcoin Vault',
+    description: 'Bitcoin yield strategies on Sei Network',
+    chain: 'Sei',
+    available: true,
+    apy: 11.5,
+    tvl: parseEther('950000'), // $950k TVL
+    minDeposit: parseEther('0.001'), // 0.001 BTC
+    tokenDecimals: 8,
+    tokenSymbol: 'BTC',
+    tokenAddress: '0xC310b43748E5303F1372Ab2C9075629E0Bb4FE54',
+    vaultAddress: '0x02406b6d17E743deA7fBbfAE8A15c82e4481E168',
+    strategy: 'BTC Yield Strategy',
+    risk: 'medium',
+    tags: ['Bitcoin', 'Sei', 'Yield']
+  },
   
   // Core Vaults
   coreUsdtVault: {

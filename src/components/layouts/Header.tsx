@@ -18,9 +18,9 @@ export function Header() {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname === path || 
-           (path !== '/' && pathname.startsWith(path) && 
-           (pathname[path.length] === '/' || pathname.length === path.length));
+    return pathname === path ||
+      (path !== '/' && pathname.startsWith(path) &&
+        (pathname[path.length] === '/' || pathname.length === path.length));
   };
 
   return (
@@ -41,8 +41,8 @@ export function Header() {
                   href={item.href}
                   className={cn(
                     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary",
-                    isActive(item.href) 
-                      ? "text-primary" 
+                    isActive(item.href)
+                      ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -56,6 +56,10 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-medium">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="whitespace-nowrap">Polkadot Hub (EVM)</span>
+            </div>
             <ThemeToggle />
             <div className="hidden md:block">
               <ConnectButton />

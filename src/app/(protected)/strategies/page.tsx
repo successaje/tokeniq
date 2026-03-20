@@ -6,9 +6,12 @@ import { StrategyCardSkeleton } from './components/strategy-card-skeleton';
 import { StrategyPreviewModal } from './components/strategy-preview-modal';
 import { ScheduleStrategyModal } from './components/schedule-strategy-modal';
 import { Input } from '@/components/ui/input';
-import { Search, SlidersHorizontal, Plus, RefreshCw } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, RefreshCw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Network } from 'lucide-react';
 import { toast } from 'sonner';
+import { SEI_BRANDING } from '@/config/sei-branding';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -119,6 +122,7 @@ export default function StrategiesPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState<'a-z' | 'allocation' | 'risk'>('a-z');
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [crossChainEnabled, setCrossChainEnabled] = useState(true);
 
   // Simulate loading data
   useEffect(() => {
@@ -141,24 +145,24 @@ export default function StrategiesPage() {
   // Handle strategy scheduling
   const handleScheduleSubmit = (date: Date, amount: string) => {
     if (!selectedStrategy) return;
-    
+
     // In a real app, this would be an API call
     console.log(`Scheduled ${amount} USDC for ${selectedStrategy.title} on ${date}`);
-    
+
     // Show success toast
     toast.success(`Scheduled ${selectedStrategy.title} strategy`, {
       description: `Will execute on ${date.toLocaleDateString()} with ${amount} USDC`
     });
-    
+
     setIsScheduleOpen(false);
   };
 
   const filteredStrategies = strategies
     .filter(strategy => {
-      const matchesSearch = 
+      const matchesSearch =
         strategy.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         strategy.summary.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       if (activeTab === 'all') return matchesSearch;
       if (activeTab === 'active') return matchesSearch && strategy.allocation > 0;
       return matchesSearch;
@@ -182,23 +186,32 @@ export default function StrategiesPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="flex-1 p-4 md:p-6 max-w-[2000px] mx-auto w-full space-y-6">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 flex-wrap">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   Investment Strategies
-                  <div className="mt-1 h-1 w-20 rounded-full bg-gradient-to-r from-blue-500 to-blue-600"></div>
                 </h1>
-                <p className="mt-2 text-gray-500">
-                  Browse and manage your investment strategies
+                <p className="mt-2 text-muted-foreground">
+                  AI-powered cross-chain yield strategies on Polkadot Hub
                 </p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="text-sm">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  {SEI_BRANDING.badges.intelligenceLayer}
+                </Badge>
+                <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 text-sm">
+                  <Network className="h-3 w-3 mr-1" />
+                  Cross-Chain Strategy Enabled
+                </Badge>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleRefresh}
                 disabled={isLoading}
                 className={isLoading ? 'cursor-not-allowed' : ''}
@@ -208,8 +221,8 @@ export default function StrategiesPage() {
               </Button>
             </div>
           </div>
-          <Button 
-            className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm transition-all hover:shadow-md hover:shadow-blue-500/30"
+          <Button
+            className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-sm transition-all hover:shadow-md hover:shadow-purple-500/30"
             onClick={() => {
               // In a real app, this would open a form to create a new strategy
               toast.info('Create new strategy form would open here');
@@ -217,34 +230,48 @@ export default function StrategiesPage() {
           >
             <Plus className="mr-2 h-4 w-4" />
             <span className="relative z-10">New Strategy</span>
-            <span className="absolute inset-0 -z-0 bg-gradient-to-r from-blue-400/0 via-white/30 to-blue-400/0 opacity-0 transition-opacity group-hover:opacity-100"></span>
+            <span className="absolute inset-0 -z-0 bg-gradient-to-r from-purple-400/0 via-white/30 to-purple-400/0 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </Button>
         </div>
 
         <div className="space-y-4">
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-            <Tabs 
-              value={activeTab} 
+            <Tabs
+              value={activeTab}
               onValueChange={setActiveTab}
               className="w-full md:w-auto"
             >
               <TabsList className="bg-gray-100 p-1 h-auto">
-                <TabsTrigger 
-                  value="all" 
+                <TabsTrigger
+                  value="all"
                   className="px-4 py-1.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600"
                 >
                   All Strategies
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="active" 
+                <TabsTrigger
+                  value="active"
                   className="px-4 py-1.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600"
                 >
                   Active
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-            
-            <div className="flex space-x-2">
+
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 items-center">
+              <button
+                onClick={() => setCrossChainEnabled(!crossChainEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${crossChainEnabled ? 'bg-purple-600' : 'bg-gray-200'
+                  }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${crossChainEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                />
+              </button>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap hidden md:block">
+                Enable Cross-Chain Optimization
+              </span>
+
               <div className="relative w-full md:w-64">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
@@ -255,11 +282,11 @@ export default function StrategiesPage() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     disabled={isLoading}
                   >
@@ -270,21 +297,21 @@ export default function StrategiesPage() {
                 <DropdownMenuContent className="w-48 border-gray-200 bg-white shadow-lg">
                   <DropdownMenuLabel className="text-gray-700">Sort by</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-gray-200" />
-                  <DropdownMenuCheckboxItem 
-                    checked={sortBy === 'a-z'} 
+                  <DropdownMenuCheckboxItem
+                    checked={sortBy === 'a-z'}
                     onCheckedChange={() => setSortBy('a-z')}
                     className="text-gray-700 focus:bg-blue-50 focus:text-blue-600"
                   >
                     A-Z
                   </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem 
+                  <DropdownMenuCheckboxItem
                     checked={sortBy === 'allocation'}
                     onCheckedChange={() => setSortBy('allocation')}
                     className="text-gray-700 focus:bg-blue-50 focus:text-blue-600"
                   >
                     Allocation
                   </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem 
+                  <DropdownMenuCheckboxItem
                     checked={sortBy === 'risk'}
                     onCheckedChange={() => setSortBy('risk')}
                     className="text-gray-700 focus:bg-blue-50 focus:text-blue-600"
@@ -311,7 +338,7 @@ export default function StrategiesPage() {
                   {filteredStrategies.map((strategy) => {
                     const { id, title, icon, allocation, apy, riskLevel, summary, lastExecuted } = strategy;
                     return (
-                      <div 
+                      <div
                         key={id}
                         className="relative transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                       >
@@ -337,23 +364,23 @@ export default function StrategiesPage() {
                   </div>
                   <h3 className="mt-4 text-lg font-medium text-gray-900">No strategies found</h3>
                   <p className="mt-2 text-gray-500">
-                    {searchTerm 
+                    {searchTerm
                       ? 'No strategies match your search. Try adjusting your filters.'
-                      : activeTab === 'active' 
+                      : activeTab === 'active'
                         ? 'You don\'t have any active strategies yet.'
                         : 'No strategies available.'}
                   </p>
                   <div className="mt-6 flex justify-center space-x-3">
                     {searchTerm && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setSearchTerm('')}
                         className="border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                       >
                         Clear search
                       </Button>
                     )}
-                    <Button 
+                    <Button
                       variant="default"
                       onClick={() => {
                         // In a real app, this would open a form to create a new strategy
@@ -387,7 +414,7 @@ export default function StrategiesPage() {
               minLockPeriod: '30 days',
             }}
           />
-          
+
           <ScheduleStrategyModal
             isOpen={isScheduleOpen}
             onClose={() => setIsScheduleOpen(false)}

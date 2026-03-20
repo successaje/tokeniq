@@ -1,4 +1,6 @@
 import { PortfolioOverview } from '@/components/portfolio/PortfolioOverview';
+import { CrossChainAllocation } from '@/components/portfolio/CrossChainAllocation';
+import { XcmActivityLog } from '@/components/portfolio/XcmActivityLog';
 import { Surface } from '@/components/ui/surface';
 
 export default function PortfolioPage() {
@@ -17,8 +19,17 @@ export default function PortfolioPage() {
           </div>
         </div>
       </Surface>
-      
+
       <PortfolioOverview />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div>
+          <CrossChainAllocation />
+        </div>
+        <div>
+          <XcmActivityLog />
+        </div>
+      </div>
     </div>
   );
 }
