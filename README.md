@@ -1,9 +1,14 @@
+<div align="center">
+  <img src="https://cryptologos.cc/logos/polkadot-new-dot-logo.png" alt="Polkadot Logo" width="100" />
+  <h2>Polkadot Solidity Hackathon Submission</h2>
+</div>
+
 # 🧠 TokenIQ
 
-**TokenIQ** is a B2B decentralized finance (DeFi) platform that leverages **AI**, **Chainlink infrastructure**, and **tokenized real-world assets (RWAs)** to empower businesses, DAOs, and funds with smart treasury management, cross-chain liquidity, and yield optimization strategies.
+**TokenIQ** is a B2B decentralized finance (DeFi) platform that leverages **AI**, **Polkadot Hub (EVM)**, and **tokenized real-world assets (RWAs)** to empower businesses, DAOs, and funds with smart treasury management, cross-chain (XCM) liquidity, and yield optimization strategies across Polkadot parachains.
 
 > Think: **Quant-as-a-Service** + **Decentralized BlackRock**  
-> Powered by **AI-driven capital allocation** and **Chainlink CCIP**, TokenIQ turns idle capital into intelligent yield.
+> Powered by **AI-driven capital allocation** and **Polkadot XCM**, TokenIQ turns idle capital into intelligent yield across Moonbeam, Astar, and Acala.
 
 
 ## 🚀 Key Features
