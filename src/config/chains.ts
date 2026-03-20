@@ -21,7 +21,7 @@ export const SEI_MAINNET: Chain = {
     public: { http: ['https://rpc-sei.keplr.app'] },
   },
   blockExplorers: {
-    default: { 
+    default: {
       name: 'Sei Explorer',
       url: 'https://www.seiscan.app',
     },
@@ -34,7 +34,7 @@ export const SEI_TESTNET: Chain = {
   name: 'Sei Testnet',
   network: 'sei-testnet',
   icon: "/logos/sei-logo.png",
-  
+
   nativeCurrency: {
     decimals: 18,
     name: 'SEI',
@@ -45,7 +45,7 @@ export const SEI_TESTNET: Chain = {
     public: { http: ['https://evm-rpc-testnet.sei-apis.com'] },
   },
   blockExplorers: {
-    default: { 
+    default: {
       name: 'Sei Testnet Explorer',
       url: 'https://testnet.seitrace.com',
     },
@@ -71,7 +71,7 @@ export const SUPPORTED_CHAINS = {
     logo: '/logos/sei-logo.png',
     color: '#00e6b8',
   },
-  
+
   // Creditcoin chains
   creditcoin: {
     id: CREDITCOIN_MAINNET_ID,
@@ -103,7 +103,7 @@ export const CREDITCOIN_MAINNET: Chain = {
     public: { http: ['https://mainnet3.creditcoin.network'] },
   },
   blockExplorers: {
-    default: { 
+    default: {
       name: 'Creditcoin Explorer',
       url: 'https://explorer.creditcoin.network',
     },
@@ -126,7 +126,7 @@ export const CREDITCOIN_TESTNET: Chain = {
     public: { http: ['https://rpc.cc3-testnet.creditcoin.network'] },
   },
   blockExplorers: {
-    default: { 
+    default: {
       name: 'Creditcoin Testnet Explorer',
       url: 'https://explorer.cc3-testnet.creditcoin.network',
     },
@@ -135,6 +135,26 @@ export const CREDITCOIN_TESTNET: Chain = {
 };
 
 export const chains: CustomChain[] = [
+  // Polkadot Hub
+  {
+    id: 1284,
+    name: "Polkadot Hub",
+    network: "polkadot-hub",
+    icon: "https://cryptologos.cc/logos/polkadot-new-dot-logo.png",
+    color: "#E6007A",
+    nativeCurrency: {
+      name: "Polkadot",
+      symbol: "DOT",
+      decimals: 18,
+    },
+    rpcUrls: {
+      default: { http: ["https://rpc.api.moonbeam.network"] },
+      public: { http: ["https://rpc.api.moonbeam.network"] },
+    },
+    blockExplorers: {
+      default: { name: "Moonscan", url: "https://moonscan.io" },
+    },
+  },
   // Creditcoin Mainnet
   {
     id: CREDITCOIN_MAINNET_ID,
@@ -155,7 +175,7 @@ export const chains: CustomChain[] = [
       default: { name: "Creditcoin Explorer", url: "https://explorer.creditcoin.network" },
     },
   },
-  
+
   // Creditcoin Testnet
   {
     id: CREDITCOIN_TESTNET_ID,
@@ -176,14 +196,14 @@ export const chains: CustomChain[] = [
       default: { name: "Creditcoin Testnet Explorer", url: "https://explorer.cc3-testnet.creditcoin.network" },
     },
   },
-  
+
   // Sei Network
   {
     ...SEI_MAINNET,
     icon: "/logos/sei-logo.png",
     color: "#00e6b8",
   },
-  
+
   // Avalanche
   {
     id: 43114,

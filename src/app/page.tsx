@@ -12,10 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { 
+import {
   ArrowRightIcon,
   ArrowDownIcon,
-  SparklesIcon, 
+  SparklesIcon,
   ChartBarIcon,
   ShieldCheckIcon,
   ArrowsRightLeftIcon,
@@ -44,12 +44,12 @@ const AnimatedText = ({ texts, interval = 4000 }: { texts: string[], interval?: 
   }, [texts.length, interval]);
 
   const variants = {
-    current: { 
+    current: {
       opacity: 1 as const,
       y: 0 as const,
       filter: 'blur(0px)' as const,
     },
-    next: { 
+    next: {
       opacity: 0 as const,
       y: 30 as const,
       filter: 'blur(4px)' as const,
@@ -81,7 +81,7 @@ const AnimatedText = ({ texts, interval = 4000 }: { texts: string[], interval?: 
           {texts[currentIndex]}
         </span>
       </motion.span>
-      
+
       {/* Next text */}
       {isAnimating && (
         <motion.span
@@ -104,10 +104,10 @@ const AnimatedText = ({ texts, interval = 4000 }: { texts: string[], interval?: 
 // Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { 
+    transition: {
       duration: 0.6
     }
   }
@@ -288,7 +288,7 @@ export default function Home() {
         <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-full blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--primary)/2%,transparent_70%)]" />
       </div>
-      
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Development Status Tag */}
@@ -306,9 +306,9 @@ export default function Home() {
         <div className="absolute inset-0 -z-10">
           {/* Gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background/90 to-primary/5" />
-          
+
           {/* Animated floating assets */}
-          <motion.div 
+          <motion.div
             className="absolute top-1/4 left-1/4 w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-300 shadow-lg"
             animate={{
               y: [0, -20, 0],
@@ -323,8 +323,8 @@ export default function Home() {
           >
             <span className="absolute inset-0 flex items-center justify-center text-2xl">₿</span>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="absolute top-1/3 right-1/4 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-300 shadow-lg"
             animate={{
               y: [0, -15, 0],
@@ -341,8 +341,8 @@ export default function Home() {
           >
             <span className="absolute inset-0 flex items-center justify-center text-xl">Ξ</span>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="absolute bottom-1/4 left-1/3 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-300 shadow-lg"
             animate={{
               y: [0, 15, 0],
@@ -359,9 +359,9 @@ export default function Home() {
           >
             <span className="absolute inset-0 flex items-center justify-center text-lg">Ⓢ</span>
           </motion.div>
-          
+
           {/* AI Brain / Vault Animation */}
-          <motion.div 
+          <motion.div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-10"
             animate={{
               scale: [1, 1.1, 1],
@@ -376,8 +376,8 @@ export default function Home() {
           >
             <div className="absolute inset-0 rounded-full border-2 border-primary/30" />
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10"
             animate={{
               scale: [1, 1.15, 1],
@@ -392,8 +392,8 @@ export default function Home() {
           >
             <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-gradient-to-br from-primary/5 to-primary/20"
             animate={{
               scale: [1, 1.05, 1],
@@ -412,15 +412,15 @@ export default function Home() {
               </svg>
             </div>
           </motion.div>
-          
+
           {/* Animated grid pattern */}
           <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }} />
-          
+
           {/* Floating gradient orbs */}
-          <motion.div 
+          <motion.div
             className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl -z-10"
             animate={{
               scale: [1, 1.1, 1],
@@ -434,7 +434,7 @@ export default function Home() {
               ease: 'easeInOut',
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl -z-10"
             animate={{
               scale: [1, 1.1, 1],
@@ -450,15 +450,15 @@ export default function Home() {
             }}
           />
         </div>
-        
+
         <div className="container px-6 mx-auto relative z-10">
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
             className="max-w-6xl mx-auto text-center pt-8 sm:pt-12 md:pt-16"
           >
-            <motion.div 
+            <motion.div
               variants={fadeInUp}
               className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary-foreground mb-10 md:mb-12 border border-border/20 backdrop-blur-sm"
             >
@@ -466,13 +466,13 @@ export default function Home() {
               <span>Now with AI-Powered Insights</span>
               <div className="ml-2 h-2 w-2 rounded-full bg-green-400 animate-pulse" />
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               variants={fadeInUp}
               className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl xl:text-8xl mb-8 leading-tight"
             >
               <div className="mb-2">The Future of</div>
-              <AnimatedText 
+              <AnimatedText
                 texts={[
                   'DeFi Analytics',
                   'Crypto Trading',
@@ -480,10 +480,10 @@ export default function Home() {
                   'Yield Optimization',
                   'Cross-Chain Swaps',
                   'AI-Powered Insights'
-                ]} 
+                ]}
                 interval={4000}
               />
-              <motion.span 
+              <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-2xl -z-0"
                 animate={{
                   opacity: [0.6, 0.8, 0.6],
@@ -495,15 +495,15 @@ export default function Home() {
                 }}
               />
             </motion.div>
-            
-            <motion.p 
+
+            <motion.p
               variants={fadeInUp}
               className="text-xl md:text-2xl text-foreground/80 mb-12 max-w-4xl mx-auto leading-relaxed"
             >
               Unlock the full potential of your Crypto portfolio and Bitcoin assets through advanced vault strategies, tokenization, and AI-driven financial automation—all in one platform.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               variants={fadeInUp}
               className="flex flex-col sm:flex-row items-center justify-center gap-6"
             >
@@ -524,9 +524,9 @@ export default function Home() {
                 </Link>
               </div>
             </motion.div>
-            
+
             {/* Stats preview */}
-            <motion.div 
+            <motion.div
               variants={fadeIn}
               className="mt-16 p-6 bg-background/50 backdrop-blur-md rounded-2xl border border-border/20 inline-flex flex-wrap justify-center gap-8"
             >
@@ -544,12 +544,12 @@ export default function Home() {
                 </div>
               ))}
             </motion.div>
-            
+
             {/* Scroll indicator */}
-            <motion.div 
+            <motion.div
               className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ 
+              animate={{
                 opacity: [0, 1, 1, 0],
                 y: [20, 0, 0, -10],
               }}
@@ -576,11 +576,11 @@ export default function Home() {
               </div>
               <span className="text-xs text-foreground/50">Scroll to explore</span>
             </motion.div>
-            
+
             {/* How It Works Section */}
             <section className="py-20 bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
               <div className="container mx-auto px-6">
-                <motion.div 
+                <motion.div
                   className="text-center mb-16"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -598,7 +598,7 @@ export default function Home() {
                 <div className="relative max-w-4xl mx-auto">
                   {/* Connecting line */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/20 via-purple-500/40 to-pink-500/20 -z-10" />
-                  
+
                   {/* Steps */}
                   <div className="space-y-16">
                     {/* Step 1 */}
@@ -677,9 +677,9 @@ export default function Home() {
                   backgroundSize: '20px 20px',
                 }} />
               </div>
-              
+
               <div className="container mx-auto px-6">
-                <motion.div 
+                <motion.div
                   className="text-center mb-16"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -693,7 +693,7 @@ export default function Home() {
                     Advanced DeFi solutions built on Core to maximize your Bitcoin's potential
                   </p>
                 </motion.div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                   {[
                     {
@@ -746,9 +746,9 @@ export default function Home() {
                 </div>
               </div>
             </section>
-            
+
             {/* Trusted by section with gradient theme */}
-            <motion.div 
+            <motion.div
               className="relative mt-32 py-16 overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -760,10 +760,10 @@ export default function Home() {
                 <div className="absolute -top-1/2 left-1/4 w-1/2 h-1/2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl" />
                 <div className="absolute -bottom-1/4 right-1/4 w-1/3 h-1/2 bg-gradient-to-r from-pink-500/5 to-blue-500/5 rounded-full blur-3xl" />
               </div>
-              
+
               <div className="container mx-auto px-6">
                 <div className="text-center mb-12">
-                  <motion.h2 
+                  <motion.h2
                     className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -772,7 +772,7 @@ export default function Home() {
                   >
                     Trusted by Industry Leaders
                   </motion.h2>
-                  <motion.p 
+                  <motion.p
                     className="text-foreground/70 max-w-2xl mx-auto text-lg"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -785,6 +785,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 items-center justify-items-center">
                   {[
+                    { name: 'Polkadot', logo: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png' },
                     { name: 'Sei', logo: '/sei-logo.png' },
                     { name: 'Ethereum', logo: '/logos/ethereum.png' },
                     { name: 'Creditcoin', logo: '/logos/creditcoin-logo.png' },
@@ -801,7 +802,7 @@ export default function Home() {
                     { name: 'Aave', logo: '/logos/aave.png' },
                     { name: 'Chainlink', logo: '/logos/chainlink.png' },
                   ].map((item, index) => (
-                    <motion.div 
+                    <motion.div
                       key={item.name}
                       className="relative group w-full h-24 flex items-center justify-center p-4 rounded-2xl backdrop-blur-sm bg-gradient-to-br from-background/80 to-background/50 border border-border/20 hover:border-blue-400/30 transition-all duration-300"
                       initial={{ opacity: 0, y: 20 }}
@@ -814,8 +815,8 @@ export default function Home() {
                       }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <img 
-                        src={item.logo} 
+                      <img
+                        src={item.logo}
                         alt={item.name}
                         className="h-10 w-auto max-w-[120px] object-contain opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110"
                         loading="lazy"
@@ -835,24 +836,24 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/90" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary)/0.03),transparent_70%)]" />
         </div>
-        
+
         <div className="container px-6 mx-auto">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
               What is BTCfi?
             </h2>
-            
+
             <div className="space-y-8">
               <div className="bg-background/80 backdrop-blur-sm border border-border/20 rounded-2xl p-8 md:p-10 shadow-sm">
                 <p className="text-lg leading-relaxed text-foreground/90 mb-6">
                   <strong className="font-semibold text-foreground">BTCfi (Bitcoin Decentralized Finance)</strong> is the emerging frontier of DeFi innovation built around Bitcoin — unlocking the full potential of your BTC assets beyond holding.
                 </p>
-                
+
                 <p className="text-foreground/80 leading-relaxed">
                   With TokenIQ, BTCfi becomes smarter, faster, and more accessible. Our platform fuses powerful AI automation, cross-chain liquidity, and the Core blockchain's performance to let you do more with your Bitcoin than ever before.
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { emoji: '📈', text: 'Stake & earn from smart vaults' },
@@ -861,8 +862,8 @@ export default function Home() {
                   { emoji: '🌍', text: 'Tokenize assets using BTC' },
                   { emoji: '🔗', text: 'Bridge BTC across chains' }
                 ].map((item, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-background/80 backdrop-blur-sm border border-border/20 rounded-xl p-4 text-left flex items-center gap-3 hover:border-primary/30 transition-colors"
                   >
                     <span className="text-2xl">{item.emoji}</span>
@@ -874,7 +875,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+
       {/* Features Section */}
       <section id="features" className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 -z-10">
@@ -882,7 +883,7 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 h-2/3 bg-gradient-radial from-blue-500/5 via-transparent to-transparent rounded-full" />
         </div>
         <div className="container px-6 mx-auto relative">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -894,7 +895,7 @@ export default function Home() {
               Everything you need to manage your digital assets efficiently and securely
             </p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -955,7 +956,7 @@ export default function Home() {
         </div>
         <div className="container px-6 mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <motion.div 
+            <motion.div
               className="md:w-1/2"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1001,7 +1002,7 @@ export default function Home() {
                 </Link>
               </div>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="md:w-1/2 relative"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1013,15 +1014,15 @@ export default function Home() {
                 <div className="relative bg-background/50 backdrop-blur-sm p-8 rounded-2xl border border-border/20 shadow-lg">
                   <div className="p-6 rounded-xl bg-gradient-to-br from-background to-background/80 border border-border/20">
                     {/* Light mode logo */}
-                    <img 
-                      src="/logo_eliza_OS_light.png" 
+                    <img
+                      src="/logo_eliza_OS_light.png"
                       alt="ElizaOS"
                       className="h-12 w-auto dark:hidden"
                       loading="lazy"
                     />
                     {/* Dark mode logo */}
-                    <img 
-                      src="/logo_eliza_OS_dark.png" 
+                    <img
+                      src="/logo_eliza_OS_dark.png"
                       alt="ElizaOS"
                       className="h-12 w-auto hidden dark:block"
                       loading="lazy"
@@ -1057,7 +1058,7 @@ export default function Home() {
           <div className="absolute -left-1/4 bottom-1/4 w-1/2 h-1/2 bg-gradient-to-l from-pink-500/20 to-blue-500/20 rounded-full blur-3xl" />
         </div>
         <div className="container px-6 mx-auto text-center relative">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1093,7 +1094,7 @@ export default function Home() {
               { value: '50+', label: 'Blockchains' },
               { value: '24/7', label: 'Support' }
             ].map((stat, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -1149,8 +1150,8 @@ export default function Home() {
               <ul className="space-y-2">
                 {['About', 'Whitepaper', 'Careers', 'Contact'].map((item) => (
                   <li key={item}>
-                    <a 
-                      href={item === 'Whitepaper' ? '/whitepaper' : '#'} 
+                    <a
+                      href={item === 'Whitepaper' ? '/whitepaper' : '#'}
                       className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {item}
@@ -1165,9 +1166,9 @@ export default function Home() {
               &copy; {new Date().getFullYear()} TokenIQ. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a 
-                href="https://x.com/TokenIQLabs" 
-                target="_blank" 
+              <a
+                href="https://x.com/TokenIQLabs"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Twitter"
@@ -1177,9 +1178,9 @@ export default function Home() {
                   <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
                 </svg>
               </a>
-              <a 
-                href="https://github.com/successaje/tokeniq" 
-                target="_blank" 
+              <a
+                href="https://github.com/successaje/tokeniq"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="GitHub"
@@ -1189,20 +1190,20 @@ export default function Home() {
                   <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
                 </svg>
               </a>
-              <a 
-                href="https://linkedin.com/company/tokeniqlabs" 
-                target="_blank" 
+              <a
+                href="https://linkedin.com/company/tokeniqlabs"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="LinkedIn"
               >
                 <span className="sr-only">LinkedIn</span>
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                 </svg>
               </a>
-              <a 
-                href="mailto:successaje7@gmail.com" 
+              <a
+                href="mailto:successaje7@gmail.com"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Email"
               >

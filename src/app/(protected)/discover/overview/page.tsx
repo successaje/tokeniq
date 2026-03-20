@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default function DiscoverOverviewPage() {
   // Sample data - replace with real data from your API
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   const assets = [
     { name: 'ETH', value: 1500000, color: '#627EEA' },
     { name: 'BTC', value: 1200000, color: '#F7931A' },
@@ -25,44 +25,51 @@ export default function DiscoverOverviewPage() {
   ];
 
   const chains = [
-    { 
-      name: 'Ethereum', 
-      value: 2200000, 
+    {
+      name: 'Polkadot Hub',
+      value: 3500000,
+      color: '#E6007A',
+      logoUrl: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
+      fallbackUrl: ''
+    },
+    {
+      name: 'Ethereum',
+      value: 2200000,
       color: '#627EEA',
       logoUrl: '/logos/ethereum.png',
       fallbackUrl: '/logos/ethereum copy.png' // Fallback in case the first one doesn't exist
     },
-    { 
-      name: 'Arbitrum', 
-      value: 800000, 
+    {
+      name: 'Arbitrum',
+      value: 800000,
       color: '#28A0F0',
       logoUrl: '/logos/arbitrum-arb-logo.png',
       fallbackUrl: ''
     },
-    { 
-      name: 'Optimism', 
-      value: 500000, 
+    {
+      name: 'Optimism',
+      value: 500000,
       color: '#FF0420',
       logoUrl: '/logos/optimism.png',
       fallbackUrl: ''
     },
-    { 
-      name: 'Polygon', 
-      value: 300000, 
+    {
+      name: 'Polygon',
+      value: 300000,
       color: '#8247E5',
       logoUrl: '/logos/polygon-matic-logo.png',
       fallbackUrl: ''
     },
-    { 
-      name: 'Avalanche', 
-      value: 250000, 
+    {
+      name: 'Avalanche',
+      value: 250000,
       color: '#E84142',
       logoUrl: '/logos/avalanche-avax-logo.png',
       fallbackUrl: ''
     },
     {
-      name: 'Sei Network', 
-      value: 400000, 
+      name: 'Sei Network',
+      value: 400000,
       color: '#00e6b8',
       logoUrl: '/logos/sei-logo.png',
       fallbackUrl: ''
@@ -113,13 +120,13 @@ export default function DiscoverOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <TreasuryOverview 
-        totalBalance="$4,000,000" 
+      <TreasuryOverview
+        totalBalance="$4,000,000"
         assets={assets}
         chains={chains}
       />
-      
-      <VaultsByChain 
+
+      <VaultsByChain
         vaults={Object.values(VAULT_TYPES).map(vault => ({
           id: vault.id,
           address: vault.vaultAddress as `0x${string}`,
@@ -150,19 +157,19 @@ export default function DiscoverOverviewPage() {
           isNew: true,
           userBalance: 0n,
           owner: '0x0' as `0x${string}`
-        }))} 
+        }))}
       />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Portfolio Performance</h2>
             <div className="flex items-center space-x-1">
               {['24H', '7D', '30D', '90D', '1Y', 'ALL'].map((period) => (
-                <Button 
+                <Button
                   key={period}
                   variant={period === '30D' ? 'default' : 'ghost'}
-                  size="sm" 
+                  size="sm"
                   className={`h-8 px-2 text-xs ${period === '30D' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
                 >
                   {period}
@@ -170,8 +177,8 @@ export default function DiscoverOverviewPage() {
               ))}
             </div>
           </div>
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
@@ -193,7 +200,7 @@ export default function DiscoverOverviewPage() {
                       <span>+12.5% <span className="text-muted-foreground/70 text-xs">(30d)</span></span>
                     </div>
                   </div>
-                  
+
                   <div className="bg-muted/20 p-4 rounded-xl border transition-all hover:shadow-sm">
                     <div className="flex items-center justify-between mb-1">
                       <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">30d Yield</div>
@@ -205,7 +212,7 @@ export default function DiscoverOverviewPage() {
                       <span>+2.3% <span className="text-muted-foreground/70 text-xs">(7d)</span></span>
                     </div>
                   </div>
-                  
+
                   <div className="bg-muted/20 p-4 rounded-xl border transition-all hover:shadow-sm">
                     <div className="flex items-center justify-between mb-1">
                       <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">APY</div>
@@ -217,7 +224,7 @@ export default function DiscoverOverviewPage() {
                       <span>+1.6% <span className="text-muted-foreground/70 text-xs">vs benchmark</span></span>
                     </div>
                   </div>
-                  
+
                   <div className="bg-muted/20 p-4 rounded-xl border transition-all hover:shadow-sm">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -230,8 +237,8 @@ export default function DiscoverOverviewPage() {
                       <div className="text-xs px-2.5 py-1 bg-green-500/10 text-green-500 rounded-full font-medium">3/10</div>
                     </div>
                     <div className="w-full bg-muted/50 rounded-full h-2 mb-1.5">
-                      <div 
-                        className="h-2 rounded-full bg-gradient-to-r from-green-500 to-green-400" 
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-green-500 to-green-400"
                         style={{ width: '30%' }}
                       ></div>
                     </div>
@@ -241,7 +248,7 @@ export default function DiscoverOverviewPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-muted/30 p-4 rounded-lg border">
                     <div className="flex items-center justify-between mb-3">
@@ -253,8 +260,8 @@ export default function DiscoverOverviewPage() {
                         <div key={asset.name} className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <div className="flex items-center">
-                              <div 
-                                className="w-3 h-3 rounded-full mr-2" 
+                              <div
+                                className="w-3 h-3 rounded-full mr-2"
                                 style={{ backgroundColor: asset.color }}
                               />
                               <span>{asset.name}</span>
@@ -264,8 +271,8 @@ export default function DiscoverOverviewPage() {
                             </span>
                           </div>
                           <div className="w-full bg-muted rounded-full h-2">
-                            <div 
-                              className="h-2 rounded-full" 
+                            <div
+                              className="h-2 rounded-full"
                               style={{
                                 width: `${(asset.value / 4000000) * 100}%`,
                                 backgroundColor: asset.color
@@ -276,7 +283,7 @@ export default function DiscoverOverviewPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="bg-muted/30 p-4 rounded-lg border">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-medium">Chain Distribution</h3>
@@ -288,8 +295,8 @@ export default function DiscoverOverviewPage() {
                           <div className="flex justify-between text-sm">
                             <div className="flex items-center">
                               <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-muted flex items-center justify-center">
-                                <img 
-                                  src={chain.logoUrl} 
+                                <img
+                                  src={chain.logoUrl}
                                   alt={`${chain.name} logo`}
                                   className="w-4 h-4 object-contain"
                                   onError={(e) => {
@@ -311,8 +318,8 @@ export default function DiscoverOverviewPage() {
                             </span>
                           </div>
                           <div className="w-full bg-muted rounded-full h-2">
-                            <div 
-                              className="h-2 rounded-full" 
+                            <div
+                              className="h-2 rounded-full"
                               style={{
                                 width: `${(chain.value / 4000000) * 100}%`,
                                 backgroundColor: chain.color
@@ -333,8 +340,8 @@ export default function DiscoverOverviewPage() {
             </TabsContent>
           </Tabs>
         </Card>
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -360,7 +367,7 @@ export default function DiscoverOverviewPage() {
               </Button>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies.map((strategy, index) => (
               <motion.div
@@ -380,7 +387,7 @@ export default function DiscoverOverviewPage() {
                 />
               </motion.div>
             ))}
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -396,7 +403,7 @@ export default function DiscoverOverviewPage() {
               </Card>
             </motion.div>
           </div>
-          
+
           <div className="flex justify-center mt-6">
             <Button variant="outline" className="gap-2">
               Load More Strategies
@@ -405,7 +412,7 @@ export default function DiscoverOverviewPage() {
           </div>
         </motion.div>
       </div>
-      
+
       <YieldHistory data={yieldHistoryData} className="mt-6" />
     </div>
   );

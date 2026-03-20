@@ -112,29 +112,35 @@ export const MOCK_TOKENS: Token[] = [
 ];
 
 export const CHAINS = [
-  { 
-    id: '1', 
-    label: 'Ethereum', 
+  {
+    id: '1284',
+    label: 'Polkadot Hub',
+    logoUrl: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
+    count: 8
+  },
+  {
+    id: '1',
+    label: 'Ethereum',
     logoUrl: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-    count: 5 
+    count: 5
   },
-  { 
-    id: '5', 
-    label: 'Solana', 
+  {
+    id: '5',
+    label: 'Solana',
     logoUrl: 'https://cryptologos.cc/logos/solana-sol-logo.png',
-    count: 1 
+    count: 1
   },
-  { 
-    id: '137', 
-    label: 'Polygon', 
+  {
+    id: '137',
+    label: 'Polygon',
     logoUrl: 'https://cryptologos.cc/logos/polygon-matic-logo.png',
-    count: 1 
+    count: 1
   },
-  { 
-    id: '43114', 
-    label: 'Avalanche', 
+  {
+    id: '43114',
+    label: 'Avalanche',
     logoUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-    count: 1 
+    count: 1
   },
 ];
 

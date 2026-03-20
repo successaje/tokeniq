@@ -24,6 +24,16 @@ interface ChainConfig {
 }
 
 export const SUPPORTED_CHAINS: Record<number, ChainConfig> = {
+  1284: { // Polkadot Hub / Moonbeam
+    id: 1284,
+    name: 'Polkadot Hub',
+    chainSelector: 1284n,
+    routerAddress: '0x0000000000000000000000000000000000000000',
+    nativeToken: 'DOT',
+    explorerUrl: 'https://moonscan.io',
+    logo: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
+    icon: '🔴'
+  },
   11155111: { // Ethereum Sepolia
     id: 11155111,
     name: 'Ethereum Sepolia',
@@ -226,7 +236,7 @@ const defaultContext: ContractContextType = {
   error: null,
   userVaults: [],
   allVaults: [],
-  refreshVaults: async () => {},
+  refreshVaults: async () => { },
   createVault: async () => null,
   depositToVault: async () => false,
   withdrawFromVault: async () => false,
@@ -257,7 +267,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   const { data: walletClient } = useWalletClient();
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  
+
   // State
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -267,7 +277,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   const [tokenBalances, setTokenBalances] = useState<Record<string, TokenBalance>>({});
   const [transactionHistory, setTransactionHistory] = useState<Record<string, TransactionHistory[]>>({});
   const [feeEstimates, setFeeEstimates] = useState<Record<string, FeeEstimate>>({});
-  
+
   // Memoize contract instances
   const { vaultFactory, vaultManager, aaveVault, crossChainRouter, treasuryAIManager } = useMemo(() => ({
     vaultFactory: contracts?.vaultFactory as VaultFactoryContract | undefined,
@@ -288,7 +298,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   // Token Balance Functions
   const getTokenBalances = useCallback(async (tokens: { address: Address; symbol: string; decimals: number }[]): Promise<TokenBalance[]> => {
     if (!publicClient || !address || !isMounted) return [];
-    
+
     try {
       const balancePromises = tokens.map(async (token) => {
         try {
@@ -302,14 +312,14 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
               decimals: token.decimals,
             } as TokenBalance;
           }
-          
+
           // For ERC20 tokens
           try {
             // First check if the contract exists by getting the bytecode
-            const bytecode = await publicClient.getBytecode({ 
-              address: token.address 
+            const bytecode = await publicClient.getBytecode({
+              address: token.address
             });
-            
+
             if (!bytecode || bytecode === '0x') {
               console.warn(`No contract found at address ${token.address} for token ${token.symbol}`);
               // Return zero balance for non-existent contracts
@@ -320,7 +330,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
                 decimals: token.decimals,
               } as TokenBalance;
             }
-            
+
             const balance = await publicClient.readContract({
               address: token.address,
               abi: [
@@ -335,7 +345,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
               functionName: 'balanceOf',
               args: [address],
             });
-            
+
             return {
               token: token.address,
               symbol: token.symbol,
@@ -357,70 +367,70 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
           return null;
         }
       });
-      
+
       const balances = await Promise.all(balancePromises);
-      
+
       // Filter out any null values and ensure we have TokenBalance[]
       const validBalances = balances.filter((b): b is TokenBalance => b !== null);
-      
+
       // Update cache
       const newBalances = validBalances.reduce<Record<string, TokenBalance>>((acc, balance) => {
         acc[`${balance.token}_${address}`] = balance;
         return acc;
       }, {});
-      
+
       setTokenBalances(prev => ({
         ...prev,
         ...newBalances,
       }));
-      
+
       return validBalances;
     } catch (error) {
       console.error('Error fetching token balances:', error);
       return [];
     }
   }, [publicClient, address]);
-  
+
   // Alias for getTokenBalances for backward compatibility
   const fetchTokenBalances = getTokenBalances;
-  
+
   const getNativeBalance = useCallback(async (address: Address) => {
     if (!publicClient) return 0n;
     return await publicClient.getBalance({ address });
   }, [publicClient]);
-  
+
   // Transaction History
   const getTransactionHistory = useCallback(async (address: Address, limit = 10): Promise<TransactionHistory[]> => {
     if (!publicClient) return [];
-    
+
     const cacheKey = `${address}_${limit}`;
-    
+
     // Return cached data if available
     if (transactionHistory[cacheKey]) {
       return transactionHistory[cacheKey];
     }
-    
+
     try {
       // In a real app, this would query a subgraph or indexer
       // For now, we'll return an empty array
       const history: TransactionHistory[] = [];
-      
+
       // Update cache
       setTransactionHistory(prev => ({
         ...prev,
         [cacheKey]: history,
       }));
-      
+
       return history;
     } catch (error) {
       console.error('Error fetching transaction history:', error);
       return [];
     }
   }, [publicClient, transactionHistory]);
-  
+
   // Alias for getTransactionHistory for backward compatibility
   const fetchTransactionHistory = getTransactionHistory;
-  
+
   // Fee Estimation
   const estimateCrossChainFees = useCallback(async (
     fromChainId: number,
@@ -429,18 +439,18 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
     amount: bigint
   ): Promise<FeeEstimate> => {
     const cacheKey = `${fromChainId}_${toChainId}_${token}_${amount}`;
-    
+
     // Return cached estimate if available
     if (feeEstimates[cacheKey]) {
       return feeEstimates[cacheKey];
     }
-    
+
     // In a real app, this would query the contract or an API for fee estimation
     // For now, we'll return a mock response
     const baseFee = 0.001; // Base fee in native token
     const amountFee = Number(amount) * 0.0001; // 0.01% of amount
     const total = baseFee + amountFee;
-    
+
     const estimate = {
       total,
       breakdown: [
@@ -448,16 +458,16 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
         { label: 'Amount Fee', value: amountFee },
       ],
     };
-    
+
     // Update cache
     setFeeEstimates(prev => ({
       ...prev,
       [cacheKey]: estimate,
     }));
-    
+
     return estimate;
   }, [feeEstimates]);
-  
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
@@ -522,7 +532,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   // Fetch all vaults from the contract
   const fetchAllVaults = useCallback(async () => {
     if (!vaultFactory) return [];
-    
+
     try {
       const vaultAddresses = await vaultFactory.read.getAllVaults();
       const vaults = await Promise.all(
@@ -565,18 +575,18 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   // Refresh both user and all vaults
   const refreshVaults = useCallback(async () => {
     if (!isMounted) return;
-    
+
     try {
       setIsLoading(true);
       resetError();
-      
+
       // Fetch all vaults
       const allVaults = await fetchAllVaults();
-      
+
       // Update state with the new vaults
       if (isMounted) {
         setAllVaults(allVaults);
-        
+
         // Filter user's vaults if address is available
         if (address) {
           const userVaults = allVaults.filter(
@@ -597,12 +607,12 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   // Fetch all vaults and update state
   const fetchVaults = useCallback(async () => {
     if (!vaultFactory || !vaultManager || !address || !isMounted) return;
-    
+
     const loadVaults = async () => {
       try {
         // Get all vaults
         const vaultAddresses = await vaultFactory.read.getAllVaults();
-        
+
         // Get vault details for each vault
         const vaultsPromises = vaultAddresses.map(async (vaultAddress) => {
           try {
@@ -613,7 +623,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
               vaultFactory.read.totalAssets([vaultAddress]),
               vaultFactory.read.totalSupply([vaultAddress])
             ]);
-            
+
             return {
               address: vaultAddress,
               name,
@@ -627,9 +637,9 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
             return null;
           }
         });
-        
+
         const allVaults = (await Promise.all(vaultsPromises)).filter(Boolean) as VaultInfo[];
-        
+
         // Get user's vaults
         const userVaultsPromises = allVaults.map(async (vault) => {
           try {
@@ -640,9 +650,9 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
             return null;
           }
         });
-        
+
         const userVaults = (await Promise.all(userVaultsPromises)).filter(Boolean) as VaultInfo[];
-        
+
         if (isMounted) {
           setAllVaults(allVaults);
           setUserVaults(userVaults);
@@ -658,7 +668,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
         }
       }
     };
-    
+
     // Set loading state and start loading
     setIsLoading(true);
     loadVaults();
@@ -691,12 +701,12 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
       // Wait for transaction receipt
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      
+
       // Find the VaultCreated event in the receipt
       const vaultCreatedEvent = receipt.logs.find(
         log => log.topics[0] === '0x...' // Replace with actual event signature
       );
-      
+
       if (!vaultCreatedEvent) {
         throw new Error('Vault creation event not found');
       }
@@ -707,16 +717,16 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
         data: vaultCreatedEvent.data,
         topics: vaultCreatedEvent.topics as [string, string, string]
       });
-      
+
       const vaultAddress = (decodedEvent as any).args?.vaultAddress as Address | undefined;
-      
+
       if (!vaultAddress) {
         throw new Error('Vault address not found in event');
       }
-      
+
       // Refresh the vaults list
       await refreshVaults();
-      
+
       return vaultAddress;
     } catch (error) {
       handleError(error, 'Failed to create vault');
@@ -750,7 +760,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
       await publicClient.waitForTransactionReceipt({ hash });
       await refreshVaults();
-      
+
       return true;
     } catch (error) {
       handleError(error, 'Failed to deposit to vault');
@@ -785,7 +795,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
       await publicClient.waitForTransactionReceipt({ hash });
       await refreshVaults();
-      
+
       return true;
     } catch (error) {
       handleError(error, 'Failed to withdraw from vault');
@@ -827,179 +837,179 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       // Implementation for aaveWithdraw
       const estimateCrossChainFee = useCallback(async (
-    destinationChainId: number,
-    token: Address,
-    amount: bigint
-  ): Promise<bigint> => {
-    if (!contracts.crossChainRouter?.read) {
-      throw new Error('CrossChainRouter not available');
-    }
+        destinationChainId: number,
+        token: Address,
+        amount: bigint
+      ): Promise<bigint> => {
+        if (!contracts.crossChainRouter?.read) {
+          throw new Error('CrossChainRouter not available');
+        }
 
-    const destinationChain = SUPPORTED_CHAINS[destinationChainId];
-    if (!destinationChain) {
-      throw new Error(`Unsupported destination chain: ${destinationChainId}`);
-    }
+        const destinationChain = SUPPORTED_CHAINS[destinationChainId];
+        if (!destinationChain) {
+          throw new Error(`Unsupported destination chain: ${destinationChainId}`);
+        }
 
-    try {
-      return await publicClient.readContract({
-        address: contracts.crossChainRouter.address,
-        abi: contracts.crossChainRouter.abi,
-        functionName: 'getFee',
-        args: [destinationChain.chainSelector, token, amount]
-      }) as bigint;
-    } catch (error) {
-      console.error('Error estimating cross-chain fee:', error);
-      throw new Error('Failed to estimate cross-chain fee');
-    }
-  }, [contracts.crossChainRouter, publicClient]);
+        try {
+          return await publicClient.readContract({
+            address: contracts.crossChainRouter.address,
+            abi: contracts.crossChainRouter.abi,
+            functionName: 'getFee',
+            args: [destinationChain.chainSelector, token, amount]
+          }) as bigint;
+        } catch (error) {
+          console.error('Error estimating cross-chain fee:', error);
+          throw new Error('Failed to estimate cross-chain fee');
+        }
+      }, [contracts.crossChainRouter, publicClient]);
 
-  const sendCrossChainTokens = useCallback(async (
-    destinationChainId: number,
-    token: Address,
-    amount: bigint
-  ): Promise<boolean> => {
-    if (!contracts.crossChainRouter?.write || !walletClient?.account?.address) {
-      throw new Error('CrossChainRouter or wallet client not available');
-    }
+      const sendCrossChainTokens = useCallback(async (
+        destinationChainId: number,
+        token: Address,
+        amount: bigint
+      ): Promise<boolean> => {
+        if (!contracts.crossChainRouter?.write || !walletClient?.account?.address) {
+          throw new Error('CrossChainRouter or wallet client not available');
+        }
 
-    const destinationChain = SUPPORTED_CHAINS[destinationChainId];
-    if (!destinationChain) {
-      throw new Error(`Unsupported destination chain: ${destinationChainId}`);
-    }
+        const destinationChain = SUPPORTED_CHAINS[destinationChainId];
+        if (!destinationChain) {
+          throw new Error(`Unsupported destination chain: ${destinationChainId}`);
+        }
 
-    try {
-      setIsLoading(true);
-      setError(null);
+        try {
+          setIsLoading(true);
+          setError(null);
 
-      console.log('Initiating cross-chain token transfer...', {
-        destinationChain: destinationChain.name,
-        token,
-        amount: amount.toString(),
-        from: walletClient.account.address
-      });
+          console.log('Initiating cross-chain token transfer...', {
+            destinationChain: destinationChain.name,
+            token,
+            amount: amount.toString(),
+            from: walletClient.account.address
+          });
 
-      // 1. Approve token transfer if needed
-      const tokenContract = {
-        address: token,
-        abi: [
-          {
-            constant: false,
-            inputs: [
-              { name: 'spender', type: 'address' },
-              { name: 'amount', type: 'uint256' }
-            ],
-            name: 'approve',
-            outputs: [{ type: 'bool' }],
-            payable: false,
-            stateMutability: 'nonpayable',
-            type: 'function'
-          },
-          {
-            constant: true,
-            inputs: [
-              { name: 'owner', type: 'address' },
-              { name: 'spender', type: 'address' }
-            ],
-            name: 'allowance',
-            outputs: [{ type: 'uint256' }],
-            payable: false,
-            stateMutability: 'view',
-            type: 'function'
+          // 1. Approve token transfer if needed
+          const tokenContract = {
+            address: token,
+            abi: [
+              {
+                constant: false,
+                inputs: [
+                  { name: 'spender', type: 'address' },
+                  { name: 'amount', type: 'uint256' }
+                ],
+                name: 'approve',
+                outputs: [{ type: 'bool' }],
+                payable: false,
+                stateMutability: 'nonpayable',
+                type: 'function'
+              },
+              {
+                constant: true,
+                inputs: [
+                  { name: 'owner', type: 'address' },
+                  { name: 'spender', type: 'address' }
+                ],
+                name: 'allowance',
+                outputs: [{ type: 'uint256' }],
+                payable: false,
+                stateMutability: 'view',
+                type: 'function'
+              }
+            ] as const,
+          };
+
+          const allowance = await publicClient.readContract({
+            ...tokenContract,
+            functionName: 'allowance',
+            args: [walletClient.account.address, contracts.crossChainRouter.address],
+          });
+
+          if (allowance < amount) {
+            console.log('Approving token spend...');
+            const approveTx = await walletClient.writeContract({
+              ...tokenContract,
+              functionName: 'approve',
+              args: [contracts.crossChainRouter.address, amount],
+              account: walletClient.account.address,
+            });
+
+            console.log('Waiting for approval transaction...', { txHash: approveTx });
+            await publicClient.waitForTransactionReceipt({
+              hash: approveTx,
+            });
+            console.log('Approval transaction confirmed');
           }
-        ] as const,
-      };
 
-      const allowance = await publicClient.readContract({
-        ...tokenContract,
-        functionName: 'allowance',
-        args: [walletClient.account.address, contracts.crossChainRouter.address],
-      });
+          // 2. Get fee estimate
+          const fee = await estimateCrossChainFee(destinationChainId, token, amount);
+          console.log('Estimated fee:', fee.toString());
 
-      if (allowance < amount) {
-        console.log('Approving token spend...');
-        const approveTx = await walletClient.writeContract({
-          ...tokenContract,
-          functionName: 'approve',
-          args: [contracts.crossChainRouter.address, amount],
-          account: walletClient.account.address,
-        });
-        
-        console.log('Waiting for approval transaction...', { txHash: approveTx });
-        await publicClient.waitForTransactionReceipt({
-          hash: approveTx,
-        });
-        console.log('Approval transaction confirmed');
-      }
+          // 3. Send cross-chain transfer
+          console.log('Sending cross-chain transfer...');
+          const txHash = await walletClient.writeContract({
+            address: contracts.crossChainRouter.address,
+            abi: contracts.crossChainRouter.abi,
+            functionName: 'sendTokens',
+            args: [destinationChain.chainSelector, token, amount],
+            account: walletClient.account.address,
+            value: fee,
+            gas: 500000n, // Adjust gas limit as needed
+          });
 
-      // 2. Get fee estimate
-      const fee = await estimateCrossChainFee(destinationChainId, token, amount);
-      console.log('Estimated fee:', fee.toString());
+          console.log('Cross-chain transfer transaction hash:', txHash);
 
-      // 3. Send cross-chain transfer
-      console.log('Sending cross-chain transfer...');
-      const txHash = await walletClient.writeContract({
-        address: contracts.crossChainRouter.address,
-        abi: contracts.crossChainRouter.abi,
-        functionName: 'sendTokens',
-        args: [destinationChain.chainSelector, token, amount],
-        account: walletClient.account.address,
-        value: fee,
-        gas: 500000n, // Adjust gas limit as needed
-      });
+          // Wait for the transaction to be mined
+          const receipt = await publicClient.waitForTransactionReceipt({
+            hash: txHash,
+          });
 
-      console.log('Cross-chain transfer transaction hash:', txHash);
-      
-      // Wait for the transaction to be mined
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: txHash,
-      });
+          if (receipt.status === 'success') {
+            console.log('Cross-chain transfer successful');
+            toast({
+              title: 'Transfer Successful',
+              description: 'Your cross-chain transfer has been initiated.',
+            });
+            return true;
+          } else {
+            throw new Error('Transaction reverted');
+          }
+        } catch (error: unknown) {
+          console.error('Cross-chain transfer error:', error);
 
-      if (receipt.status === 'success') {
-        console.log('Cross-chain transfer successful');
-        toast({
-          title: 'Transfer Successful',
-          description: 'Your cross-chain transfer has been initiated.',
-        });
-        return true;
-      } else {
-        throw new Error('Transaction reverted');
-      }
-    } catch (error: unknown) {
-      console.error('Cross-chain transfer error:', error);
-      
-      // Try to extract revert reason
-      let errorMessage = 'Failed to send cross-chain tokens';
-      const err = error as any;
-      
-      if (err?.cause?.data?.errorName) {
-        errorMessage = `Revert: ${err.cause.data.errorName} - ${err.cause.data.errorArgs?.join(', ')}`;
-      } else if (err?.message?.includes('revert')) {
-        errorMessage = err.message;
-      } else if (err?.shortMessage) {
-        errorMessage = err.shortMessage;
-      }
-      
-      const errorObj = new Error(errorMessage);
-      setError(errorObj);
-      toast({
-        title: 'Transfer Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    }
-  }, [contracts.crossChainRouter, walletClient, publicClient, isMounted, toast, estimateCrossChainFee]);
+          // Try to extract revert reason
+          let errorMessage = 'Failed to send cross-chain tokens';
+          const err = error as any;
 
-  const getChainConfig = useCallback((chainId: number): ChainConfig | undefined => {
-    return SUPPORTED_CHAINS[chainId];
-  }, []);   
+          if (err?.cause?.data?.errorName) {
+            errorMessage = `Revert: ${err.cause.data.errorName} - ${err.cause.data.errorArgs?.join(', ')}`;
+          } else if (err?.message?.includes('revert')) {
+            errorMessage = err.message;
+          } else if (err?.shortMessage) {
+            errorMessage = err.shortMessage;
+          }
+
+          const errorObj = new Error(errorMessage);
+          setError(errorObj);
+          toast({
+            title: 'Transfer Failed',
+            description: errorMessage,
+            variant: 'destructive',
+          });
+          return false;
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+      }, [contracts.crossChainRouter, walletClient, publicClient, isMounted, toast, estimateCrossChainFee]);
+
+      const getChainConfig = useCallback((chainId: number): ChainConfig | undefined => {
+        return SUPPORTED_CHAINS[chainId];
+      }, []);
       return true;
     } catch (error) {
       console.error('Aave withdraw error:', error);
@@ -1014,14 +1024,14 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
   const aaveWithdraw = useCallback(async (amount: bigint): Promise<boolean> => {
     if (!aaveVault?.write || !walletClient?.account?.address) return false;
-    
+
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       // Implementation for aaveWithdraw
       // Add your withdraw logic here
-      
+
       return true;
     } catch (error) {
       console.error('Aave withdraw error:', error);
@@ -1036,14 +1046,14 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
   const aaveRebalance = useCallback(async (): Promise<boolean> => {
     if (!aaveVault?.write || !walletClient?.account?.address) return false;
-    
+
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       // Implementation for aaveRebalance
       // Add your rebalance logic here
-      
+
       return true;
     } catch (error) {
       console.error('Aave rebalance error:', error);
@@ -1061,7 +1071,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
       console.log('AaveVault not available');
       return null;
     }
-    
+
     try {
       // First check if the functions exist on the contract instance
       const hasGetTotalValue = typeof aaveVault.read.getTotalValue === 'function';
@@ -1082,7 +1092,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
           console.warn('Error calling totalAssets:', err);
         }
       }
-      
+
       console.warn('No valid total value function found on AaveVault at', aaveVault.address);
       return 0n; // Return 0 instead of null to prevent UI issues
     } catch (error) {
@@ -1092,19 +1102,19 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   }, [aaveVault]);
 
   const sendCrossChainTokens = useCallback(async (
-    destinationChainSelector: bigint, 
-    token: Address, 
+    destinationChainSelector: bigint,
+    token: Address,
     amount: bigint
   ): Promise<boolean> => {
     if (!crossChainRouter?.write || !walletClient?.account?.address) {
       console.error('CrossChainRouter or wallet client not available');
       return false;
     }
-    
+
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       console.log('Initiating cross-chain token transfer...', {
         destinationChainSelector: destinationChainSelector.toString(),
         token,
@@ -1132,7 +1142,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
           args: [crossChainRouter.address, amount],
           account: walletClient.account.address,
         });
-        
+
         console.log('Waiting for approval transaction...', { txHash: approveTx });
         await publicClient.waitForTransactionReceipt({
           hash: approveTx,
@@ -1152,7 +1162,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
       });
 
       console.log('Cross-chain transfer transaction hash:', txHash);
-      
+
       // Wait for the transaction to be mined
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: txHash,
@@ -1166,11 +1176,11 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Cross-chain transfer error:', error);
-      
+
       // Try to extract revert reason
       let errorMessage = 'Failed to send cross-chain tokens';
       const err = error as any;
-      
+
       if (err?.cause?.data?.errorName) {
         errorMessage = `Revert: ${err.cause.data.errorName} - ${err.cause.data.errorArgs?.join(', ')}`;
       } else if (err?.message?.includes('revert')) {
@@ -1178,7 +1188,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
       } else if (err?.shortMessage) {
         errorMessage = err.shortMessage;
       }
-      
+
       handleError?.(new Error(errorMessage), 'Failed to send cross-chain tokens');
       return false;
     } finally {
@@ -1189,20 +1199,20 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   }, [crossChainRouter, walletClient, isMounted, setIsLoading, resetError, handleError]);
 
   const processTreasuryDecision = useCallback(async (
-    decisionId: string, 
-    strategy: Address, 
-    allocation: bigint, 
+    decisionId: string,
+    strategy: Address,
+    allocation: bigint,
     reason: string
   ): Promise<boolean> => {
     if (!treasuryAIManager?.write || !walletClient?.account?.address) return false;
-    
+
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       // Implementation for processTreasuryDecision
       // Add your treasury decision processing logic here
-      
+
       return true;
     } catch (error) {
       console.error('Treasury decision processing error:', error);
@@ -1217,14 +1227,14 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
 
   const performTreasuryUpkeep = useCallback(async (performData: string): Promise<boolean> => {
     if (!treasuryAIManager?.write || !walletClient?.account?.address) return false;
-    
+
     try {
       setIsLoading?.(true);
       resetError?.();
-      
+
       // Implementation for performTreasuryUpkeep
       // Add your treasury upkeep logic here
-      
+
       return true;
     } catch (error) {
       console.error('Treasury upkeep error:', error);

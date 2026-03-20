@@ -7,6 +7,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { mainnet, sepolia, avalanche, avalancheFuji, base, seiTestnet, sei, baseSepolia, Chain } from 'viem/chains';
+import { defineChain } from 'viem';
 import { CREDITCOIN_MAINNET, CREDITCOIN_TESTNET } from '@/config/chains';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
@@ -33,7 +34,30 @@ const queryClient = new QueryClient({
 });
 
 // Define our supported chains with their RPC URLs
+export const polkadotHub = defineChain({
+  id: 1284,
+  name: 'Polkadot Hub',
+  network: 'polkadot',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'DOT',
+    symbol: 'DOT',
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc.api.moonbeam.network'] },
+    public: { http: ['https://rpc.api.moonbeam.network'] },
+  },
+  blockExplorers: {
+    default: { name: 'Moonscan', url: 'https://moonscan.io' },
+  },
+});
+
 const CHAINS = {
+  polkadotHub: {
+    ...polkadotHub,
+    hasIcon: true,
+    iconUrl: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.svg',
+  },
   mainnet: {
     ...mainnet,
     rpcUrls: {
@@ -97,6 +121,7 @@ const projectId = WALLET_CONNECT_PROJECT_ID;
 
 // Create wagmiConfig with supported chains
 const chains = [
+  CHAINS.polkadotHub,
   CHAINS.mainnet,
   CHAINS.sepolia,
   CHAINS.avalanche,
@@ -150,7 +175,7 @@ if (typeof window !== 'undefined') {
 // Create chains array from SUPPORTED_CHAINS
 const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
   const chainId = chainConfig.id;
-  
+
   // Map to our predefined chains
   switch (chainId) {
     case 1: return CHAINS.mainnet;
@@ -175,6 +200,7 @@ if (supportedChains.length === 0) {
 // Create wagmi config
 const config = createConfig({
   chains: [
+    CHAINS.polkadotHub,
     CHAINS.mainnet,
     CHAINS.sepolia,
     CHAINS.avalanche,
@@ -187,6 +213,7 @@ const config = createConfig({
     CREDITCOIN_TESTNET,
   ],
   transports: {
+    [polkadotHub.id]: http(CHAINS.polkadotHub.rpcUrls.default.http[0]),
     [mainnet.id]: http(CHAINS.mainnet.rpcUrls.default.http[0]),
     [sepolia.id]: http(CHAINS.sepolia.rpcUrls.default.http[0]),
     [avalanche.id]: http(CHAINS.avalanche.rpcUrls.default.http[0]),
@@ -203,11 +230,11 @@ const config = createConfig({
 // ClientWeb3Provider component - only rendered on client side
 const ClientWeb3Provider = React.memo(({ children }: { children: React.ReactNode }) => {
   const [mounted, setMounted] = React.useState(false);
-  
+
   // Use effect to handle client-side only operations
   React.useEffect(() => {
     setMounted(true);
-    
+
     // Initialize Web3Modal on client side
     if (typeof window !== 'undefined' && !web3Modal) {
       web3Modal = createWeb3Modal({
@@ -230,12 +257,12 @@ const ClientWeb3Provider = React.memo(({ children }: { children: React.ReactNode
         privacyPolicyUrl: 'https://coreiq.xyz/privacy'
       });
     }
-    
+
     return () => {
       // Cleanup if needed
     };
   }, []);
-  
+
   // Use dark theme for RainbowKit
   const theme = darkTheme({
     accentColor: '#7C3AED',
