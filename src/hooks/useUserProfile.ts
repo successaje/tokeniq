@@ -45,9 +45,10 @@ export const useUserProfile = (walletAddress: string | undefined) => {
         setUserExists(true);
       }
     } catch (err) {
-      console.error('Error in checkUserExists:', {
-        error: err,
-        message: err instanceof Error ? err.message : 'Unknown error',
+      console.error('Error in checkUserExists raw error:', err);
+      console.error('Error in checkUserExists formatted:', {
+        error: JSON.stringify(err),
+        message: err instanceof Error ? err.message : (err as any)?.message || 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined
       });
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));

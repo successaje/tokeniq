@@ -3,7 +3,6 @@
 import { useNetwork } from 'wagmi';
 import { CHAIN_ICONS } from '@/utils/networks';
 import { Button } from '@/components/ui/button';
-import { SEI_MAINNET, SEI_TESTNET } from '@/config/chains';
 import { supportedChains } from '@/config/wagmi';
 import {
   DropdownMenu,

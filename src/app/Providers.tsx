@@ -68,8 +68,12 @@ export function AppProviders({ children }: AppProvidersProps) {
   }
 
   const isPublicRoute = pathname === '/' || 
-    (pathname?.startsWith('/(public)') ?? false) ||
-    !pathname?.startsWith('/protected');
+    pathname === '/whitepaper' || 
+    pathname === '/documentation' || 
+    pathname === '/onboarding' || 
+    pathname === '/chat' || 
+    pathname === '/login' ||
+    (pathname?.startsWith('/(public)') ?? false);
 
   return (
     <ErrorBoundary>

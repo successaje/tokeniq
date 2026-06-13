@@ -11,7 +11,10 @@ type InsightType = 'info' | 'warning' | 'opportunity' | 'alert';
 interface Insight {
   id: string;
   type: InsightType;
-  message: string;
+  decision: string;
+  reasoning: string;
+  riskLevel: 'Low' | 'Medium' | 'High';
+  expectedYield: string;
   timestamp: number;
   action?: {
     label: string;
@@ -21,28 +24,26 @@ interface Insight {
 
 const MOCK_INSIGHTS: Omit<Insight, 'id' | 'timestamp'>[] = [
   {
-    type: 'warning',
-    message: 'AVAX yields on Aave have dropped below 4%. Consider rebalancing your portfolio.',
-    action: {
-      label: 'View Pools',
-      onClick: () => console.log('Navigate to pools')
-    }
-  },
-  {
-    type: 'info',
-    message: 'ETH price fell 2.4% in the last hour. Consider a stable allocation buffer.'
-  },
-  {
     type: 'opportunity',
-    message: 'A spike in staking on Base — explore short-term LP opportunities?',
+    decision: 'Allocate to Arbitrum Stablecoin Vault',
+    reasoning: 'Detected idle capital. The Arbitrum stablecoin vault is currently yielding above average rates with minimal impermanent loss risk.',
+    riskLevel: 'Low',
+    expectedYield: '8.5% - 10.2% APY',
     action: {
-      label: 'Explore',
-      onClick: () => console.log('Navigate to staking')
+      label: 'Execute Allocation',
+      onClick: () => console.log('Execute allocation')
     }
   },
   {
-    type: 'info',
-    message: 'Chainlink CCIP usage just surged. Might be worth connecting cross-chain logic.'
+    type: 'warning',
+    decision: 'Rebalance from ETH Staking to Liquidity Mining',
+    reasoning: 'ETH price volatility is increasing. Rebalancing to a Delta-neutral strategy on Arbitrum DEXs will protect principal while capturing fee yield.',
+    riskLevel: 'Medium',
+    expectedYield: '12.0% - 15.5% APY',
+    action: {
+      label: 'View Strategy',
+      onClick: () => console.log('View strategy')
+    }
   }
 ];
 
@@ -58,7 +59,7 @@ const getInsightIcon = (type: InsightType) => {
 };
 
 export function ElizaOS() {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [currentInsight, setCurrentInsight] = useState<Insight | null>(null);
   const [insightQueue, setInsightQueue] = useState<Insight[]>([]);
   const [isHovered, setIsHovered] = useState(false);
@@ -180,12 +181,25 @@ export function ElizaOS() {
                   {getInsightIcon(currentInsight.type)}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm">{currentInsight.message}</p>
+                  <div className="font-semibold text-sm mb-1">{currentInsight.decision}</div>
+                  <p className="text-xs text-muted-foreground mb-3">{currentInsight.reasoning}</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+                    <div className="bg-muted/30 p-1.5 rounded">
+                      <span className="text-muted-foreground">Risk:</span> <span className={cn("font-medium", {
+                        "text-green-500": currentInsight.riskLevel === 'Low',
+                        "text-yellow-500": currentInsight.riskLevel === 'Medium',
+                        "text-red-500": currentInsight.riskLevel === 'High'
+                      })}>{currentInsight.riskLevel}</span>
+                    </div>
+                    <div className="bg-muted/30 p-1.5 rounded">
+                      <span className="text-muted-foreground">Yield:</span> <span className="font-medium text-blue-500">{currentInsight.expectedYield}</span>
+                    </div>
+                  </div>
                   {currentInsight.action && (
                     <Button
-                      variant="link"
+                      variant="default"
                       size="sm"
-                      className="h-auto p-0 mt-2 text-blue-500 hover:no-underline"
+                      className="w-full mt-2"
                       onClick={() => currentInsight.action && handleAction(currentInsight.action.onClick)}
                     >
                       {currentInsight.action.label} <ArrowRight className="ml-1 w-3.5 h-3.5" />

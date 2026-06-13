@@ -6,8 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
-import { mainnet, sepolia, avalanche, avalancheFuji, base, seiTestnet, sei, baseSepolia, Chain } from 'viem/chains';
-import { CREDITCOIN_MAINNET, CREDITCOIN_TESTNET } from '@/config/chains';
+import { mainnet, sepolia, arbitrum, arbitrumSepolia, base, baseSepolia } from 'viem/chains';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
@@ -48,19 +47,11 @@ const CHAINS = {
       default: { http: ['https://rpc.sepolia.org'] },
     },
   },
-  avalanche: {
-    ...avalanche,
-    rpcUrls: {
-      ...avalanche.rpcUrls,
-      default: { http: ['https://api.avax.network/ext/bc/C/rpc'] },
-    },
+  arbitrum: {
+    ...arbitrum,
   },
-  avalancheFuji: {
-    ...avalancheFuji,
-    rpcUrls: {
-      ...avalancheFuji.rpcUrls,
-      default: { http: ['https://api.avax-test.network/ext/bc/C/rpc'] },
-    },
+  arbitrumSepolia: {
+    ...arbitrumSepolia,
   },
   base: {
     ...base,
@@ -76,20 +67,6 @@ const CHAINS = {
       default: { http: ['https://sepolia.base.org'] },
     },
   },
-  seiTestnet: {
-    ...seiTestnet,
-    rpcUrls: {
-      ...seiTestnet.rpcUrls,
-      default: { http: ['https://sei-testnet.drpc.org'] },
-    },
-  },
-  sei: {
-    ...sei,
-    rpcUrls: {
-      ...sei.rpcUrls,
-      default: { http: ['wss://sei.drpc.org'] },
-    },
-  },
 } as const;
 
 // Configure Web3Modal
@@ -99,14 +76,10 @@ const projectId = WALLET_CONNECT_PROJECT_ID;
 const chains = [
   CHAINS.mainnet,
   CHAINS.sepolia,
-  CHAINS.avalanche,
-  CHAINS.avalancheFuji,
+  CHAINS.arbitrum,
+  CHAINS.arbitrumSepolia,
   CHAINS.base,
   CHAINS.baseSepolia,
-  CHAINS.seiTestnet,
-  CHAINS.sei,
-  CREDITCOIN_MAINNET,
-  CREDITCOIN_TESTNET,
 ] as const;
 
 // Create wagmiConfig
@@ -155,14 +128,10 @@ const supportedChains = Object.values(SUPPORTED_CHAINS).map(chainConfig => {
   switch (chainId) {
     case 1: return CHAINS.mainnet;
     case 11155111: return CHAINS.sepolia;
-    case 43114: return CHAINS.avalanche;
-    case 43113: return CHAINS.avalancheFuji;
+    case 42161: return CHAINS.arbitrum;
+    case 421614: return CHAINS.arbitrumSepolia;
     case 8453: return CHAINS.base;
     case 84532: return CHAINS.baseSepolia;
-    case 1328: return CHAINS.seiTestnet;
-    case 1329: return CHAINS.sei;
-    case 102030: return CREDITCOIN_MAINNET;
-    case 102031: return CREDITCOIN_TESTNET;
     default: return CHAINS.mainnet;
   }
 });
@@ -177,26 +146,18 @@ const config = createConfig({
   chains: [
     CHAINS.mainnet,
     CHAINS.sepolia,
-    CHAINS.avalanche,
-    CHAINS.avalancheFuji,
+    CHAINS.arbitrum,
+    CHAINS.arbitrumSepolia,
     CHAINS.base,
     CHAINS.baseSepolia,
-    CHAINS.seiTestnet,
-    CHAINS.sei,
-    CREDITCOIN_MAINNET,
-    CREDITCOIN_TESTNET,
   ],
   transports: {
     [mainnet.id]: http(CHAINS.mainnet.rpcUrls.default.http[0]),
     [sepolia.id]: http(CHAINS.sepolia.rpcUrls.default.http[0]),
-    [avalanche.id]: http(CHAINS.avalanche.rpcUrls.default.http[0]),
-    [avalancheFuji.id]: http(CHAINS.avalancheFuji.rpcUrls.default.http[0]),
+    [arbitrum.id]: http(),
+    [arbitrumSepolia.id]: http(),
     [base.id]: http(CHAINS.base.rpcUrls.default.http[0]),
     [baseSepolia.id]: http(CHAINS.baseSepolia.rpcUrls.default.http[0]),
-    [seiTestnet.id]: http(CHAINS.seiTestnet.rpcUrls.default.http[0]),
-    [sei.id]: http(CHAINS.sei.rpcUrls.default.http[0]),
-    [CREDITCOIN_MAINNET.id]: http(CREDITCOIN_MAINNET.rpcUrls.default.http[0]),
-    [CREDITCOIN_TESTNET.id]: http(CREDITCOIN_TESTNET.rpcUrls.default.http[0]),
   },
 });
 

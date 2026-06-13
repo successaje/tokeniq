@@ -1,13 +1,6 @@
 'use client'
 
-import { useAccount, useDisconnect } from 'wagmi'
-import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { useState, useEffect, Fragment } from 'react'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle } from './theme-toggle'
-import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline'
-import { useRouter } from 'next/navigation'
-import { Menu, Transition } from '@headlessui/react'
 import { cn } from '@/lib/utils'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 
@@ -26,49 +19,108 @@ export function CustomConnectButton({
   className = '',
   showFullAddress = false 
 }: CustomConnectButtonProps) {
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-
-  if (!isConnected) {
-    return <ConnectButton />;
-  }
-
   return (
-    <Menu as="div" className="relative">
-      <Menu.Button className={cn(
-        "flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90",
-        className
-      )}>
-        {showFullAddress ? address : `${address?.slice(0, 6)}...${address?.slice(-4)}`}
-      </Menu.Button>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-card shadow-lg ring-1 ring-border focus:outline-none">
-          <div className="py-1">
-            <Menu.Item>
-              {({ active }) => (
-                <button
-                  onClick={() => disconnect()}
-                  className={cn(
-                    'flex w-full items-center px-4 py-2 text-sm',
-                    active ? 'bg-accent text-accent-foreground' : 'text-foreground'
-                  )}
-                >
-                  Disconnect
-                </button>
-              )}
-            </Menu.Item>
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        const ready = mounted && authenticationStatus !== 'loading';
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus ||
+            authenticationStatus === 'authenticated');
+
+        return (
+          <div
+            {...(!ready && {
+              'aria-hidden': true,
+              style: {
+                opacity: 0,
+                pointerEvents: 'none',
+                userSelect: 'none',
+              },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <Button 
+                    onClick={openConnectModal} 
+                    className={cn(
+                      "rounded-full font-semibold shadow-[0_0_20px_-5px_rgba(var(--primary),0.4)] hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.6)] transition-all bg-primary/90 hover:bg-primary",
+                      className
+                    )}
+                  >
+                    Connect Wallet
+                  </Button>
+                );
+              }
+
+              if (chain.unsupported) {
+                return (
+                  <Button onClick={openChainModal} variant="destructive" className="rounded-full">
+                    Wrong network
+                  </Button>
+                );
+              }
+
+              return (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={openChainModal}
+                    variant="outline"
+                    className="flex items-center gap-2 rounded-full border-border/50 bg-background/50 backdrop-blur-sm px-3"
+                  >
+                    {chain.hasIcon && (
+                      <div
+                        style={{
+                          background: chain.iconBackground,
+                          width: 16,
+                          height: 16,
+                          borderRadius: 999,
+                          overflow: 'hidden',
+                          marginRight: 4,
+                        }}
+                      >
+                        {chain.iconUrl && (
+                          <img
+                            alt={chain.name ?? 'Chain icon'}
+                            src={chain.iconUrl}
+                            style={{ width: 16, height: 16 }}
+                          />
+                        )}
+                      </div>
+                    )}
+                    <span className="text-xs hidden sm:block">{chain.name}</span>
+                  </Button>
+
+                  <Button 
+                    onClick={openAccountModal} 
+                    variant="outline"
+                    className="flex items-center gap-2 rounded-full border-primary/30 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm text-primary font-mono px-4"
+                  >
+                    {account.displayBalance
+                      ? ` ${account.displayBalance}`
+                      : ''}
+                    <span className="text-foreground ml-2">
+                      {showFullAddress ? account.address : account.displayName}
+                    </span>
+                  </Button>
+                </div>
+              );
+            })()}
           </div>
-        </Menu.Items>
-      </Transition>
-    </Menu>
+        );
+      }}
+    </ConnectButton.Custom>
   );
 }
 

@@ -1,61 +1,76 @@
 @import "tailwindcss";
-
+@config "../../tailwind.config.ts";
 @layer base {
   :root {
-    --sidebar: 0 0% 100%;
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --background: 0 0% 98%;
+    /* TokenIQ v2 Default (Light) Theme */
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --primary: 183 100% 35%;
-    --primary-foreground: 210 40% 98%;
+    
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
+    
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
+    
+    /* Institutional Blue/Indigo */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 20% 98%;
+    
+    --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
+    
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-    --elevated: 0 0% 100%;
-    --elevated-foreground: 222.2 84% 4.9%;
-    --surface: 0 0% 97%;
-    --surface-foreground: 222.2 84% 4.9%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 183 100% 35%;
+    --ring: 221.2 83.2% 53.3%;
+    
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    
+    --elevated: 0 0% 100%;
+    --elevated-foreground: 222.2 84% 4.9%;
+    
+    --surface: 0 0% 96%;
+    --surface-foreground: 222.2 84% 4.9%;
+    
     --radius: 0.5rem;
   }
 
   .dark {
-    --sidebar: 220 14% 8%;
-    --sidebar-foreground: 210 40% 98%;
-    --background: 222.2 84% 3.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 32% 5%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 32% 5%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 183 100% 35%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 10%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 10%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 10%;
-    --accent-foreground: 210 40% 98%;
-    --elevated: 222.2 32% 8%;
-    --elevated-foreground: 210 40% 98%;
-    --surface: 220 14% 6%;
-    --surface-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 15.5%;
-    --input: 217.2 32.6% 15.5%;
-    --ring: 183 100% 35%;
+    /* Same as root to force dark mode everywhere smoothly */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 235 85% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 235 85% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 235 85% 65%;
+    --sidebar: 0 0% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --elevated: 0 0% 7%;
+    --elevated-foreground: 0 0% 98%;
+    --surface: 0 0% 9%;
+    --surface-foreground: 0 0% 98%;
   }
 }
 

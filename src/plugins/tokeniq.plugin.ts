@@ -8,8 +8,8 @@ const analyzeAssetAction: Action = {
   description: 'Analyzes a real-world asset for tokenization potential',
 
   validate: async (runtime: IAgentRuntime, message: Memory, state: State): Promise<boolean> => {
-    // Validate that we have the necessary asset information
-    return message.content.text.includes('analyze') || message.content.text.includes('evaluate');
+    // Validate that we have the necessary capital allocation / treasury information
+    return message.content.text.toLowerCase().includes('analyze') || message.content.text.toLowerCase().includes('yield');
   },
 
   handler: async (
@@ -31,7 +31,7 @@ const analyzeAssetAction: Action = {
 
       // Create response content
       const responseContent: Content = {
-        text: `Asset Analysis Results:\n${JSON.stringify(analysis, null, 2)}`,
+        text: JSON.stringify(analysis, null, 2),
         actions: ['ANALYZE_ASSET'],
         source: message.content.source,
       };
@@ -164,13 +164,12 @@ function extractAssetInfo(text: string): any {
 }
 
 async function performAssetAnalysis(assetInfo: any): Promise<any> {
-  // Implement asset analysis logic
+  // Implement asset analysis logic returning structured JSON for UI parsing
   return {
-    tokenizationPotential: 'high',
-    estimatedValue: assetInfo.value,
-    riskAssessment: 'low',
-    recommendedStructure: 'fractional',
-    // Add more analysis results
+    decision: 'Rebalance to Arbitrum Stablecoin Vault',
+    reasoning: 'Detected lower yields on current ETH positions. Rebalancing to Arbitrum stablecoin pairs offers higher APY with lower volatility.',
+    riskLevel: 'Low',
+    expectedYield: '9.5% - 11.2% APY'
   };
 }
 

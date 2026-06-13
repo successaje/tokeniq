@@ -591,9 +591,8 @@ const SettingsPage = () => {
               </div>
             )}
 
-            {/* Save Button */}
-            <div className="flex justify-end pt-6">
-              <Button onClick={handleSave} className="bg-gradient-primary hover:opacity-90">
+            <div className="flex justify-end pt-6 border-t border-border/30 mt-8">
+              <Button onClick={handleSave} size="lg" className="px-8 font-semibold shadow-md hover:shadow-lg transition-all">
                 Save Changes
               </Button>
             </div>

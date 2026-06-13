@@ -1,23 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { Button, Card } from '@/components/ui';
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { 
-  ChartBarIcon,
-  ArrowTrendingUpIcon,
-  CurrencyDollarIcon,
-  ArrowPathIcon,
-  DocumentTextIcon,
-  BuildingOfficeIcon,
-  BriefcaseIcon,
-  HomeIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  UsersIcon,
-  GlobeAltIcon
-} from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
+  BarChart3, 
+  TrendingUp, 
+  Activity, 
+  PieChart, 
+  ArrowUpRight,
+  Download,
+  Filter
+} from 'lucide-react';
 import { 
   LineChart, 
   Line, 
@@ -30,324 +25,168 @@ import {
   Bar,
   AreaChart,
   Area,
-  PieChart,
-  Pie,
   Cell
 } from 'recharts';
 
-// Mock data for TVL growth
 const TVL_DATA = [
-  { date: '2024-01', value: 1000000 },
-  { date: '2024-02', value: 1200000 },
-  { date: '2024-03', value: 1500000 },
-  { date: '2024-04', value: 1800000 },
-  { date: '2024-05', value: 2200000 },
-  { date: '2024-06', value: 2500000 },
-  { date: '2024-07', value: 2800000 },
-  { date: '2024-08', value: 3200000 },
-  { date: '2024-09', value: 3500000 },
-  { date: '2024-10', value: 3800000 },
-  { date: '2024-11', value: 4200000 },
-  { date: '2024-12', value: 4500000 }
+  { date: 'Jan', value: 1.2 },
+  { date: 'Feb', value: 1.8 },
+  { date: 'Mar', value: 2.4 },
+  { date: 'Apr', value: 3.1 },
+  { date: 'May', value: 3.8 },
+  { date: 'Jun', value: 4.5 },
 ];
 
-// Mock data for asset distribution
 const ASSET_DISTRIBUTION = [
-  { name: 'Real Estate', value: 45, color: '#3B82F6' },
-  { name: 'Fixed Income', value: 25, color: '#10B981' },
-  { name: 'Equities', value: 20, color: '#F59E0B' },
-  { name: 'Cash', value: 10, color: '#6366F1' }
-];
-
-// Mock data for user growth
-const USER_GROWTH = [
-  { date: '2024-01', users: 100 },
-  { date: '2024-02', users: 150 },
-  { date: '2024-03', users: 220 },
-  { date: '2024-04', users: 300 },
-  { date: '2024-05', users: 400 },
-  { date: '2024-06', users: 520 },
-  { date: '2024-07', users: 650 },
-  { date: '2024-08', users: 800 },
-  { date: '2024-09', users: 950 },
-  { date: '2024-10', users: 1100 },
-  { date: '2024-11', users: 1300 },
-  { date: '2024-12', users: 1500 }
-];
-
-// Mock data for transaction volume
-const TRANSACTION_VOLUME = [
-  { month: 'Jan', volume: 250000 },
-  { month: 'Feb', volume: 300000 },
-  { month: 'Mar', volume: 350000 },
-  { month: 'Apr', volume: 400000 },
-  { month: 'May', volume: 450000 },
-  { month: 'Jun', volume: 500000 }
+  { name: 'ETH LSTs', value: 45, color: 'hsl(var(--primary))' },
+  { name: 'Stablecoins', value: 35, color: '#0052FF' },
+  { name: 'BTC Pairs', value: 15, color: '#627EEA' },
+  { name: 'Altcoins', value: 5, color: '#3B82F6' }
 ];
 
 export default function AnalyticsPage() {
-  const { address, isConnected } = useAccount();
-  const [timeRange, setTimeRange] = useState('1Y');
-
-  if (!isConnected) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-4">
-        <h1 className="text-2xl font-bold mb-4 text-foreground">Please connect your wallet</h1>
-        <p className="text-muted-foreground">
-          Connect your wallet to view analytics
-        </p>
-      </div>
-    );
-  }
+  const [timeRange, setTimeRange] = useState('6M');
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-          <p className="text-muted-foreground">
-            Platform performance and metrics
+          <h1 className="text-3xl font-bold tracking-tight mb-1">Treasury Analytics</h1>
+          <p className="text-muted-foreground text-sm">
+            Institutional-grade performance and risk metrics.
           </p>
         </div>
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            className="flex items-center"
-          >
-            <ArrowPathIcon className="h-5 w-5 mr-2" />
-            Refresh
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="h-9 gap-2">
+            <Filter className="h-4 w-4" /> Filter Assets
           </Button>
-          <Button
-            className="flex items-center"
-          >
-            <DocumentTextIcon className="h-5 w-5 mr-2" />
-            Export Report
+          <Button className="h-9 gap-2">
+            <Download className="h-4 w-4" /> Export CSV
           </Button>
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold mb-2 text-card-foreground">Total Value Locked</h2>
-            <p className="text-3xl font-bold text-foreground">$4.5M</p>
-            <div className="flex items-center text-emerald-500 text-sm">
-              <ArrowUpIcon className="h-4 w-4 mr-1" />
-              +12.5% (30d)
-            </div>
-          </div>
-        </Card>
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold mb-2 text-card-foreground">Active Users</h2>
-            <p className="text-3xl font-bold text-foreground">1,500</p>
-            <div className="flex items-center text-emerald-500 text-sm">
-              <ArrowUpIcon className="h-4 w-4 mr-1" />
-              +25.0% (30d)
-            </div>
-          </div>
-        </Card>
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold mb-2 text-card-foreground">Transaction Volume</h2>
-            <p className="text-3xl font-bold text-foreground">$500K</p>
-            <div className="flex items-center text-emerald-500 text-sm">
-              <ArrowUpIcon className="h-4 w-4 mr-1" />
-              +15.0% (30d)
-            </div>
-          </div>
-        </Card>
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold mb-2 text-card-foreground">Average APY</h2>
-            <p className="text-3xl font-bold text-foreground">8.5%</p>
-            <div className="flex items-center text-emerald-500 text-sm">
-              <ArrowUpIcon className="h-4 w-4 mr-1" />
-              +0.5% (30d)
-            </div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { title: 'Total AUM', value: '$45.2M', change: '+12.4%', icon: BarChart3 },
+          { title: '30D APY', value: '9.2%', change: '+0.5%', icon: TrendingUp },
+          { title: 'Sharpe Ratio', value: '1.85', change: '+0.12', icon: Activity },
+          { title: 'Max Drawdown', value: '-2.4%', change: '-0.2%', icon: PieChart }
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Card className="p-5 flex flex-col justify-between border-border/50 bg-card/30 hover:bg-card/50 transition-colors">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</span>
+                <stat.icon className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+                <div className="flex items-center mt-1 text-emerald-500 text-xs font-medium">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  {stat.change}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      {/* TVL Growth */}
-      <Card className="bg-card hover:bg-accent/50 transition-colors mb-8">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-card-foreground">TVL Growth</h2>
-            <div className="flex gap-2">
-              {['1M', '3M', '6M', '1Y', 'ALL'].map((range) => (
-                <Button
-                  key={range}
-                  variant={timeRange === range ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTimeRange(range)}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+        
+        <Card className="lg:col-span-2 p-6 border-border/50 bg-card/30">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-semibold text-lg">AUM Growth</h3>
+            <div className="flex bg-muted/50 rounded-md p-1 gap-1">
+              {['1M', '3M', '6M', '1Y'].map((t) => (
+                <button 
+                  key={t}
+                  onClick={() => setTimeRange(t)}
+                  className={`text-xs px-3 py-1 rounded-sm font-medium transition-colors ${timeRange === t ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  {range}
-                </Button>
+                  {t}
+                </button>
               ))}
             </div>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={TVL_DATA}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <AreaChart data={TVL_DATA} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorTvl" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="date" 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF' }}
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                  dy={10}
                 />
                 <YAxis 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF' }}
-                  tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(val) => `$${val}M`}
                 />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    color: '#F3F4F6'
-                  }}
-                  formatter={(value) => [`$${(Number(value) / 1000000).toFixed(2)}M`, 'TVL']}
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
+                  itemStyle={{ color: 'hsl(var(--primary))' }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="#3B82F6" 
-                  fill="#3B82F6"
-                  fillOpacity={0.2}
+                  stroke="hsl(var(--primary))" 
                   strokeWidth={2}
+                  fillOpacity={1} 
+                  fill="url(#colorTvl)" 
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </Card>
-
-      {/* Asset Distribution and User Growth */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-6 text-card-foreground">Asset Distribution</h2>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={ASSET_DISTRIBUTION}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {ASSET_DISTRIBUTION.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      color: '#F3F4F6'
-                    }}
-                    formatter={(value) => [`${value}%`, 'Allocation']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {ASSET_DISTRIBUTION.map((asset) => (
-                <div key={asset.name} className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: asset.color }}
-                  />
-                  <span className="text-sm text-muted-foreground">{asset.name}</span>
-                  <span className="text-sm font-medium text-foreground">{asset.value}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </Card>
 
-        <Card className="bg-card hover:bg-accent/50 transition-colors">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-6 text-card-foreground">User Growth</h2>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={USER_GROWTH}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#9CA3AF' }}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#9CA3AF' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      color: '#F3F4F6'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="users" 
-                    stroke="#10B981" 
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Transaction Volume */}
-      <Card className="bg-card hover:bg-accent/50 transition-colors">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-6 text-card-foreground">Transaction Volume</h2>
-          <div className="h-[300px]">
+        <Card className="p-6 border-border/50 bg-card/30">
+          <h3 className="font-semibold text-lg mb-6">Asset Distribution</h3>
+          <div className="h-[200px] w-full mb-6">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={TRANSACTION_VOLUME}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="month" 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF' }}
-                />
-                <YAxis 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF' }}
-                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
-                />
+              <BarChart data={ASSET_DISTRIBUTION} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" hide />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    color: '#F3F4F6'
-                  }}
-                  formatter={(value) => [`$${(Number(value) / 1000).toFixed(0)}K`, 'Volume']}
+                  cursor={{fill: 'transparent'}}
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                 />
-                <Bar 
-                  dataKey="volume" 
-                  fill="#6366F1"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                  {ASSET_DISTRIBUTION.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </Card>
-    </>
+          
+          <div className="space-y-3">
+            {ASSET_DISTRIBUTION.map((asset, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: asset.color }} />
+                  <span className="font-medium">{asset.name}</span>
+                </div>
+                <span className="text-muted-foreground">{asset.value}%</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+      </div>
+    </div>
   );
-} 
+}

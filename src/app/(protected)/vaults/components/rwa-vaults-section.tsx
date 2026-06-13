@@ -32,34 +32,34 @@ export function RWAVaultsSection() {
     <div className="space-y-6">
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-3">
-          <div className="p-3 bg-purple-100 rounded-full">
-            <Shield className="h-8 w-8 text-purple-600" />
+          <div className="p-3 bg-purple-500/10 rounded-full border border-purple-500/20">
+            <Shield className="h-8 w-8 text-purple-400" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
               Creditcoin RWA Vaults
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Tokenized Real-World Assets with Credit Scoring & Compliance
             </p>
           </div>
         </div>
         
-        <div className="flex flex-wrap justify-center gap-4 text-sm">
+        <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-purple-400" />
             <span>Automated Credit Scoring</span>
           </div>
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-purple-400" />
             <span>Regulatory Compliance</span>
           </div>
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-purple-400" />
             <span>Cross-Chain Native</span>
           </div>
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-purple-400" />
             <span>Real-Time Valuation</span>
           </div>
         </div>
@@ -67,55 +67,55 @@ export function RWAVaultsSection() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {rwaVaults.map((vault) => (
-          <Card key={vault.id} className="border-2 border-purple-200 hover:border-purple-400 transition-colors bg-gradient-to-br from-purple-50 to-blue-50">
+          <Card key={vault.id} className="border border-purple-500/20 hover:border-purple-500/40 transition-colors bg-card/30 hover:bg-card/50 relative overflow-hidden group shadow-sm">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {getVaultIcon(vault.id)}
                   <div>
-                    <CardTitle className="text-lg text-purple-800">{vault.name}</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-foreground group-hover:text-purple-400 transition-colors">{vault.name}</CardTitle>
                   </div>
                 </div>
                 <Badge className={getRiskColor(vault.risk)}>{vault.risk}</Badge>
               </div>
-              <p className="text-sm text-purple-600 mt-2">{vault.description}</p>
+              <p className="text-sm text-muted-foreground mt-2 min-h-[40px]">{vault.description}</p>
             </CardHeader>
             
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-muted-foreground">APY</div>
-                  <div className="font-bold text-green-600">{vault.apy}%</div>
+                  <div className="text-muted-foreground text-xs">APY</div>
+                  <div className="font-bold text-green-500">{vault.apy}%</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">TVL</div>
-                  <div className="font-bold">
+                  <div className="text-muted-foreground text-xs">TVL</div>
+                  <div className="font-bold text-foreground">
                     ${(Number(vault.tvl) / 1e18 / 1000000).toFixed(1)}M
                   </div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Min Deposit</div>
-                  <div className="font-bold">
+                  <div className="text-muted-foreground text-xs">Min Deposit</div>
+                  <div className="font-bold text-foreground">
                     {Number(vault.minDeposit) / 1e18} CTC
                   </div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Chain</div>
-                  <div className="font-bold text-purple-600">Creditcoin</div>
+                  <div className="text-muted-foreground text-xs">Chain</div>
+                  <div className="font-bold text-purple-400">Creditcoin</div>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-1">
                 {vault.tags?.slice(0, 3).map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge key={index} variant="secondary" className="text-xs bg-muted/50 border border-border/20 text-foreground">
                     {tag}
                   </Badge>
                 ))}
               </div>
 
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 pt-2">
                 <Button 
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-all shadow-md hover:shadow-lg rounded-lg"
                   size="sm"
                 >
                   <TrendingUp className="h-4 w-4 mr-1" />
@@ -124,7 +124,7 @@ export function RWAVaultsSection() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                  className="border-purple-500/20 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 transition-all rounded-lg"
                   asChild
                 >
                   <Link href={`/vaults/${vault.id}`}>
@@ -138,21 +138,21 @@ export function RWAVaultsSection() {
       </div>
 
       <div className="text-center">
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+        <Card className="bg-gradient-to-r from-purple-950/10 via-background to-blue-950/10 border-purple-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <Building2 className="h-8 w-8 text-purple-600" />
-              <h3 className="text-xl font-bold text-purple-800">
+              <Building2 className="h-8 w-8 text-purple-400" />
+              <h3 className="text-xl font-bold text-foreground">
                 Explore All RWA Options
               </h3>
             </div>
-            <p className="text-purple-600 mb-4">
+            <p className="text-muted-foreground mb-4 text-sm max-w-2xl mx-auto">
               Access comprehensive RWA tokenization with automated compliance, 
               credit scoring, and cross-chain capabilities.
             </p>
             <Button 
               asChild
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:shadow-lg transition-all rounded-lg"
             >
               <Link href="/creditcoin-rwa">
                 View Full RWA Dashboard

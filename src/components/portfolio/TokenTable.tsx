@@ -4,6 +4,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Surface } from '@/components/ui/surface';
 import { cn } from '@/lib/utils';
 
+import Image from 'next/image';
+
+const TOKEN_LOGOS: Record<string, string> = {
+  ETH: '/logos/ethereum.png',
+  BTC: '/logos/bitcoin-btc-logo.png',
+  USDC: '/usd-coin-usdc-logo.png',
+  AAVE: '/logos/aave.png',
+};
+
+const TOKEN_GRADIENTS: Record<string, string> = {
+  SOL: 'from-purple-600 via-fuchsia-500 to-indigo-500',
+  UNI: 'from-pink-500 via-rose-500 to-red-500',
+};
+
 type Token = {
   name: string;
   symbol: string;
@@ -38,9 +52,24 @@ export function TokenTable({ tokens }: TokenTableProps) {
               <TableRow key={token.symbol} className="cursor-pointer border-t hover:bg-muted/10 dark:hover:bg-muted/5">
                 <TableCell className="py-3">
                   <div className="flex items-center">
-                    <div className="mr-3 h-8 w-8 rounded-full bg-muted/50 dark:bg-muted/20 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-medium">{token.symbol[0]}</span>
-                    </div>
+                    {TOKEN_LOGOS[token.symbol] ? (
+                      <div className="mr-3 h-8 w-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-muted/20">
+                        <Image
+                          src={TOKEN_LOGOS[token.symbol]}
+                          alt={token.symbol}
+                          width={24}
+                          height={24}
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className={cn(
+                        "mr-3 h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-xs bg-gradient-to-br",
+                        TOKEN_GRADIENTS[token.symbol] || "from-blue-400 to-indigo-600"
+                      )}>
+                        {token.symbol[0]}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <div className="font-medium truncate">{token.name}</div>
                       <div className="text-sm text-muted-foreground truncate">{token.symbol}</div>
