@@ -1,6 +1,7 @@
 import { VaultList } from './components/vault-list';
 import { VaultStats } from './components/vault-stats';
 import { BtcVaultsSection } from './components/btc-vaults-section';
+import { RWAVaultsSection } from './components/rwa-vaults-section';
 
 export default function VaultsPage() {
   return (
@@ -16,6 +17,7 @@ export default function VaultsPage() {
         </div>
         
         <VaultStats />
+        <RWAVaultsSection />
         <BtcVaultsSection />
         <div className="mt-12">
           <VaultList />

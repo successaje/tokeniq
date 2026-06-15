@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { VaultInfo, VaultType } from '@/types/vault';
 import { VaultCard } from '@/components/vaults/VaultCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,18 @@ const CHAIN_ICONS: Record<string, string> = {
   'Optimism': '🔴',
   'Polygon': '🟣',
   'BNB Chain': '🟡',
+};
+
+const CHAIN_LOGOS: Record<string, string> = {
+  'Ethereum': '/logos/ethereum.png',
+  'Avalanche': '/logos/avalanche-avax-logo.png',
+  'Core': '/logos/core-dao-core-logo.png',
+  'Sei': '/logos/sei-logo.png',
+  'Base': '/logos/base-logo.jpeg',
+  'Arbitrum': '/logos/arbitrum-arb-logo.png',
+  'Optimism': '/logos/optimism.png',
+  'Polygon': '/logos/polygon-matic-logo.png',
+  'BNB Chain': '/bnb-bnb-logo.png',
 };
 
 interface VaultsByChainProps {
@@ -194,7 +207,19 @@ export function VaultsByChain({ vaults }: VaultsByChainProps) {
                     )}
                   >
                     <div className="flex items-center gap-2 w-full">
-                      <span className="text-lg">{CHAIN_ICONS[chain] || '🔗'}</span>
+                      {CHAIN_LOGOS[chain] ? (
+                        <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-border bg-background/50">
+                          <Image 
+                            src={CHAIN_LOGOS[chain]} 
+                            alt={chain} 
+                            width={20} 
+                            height={20} 
+                            className="object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-lg">{CHAIN_ICONS[chain] || '🔗'}</span>
+                      )}
                       <span className="font-medium truncate">{chain}</span>
                       <Badge 
                         variant="secondary" 

@@ -36,10 +36,10 @@ export const viewport: Viewport = {
 // Metadata configuration
 export const metadata: Metadata = {
   title: {
-    default: 'TokenIQ - Token Analytics Platform',
+    default: 'TokenIQ | Autonomous CFO for Web3',
     template: '%s | TokenIQ',
   },
-  description: 'Advanced token analytics and insights',
+  description: 'AI-powered treasury intelligence and capital optimization for Web3.',
   applicationName: 'TokenIQ',
   manifest: '/site.webmanifest',
   appleWebApp: {

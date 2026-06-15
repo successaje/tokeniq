@@ -90,31 +90,31 @@ export function BtcVaultsSection() {
         return;
       }
 
-      // Core Testnet chain ID
-      const CORE_TESTNET_ID = 1114; // From chains.ts
+      // Sei Testnet chain ID
+      const SEI_TESTNET_ID = 1328; // From chains.ts
       
-      // If we're not on Core Testnet, prompt to switch
-      if (chainId !== CORE_TESTNET_ID) {
+      // If we're not on Sei Testnet, prompt to switch
+      if (chainId !== SEI_TESTNET_ID) {
         try {
           toast({
             title: 'Switching Network',
-            description: 'Please approve the network switch to Core Testnet in your wallet',
+            description: 'Please approve the network switch to Sei Testnet in your wallet',
             duration: 4000,
           });
           
-          await switchChain({ chainId: CORE_TESTNET_ID });
+          await switchChain({ chainId: SEI_TESTNET_ID });
           
           // Wait a moment for the network switch to complete
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           // Verify the switch was successful
-          if (chainId !== CORE_TESTNET_ID) {
-            throw new Error('Failed to switch to Core Testnet. Please switch manually in your wallet.');
+          if (chainId !== SEI_TESTNET_ID) {
+            throw new Error('Failed to switch to Sei Testnet. Please switch manually in your wallet.');
           }
           
           toast({
             title: 'Network Switched',
-            description: 'Successfully connected to Core Testnet',
+            description: 'Successfully connected to Sei Testnet',
             variant: 'default',
             duration: 3000,
           });

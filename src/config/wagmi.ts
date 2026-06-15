@@ -1,24 +1,22 @@
 import { http, createConfig } from 'wagmi';
 import { 
+  arbitrum,
+  arbitrumSepolia,
+  mainnet as ethereum,
   sepolia, 
-  avalancheFuji,
-  baseSepolia,
-  defineChain
+  base,
+  baseSepolia
 } from 'wagmi/chains';
 import { injected, metaMask, walletConnect } from 'wagmi/connectors';
-import { SEI_MAINNET, SEI_TESTNET } from './chains';
-
-// Define Sei Network chains
-const seiMainnet = defineChain(SEI_MAINNET);
-const seiTestnet = defineChain(SEI_TESTNET);
 
 // Only include the chains we want to support
 export const supportedChains = [
+  arbitrum,
+  arbitrumSepolia,
+  ethereum,
   sepolia,
-  avalancheFuji,
-  baseSepolia,
-  seiMainnet,
-  seiTestnet
+  base,
+  baseSepolia
 ] as const;
 
 // Export chains as a const array

@@ -1,57 +1,8 @@
 import { Chain } from "wagmi";
 
-// Network IDs
-export const CORE_MAINNET_ID = 1116;
-export const CORE_TESTNET_ID = 1115;
-export const SEI_MAINNET_ID = 1329;
-export const SEI_TESTNET_ID = 1328;
-
-// Sei Network configuration
-export const SEI_MAINNET: Chain = {
-  id: SEI_MAINNET_ID,
-  name: 'Sei Network',
-  network: 'sei',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'SEI',
-    symbol: 'SEI',
-  },
-  rpcUrls: {
-    default: { http: ['https://rpc-sei.keplr.app'] },
-    public: { http: ['https://rpc-sei.keplr.app'] },
-  },
-  blockExplorers: {
-    default: { 
-      name: 'Sei Explorer',
-      url: 'https://www.seiscan.app',
-    },
-  },
-  testnet: false,
-};
-
-export const SEI_TESTNET: Chain = {
-  id: SEI_TESTNET_ID,
-  name: 'Sei Testnet',
-  network: 'sei-testnet',
-  icon: "/logos/sei-logo.png",
-  
-  nativeCurrency: {
-    decimals: 18,
-    name: 'SEI',
-    symbol: 'SEI',
-  },
-  rpcUrls: {
-    default: { http: ['https://evm-rpc-testnet.sei-apis.com'] },
-    public: { http: ['https://evm-rpc-testnet.sei-apis.com'] },
-  },
-  blockExplorers: {
-    default: { 
-      name: 'Sei Testnet Explorer',
-      url: 'https://testnet.seitrace.com',
-    },
-  },
-  testnet: true,
-};
+export const ARBITRUM_ID = 42161;
+export const ETHEREUM_ID = 1;
+export const BASE_ID = 8453;
 
 interface CustomChain extends Omit<Chain, 'id'> {
   id: number;
@@ -59,191 +10,10 @@ interface CustomChain extends Omit<Chain, 'id'> {
   color?: string;
 }
 
-export const SUPPORTED_CHAINS = {
-  // Core chains
-  core: {
-    id: CORE_MAINNET_ID,
-    name: 'Core Mainnet',
-    logo: '/logos/core-dao-core-logo.png',
-    color: '#31cb9e',
-  },
-  'core-testnet': {
-    id: CORE_TESTNET_ID,
-    name: 'Core Testnet',
-    logo: '/logos/core-dao-core-logo.png',
-    color: '#31cb9e',
-  },
-  
-  // Sei chains
-  sei: {
-    ...SEI_MAINNET,
-    logo: '/logos/sei-logo.png',
-    color: '#00e6b8',
-  },
-  'sei-testnet': {
-    ...SEI_TESTNET,
-    logo: '/logos/sei-logo.png',
-    color: '#00e6b8',
-  },
-};
-
-export const CORE_MAINNET: Chain = {
-  id: 1116,
-  name: 'Core Mainnet',
-  network: 'core',
-  icon: "/logos/core-dao-core-logo.png",
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Core',
-    symbol: 'CORE',
-  },
-  rpcUrls: {
-    default: { http: ['https://rpc.coredao.org'] },
-    public: { http: ['https://rpc.coredao.org'] },
-  },
-  blockExplorers: {
-    default: { 
-      name: 'CoreScan',
-      url: 'https://scan.coredao.org',
-    },
-  },
-  testnet: false,
-};
-
-
-
-export const CORE_TESTNET: Chain = {
-  id: 1114,
-  name: 'Core Testnet',
-  network: 'core-testnet',
-  icon: "/logos/core-dao-core-logo.png",
-  nativeCurrency: {
-    decimals: 18,
-    name: 'tCORE',
-    symbol: 'tCORE',
-  },
-  rpcUrls: {
-    default: { http: ['https://rpc.test.btcs.network'] },
-    public: { http: ['https://rpc.test.btcs.network'] },
-  },
-  blockExplorers: {
-    default: { 
-      name: 'CoreScan Testnet',
-      url: 'https://scan.test.btcs.network',
-    },
-  },
-  testnet: true,
-};
-
 export const chains: CustomChain[] = [
-  // Core Mainnet
+  // Arbitrum
   {
-    id: CORE_MAINNET_ID,
-    name: "Core",
-    network: "core",
-    icon: "/logos/core-dao-core-logo.png",
-    color: "#31cb9e",
-    nativeCurrency: {
-      name: "Core",
-      symbol: "CORE",
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: { http: ["https://rpc.coredao.org"] },
-      public: { http: ["https://rpc.coredao.org"] },
-    },
-    blockExplorers: {
-      default: { name: "CoreScan", url: "https://scan.coredao.org" },
-    },
-  },
-  
-  // Sei Network
-  {
-    ...SEI_MAINNET,
-    icon: "/logos/sei-logo.png",
-    color: "#00e6b8",
-  },
-  
-  // Avalanche
-  {
-    id: 43114,
-    name: "Avalanche",
-    network: "avalanche",
-    icon: "/logos/avalanche-avax-logo.png",
-    color: "#E84142",
-    nativeCurrency: {
-      name: "Avalanche",
-      symbol: "AVAX",
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
-      public: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
-    },
-    blockExplorers: {
-      default: { name: "SnowTrace", url: "https://snowtrace.io" },
-    },
-  },
-  {
-    id: 2,
-    name: "Bitcoin",
-    network: "bitcoin",
-    icon: "/logos/bitcoin-btc-logo.png",
-    color: "#F7931A",
-    nativeCurrency: {
-      name: "Bitcoin",
-      symbol: "BTC",
-      decimals: 8,
-    },
-    rpcUrls: {
-      default: { http: ["https://bitcoin.llamarpc.com"] },
-      public: { http: ["https://bitcoin.llamarpc.com"] },
-    },
-    blockExplorers: {
-      default: { name: "BlockCypher", url: "https://live.blockcypher.com" },
-    },
-  },
-  // Ethereum
-  {
-    id: 1,
-    name: "Ethereum",
-    network: "ethereum",
-    icon: "/logos/ethereum.png",
-    color: "#627EEA",
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: { http: ["https://eth.llamarpc.com"] },
-      public: { http: ["https://eth.llamarpc.com"] },
-    },
-    blockExplorers: {
-      default: { name: "Etherscan", url: "https://etherscan.io" },
-    },
-  },
-  {
-    id: 137,
-    name: "Polygon",
-    network: "polygon",
-    icon: "/logos/polygon-matic-logo.png",
-    color: "#8247E5",
-    nativeCurrency: {
-      name: "MATIC",
-      symbol: "MATIC",
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: { http: ["https://polygon.llamarpc.com"] },
-      public: { http: ["https://polygon.llamarpc.com"] },
-    },
-    blockExplorers: {
-      default: { name: "PolygonScan", url: "https://polygonscan.com" },
-    },
-  },
-  {
-    id: 42161,
+    id: ARBITRUM_ID,
     name: "Arbitrum",
     network: "arbitrum",
     icon: "/logos/arbitrum-arb-logo.png",
@@ -261,42 +31,44 @@ export const chains: CustomChain[] = [
       default: { name: "Arbiscan", url: "https://arbiscan.io" },
     },
   },
+  // Ethereum
   {
-    id: 10,
-    name: "Optimism",
-    network: "optimism",
-    icon: "/logos/optimism.png",
-    color: "#FF0420",
+    id: ETHEREUM_ID,
+    name: "Ethereum",
+    network: "ethereum",
+    icon: "/logos/ethereum.png",
+    color: "#627EEA",
     nativeCurrency: {
       name: "Ether",
       symbol: "ETH",
       decimals: 18,
     },
     rpcUrls: {
-      default: { http: ["https://mainnet.optimism.io"] },
-      public: { http: ["https://mainnet.optimism.io"] },
+      default: { http: ["https://eth.llamarpc.com"] },
+      public: { http: ["https://eth.llamarpc.com"] },
     },
     blockExplorers: {
-      default: { name: "Optimism Explorer", url: "https://optimistic.etherscan.io" },
+      default: { name: "Etherscan", url: "https://etherscan.io" },
     },
   },
+  // Base
   {
-    id: 43114,
-    name: "Avalanche",
-    network: "avalanche",
-    icon: "/logos/avalanche-avax-logo.png",
-    color: "#E84142",
+    id: BASE_ID,
+    name: "Base",
+    network: "base",
+    icon: "/base-logo.jpeg",
+    color: "#0052FF",
     nativeCurrency: {
-      name: "AVAX",
-      symbol: "AVAX",
+      name: "Ether",
+      symbol: "ETH",
       decimals: 18,
     },
     rpcUrls: {
-      default: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
-      public: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
+      default: { http: ["https://mainnet.base.org"] },
+      public: { http: ["https://mainnet.base.org"] },
     },
     blockExplorers: {
-      default: { name: "Snowtrace", url: "https://snowtrace.io" },
+      default: { name: "Basescan", url: "https://basescan.org" },
     },
-  },
-] 
+  }
+];

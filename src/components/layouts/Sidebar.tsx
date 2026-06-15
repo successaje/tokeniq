@@ -5,46 +5,33 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  HomeIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  Cog6ToothIcon,
-  ArrowLeftOnRectangleIcon,
-  DocumentDuplicateIcon,
-  ArrowsRightLeftIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-  BriefcaseIcon,
-  WalletIcon,
-  UserGroupIcon,
-  DocumentChartBarIcon,
-  BanknotesIcon,
-} from '@heroicons/react/24/outline';
-import { useState, useEffect } from 'react';
+  LayoutDashboard,
+  Wallet,
+  BrainCircuit,
+  LineChart,
+  Network,
+  Activity,
+  Settings,
+  BookOpen,
+  LogOut,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import { useDisconnect } from 'wagmi';
-import { X } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 
 const mainNavigation = [
-  { name: 'Dashboard', href: '/protected/dashboard', icon: HomeIcon },
-  { name: 'Portfolio', href: '/protected/portfolio', icon: WalletIcon },
-  { name: 'Assets', href: '/protected/assets', icon: BriefcaseIcon },
-  { name: 'Analytics', href: '/protected/analytics', icon: ChartBarIcon },
-  { name: 'Strategies', href: '/protected/strategies', icon: BanknotesIcon },
-  { name: 'Payments', href: '/protected/payments', icon: CurrencyDollarIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Portfolio', href: '/portfolio', icon: Wallet },
+  { name: 'Treasury Copilot', href: '/copilot', icon: BrainCircuit, badge: 'AI' },
+  { name: 'Strategies', href: '/strategies', icon: LineChart },
+  { name: 'Cross-Chain', href: '/crosschain', icon: Network },
+  { name: 'Analytics', href: '/analytics', icon: Activity },
 ];
 
-const rwaNavigation = [
-  { name: 'RWA Management', href: '/protected/rwa', icon: DocumentTextIcon },
-  { name: 'Tokenize', href: '/protected/rwa/tokenize', icon: DocumentDuplicateIcon },
-  { name: 'Bridge', href: '/protected/bridge', icon: ArrowsRightLeftIcon },
-  { name: 'Collateral', href: '/protected/rwa/collateral', icon: CurrencyDollarIcon },
-];
-
-const settingsNavigation = [
-  { name: 'Settings', href: '/protected/settings', icon: Cog6ToothIcon },
-  { name: 'Team', href: '/protected/team', icon: UserGroupIcon },
-  { name: 'Reports', href: '/protected/reports', icon: DocumentChartBarIcon },
+const secondaryNavigation = [
+  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Documentation', href: 'https://tokeniq.gitbook.io', icon: BookOpen, external: true },
 ];
 
 interface SidebarProps {
@@ -52,49 +39,57 @@ interface SidebarProps {
   onCollapse?: () => void;
   onClose?: () => void;
   isOpen?: boolean;
-  className?: string;
 }
 
 export function Sidebar({ 
   isOpen = true, 
   onClose, 
-  className = '',
   collapsed = false,
   onCollapse
 }: SidebarProps) {
   const pathname = usePathname();
   const { disconnect } = useDisconnect();
-  const [isRwaExpanded, setIsRwaExpanded] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
-  const NavItem = ({ item, isSubItem = false }: { item: any; isSubItem?: boolean }) => {
-    const isActive = pathname === item.href;
-    return (
-      <Link
-        href={item.href}
-        className={cn(
-          'group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
-          isActive
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground',
-          isSubItem && 'ml-2'
-        )}
-      >
+  const NavItem = ({ item }: { item: any }) => {
+    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    
+    const content = (
+      <>
         <item.icon className={cn(
-          "h-5 w-5 shrink-0 transition-colors",
-          isActive ? "text-primary" : "text-muted-foreground group-hover:text-accent-foreground"
+          "h-4 w-4 shrink-0 transition-colors",
+          isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
         )} />
         {!collapsed && (
-          <span className="flex-1">{item.name}</span>
+          <div className="flex flex-1 items-center justify-between ml-3">
+            <span className="truncate">{item.name}</span>
+            {item.badge && (
+              <span className="rounded-sm bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                {item.badge}
+              </span>
+            )}
+          </div>
         )}
+      </>
+    );
+
+    const className = cn(
+      'group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200',
+      isActive
+        ? 'bg-primary/10 text-primary'
+        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+    );
+
+    if (item.external) {
+      return (
+        <a href={item.href} target="_blank" rel="noreferrer" className={className}>
+          {content}
+        </a>
+      );
+    }
+
+    return (
+      <Link href={item.href} className={className}>
+        {content}
       </Link>
     );
   };
@@ -104,133 +99,85 @@ export function Sidebar({
       {/* Mobile overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
+      
       <div className={cn(
-        'fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r bg-background transition-all duration-300',
-        !isOpen && '-translate-x-full',
-        className
+        'fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-border bg-sidebar transition-all duration-300 ease-in-out',
+        collapsed ? 'w-16' : 'w-64',
+        !isOpen && '-translate-x-full lg:translate-x-0'
       )}>
-        {/* Mobile header */}
-        <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <Logo className="h-8 w-8" />
-            {!collapsed && <span className="text-xl font-bold">TokenIQ</span>}
+        {/* Header */}
+        <div className="flex h-14 items-center justify-between border-b border-border px-4">
+          <Link href="/" className="flex items-center gap-2 overflow-hidden">
+            <Logo className="h-6 w-6 shrink-0 text-primary" />
+            {!collapsed && <span className="text-sm font-bold tracking-tight text-foreground truncate">TokenIQ</span>}
           </Link>
-          <div className="flex items-center">
-            <button
-              onClick={onClose}
-              className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto">
-          <div className="space-y-1 p-2">
-            {!collapsed && (
-              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Main
-              </h2>
-            )}
-            <ul className="space-y-1">
+        {/* Main Nav */}
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-none">
+          <nav className="space-y-6 px-2">
+            <div className="space-y-1">
               {mainNavigation.map((item) => (
-                <li key={item.name}>
-                  <NavItem item={item} />
-                </li>
+                <NavItem key={item.name} item={item} />
               ))}
-            </ul>
-          </div>
-
-          <div className="space-y-1 p-2">
-            <div className="flex items-center justify-between">
-              {!collapsed && (
-                <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                  RWA
-                </h2>
-              )}
             </div>
-            <button
-              onClick={() => setIsRwaExpanded(!isRwaExpanded)}
-              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
-            >
-              <div className="flex items-center gap-x-3">
-                <DocumentTextIcon className="h-5 w-5" />
-                {!collapsed && <span>Real World Assets</span>}
-              </div>
+
+            <div className="space-y-1">
               {!collapsed && (
-                <svg
-                  className={cn(
-                    'h-4 w-4 transition-transform',
-                    isRwaExpanded ? 'rotate-180' : ''
-                  )}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                <div className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  System
+                </div>
               )}
-            </button>
-
-            {isRwaExpanded && (
-              <div className="mt-1 space-y-1 pl-4">
-                {rwaNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} isSubItem />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="border-t border-border/40 p-2">
-            {!collapsed && (
-              <h2 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Settings
-              </h2>
-            )}
-            <ul className="space-y-1">
-              {settingsNavigation.map((item) => (
-                <li key={item.name}>
-                  <NavItem item={item} />
-                </li>
+              {secondaryNavigation.map((item) => (
+                <NavItem key={item.name} item={item} />
               ))}
-            </ul>
-          </div>
-        </nav>
+            </div>
+          </nav>
+        </div>
 
-        {/* Bottom section */}
-        <div className="mt-auto border-t border-border/40 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-x-2">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <UserCircleIcon className="h-5 w-5 text-primary" />
+        {/* Footer / User Area */}
+        <div className="border-t border-border p-2">
+          <div className={cn(
+            "flex items-center gap-2 rounded-md p-2 hover:bg-muted transition-colors cursor-pointer",
+            collapsed ? "justify-center" : "justify-between"
+          )}>
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                <span className="text-xs font-medium">TX</span>
               </div>
               {!collapsed && (
-                <div>
-                  <p className="text-sm font-medium">User Name</p>
-                  <p className="text-xs text-muted-foreground">user@example.com</p>
+                <div className="flex flex-col truncate">
+                  <span className="text-sm font-medium text-foreground">Treasury Admin</span>
+                  <span className="text-xs text-muted-foreground truncate">Connected</span>
                 </div>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => disconnect()}
-              className="text-muted-foreground hover:text-foreground"
-              title="Sign out"
+          </div>
+          
+          <div className="mt-2 flex items-center justify-between px-2 pb-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              onClick={onCollapse}
             >
-              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
+            
+            {!collapsed && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={() => disconnect()}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
