@@ -1,0 +1,24 @@
+{
+  "name": "@tokeniq/chain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chain registry, verified token/feed addresses, on-chain readers, Safe transaction building and protocol data adapters.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:live": "LIVE_CHAIN_TESTS=1 vitest run"
+  },
+  "dependencies": {
+    "@tokeniq/core": "workspace:*",
+    "viem": "^2.57.4"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
