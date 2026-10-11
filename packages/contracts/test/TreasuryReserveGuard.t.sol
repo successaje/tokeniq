@@ -22,6 +22,45 @@ contract MalformedStorageSafe {
     }
 }
 
+
+/// @dev Stand-in Safe that drives both module-guard hooks inside ONE call, as a real Safe does
+///      within execTransactionFromModule. Transient storage only lives for one transaction, so a
+///      test that calls the hooks as separate top-level calls is not representative (and newer
+///      Foundry versions clear transient storage between top-level test calls).
+contract HookSequenceSafe {
+    uint256 internal constant MODULE_GUARD_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
+    TreasuryReserveGuard public guard;
+    address public moduleAddr;
+
+    function init(TreasuryReserveGuard g, address module_) external {
+        guard = g;
+        moduleAddr = module_;
+        g.setModuleAllowed(module_, true);
+    }
+
+    /// StorageAccessible-compatible: only the module guard slot is set.
+    function getStorageAt(uint256 offset, uint256) external view returns (bytes memory) {
+        if (offset == MODULE_GUARD_SLOT) return abi.encode(address(guard));
+        return abi.encode(bytes32(0));
+    }
+
+    function run(address target)
+        external
+        returns (bytes32 h, bytes memory mismatchRevert, bytes memory configRevert, bool inFlightBefore, bool inFlightAfter)
+    {
+        h = guard.checkModuleTransaction(target, 0, "", Enum.Operation.Call, moduleAddr);
+        inFlightBefore = guard.moduleTransactionInFlight();
+        try guard.checkAfterModuleExecution(bytes32(0), true) {} catch (bytes memory r) {
+            mismatchRevert = r;
+        }
+        try guard.setFloor(target, 0) {} catch (bytes memory r) {
+            configRevert = r;
+        }
+        guard.checkAfterModuleExecution(h, true);
+        inFlightAfter = guard.moduleTransactionInFlight();
+    }
+}
+
 contract TreasuryReserveGuardTest is SafeTestBase {
     address internal constant ETH = address(0);
     address internal constant RECIPIENT = address(0xBEEF);
@@ -599,19 +638,16 @@ contract TreasuryReserveGuardTest is SafeTestBase {
     }
 
     function test_CheckAfter_HashMismatch_Reverts() public {
-        vm.prank(address(safe));
-        bytes32 h = guard.checkModuleTransaction(address(usdc), 0, "", Enum.Operation.Call, address(module));
-        assertTrue(guard.moduleTransactionInFlight());
-        vm.prank(address(safe));
-        vm.expectRevert(abi.encodeWithSelector(TreasuryReserveGuard.ModuleTxHashMismatch.selector, h, bytes32(0)));
-        guard.checkAfterModuleExecution(bytes32(0), true);
+        HookSequenceSafe fakeSafe = new HookSequenceSafe();
+        TreasuryReserveGuard g = new TreasuryReserveGuard(address(fakeSafe));
+        fakeSafe.init(g, address(module));
+        (bytes32 h, bytes memory mismatchRevert, bytes memory configRevert, bool inFlightBefore, bool inFlightAfter) =
+            fakeSafe.run(address(usdc));
+        assertTrue(inFlightBefore);
+        assertEq(mismatchRevert, abi.encodeWithSelector(TreasuryReserveGuard.ModuleTxHashMismatch.selector, h, bytes32(0)));
         // config is locked while a module tx is in flight
-        vm.prank(address(safe));
-        vm.expectRevert(TreasuryReserveGuard.ConfigLockedDuringModuleExecution.selector);
-        guard.setFloor(address(usdc), 0);
-        vm.prank(address(safe));
-        guard.checkAfterModuleExecution(h, true);
-        assertFalse(guard.moduleTransactionInFlight());
+        assertEq(configRevert, abi.encodeWithSelector(TreasuryReserveGuard.ConfigLockedDuringModuleExecution.selector));
+        assertFalse(inFlightAfter);
     }
 
     // =====================================================================
