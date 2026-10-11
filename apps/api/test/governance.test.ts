@@ -175,8 +175,8 @@ describe("approvals", () => {
     const detail = await finance.get(p(`/proposals/${created.json.id}`));
     expect(detail.json.status).toBe("pending_approval");
     expect(detail.json.approval.approvals).toBe(0);
-    const audit = (await owner.get(p("/activity?action=proposal.approval_lapsed"))).json.events;
-    expect(audit.some((e: { targetId: string }) => e.targetId === created.json.id)).toBe(true);
+    const audit = (await owner.get(p("/activity?action=proposal.&limit=200"))).json.events as Array<{ action: string; targetId: string }>;
+    expect(audit.some((e) => e.action === "proposal.approval_lapsed" && e.targetId === created.json.id)).toBe(true);
     await cancel(created.json.id);
   });
 });
@@ -233,8 +233,8 @@ describe("new or changed payee addresses", () => {
     const res = await propose(payment(NEW_PAYEE));
     expect(res.status).toBe(422);
     expect(res.json.error.details.checks.find((c: { id: string }) => c.id === "payee_hold").status).toBe("fail");
-    const events = (await owner.get(p("/activity?action=obligation.payee_changed"))).json.events;
-    expect(events[0].data).toMatchObject({ from: PAYEE.toLowerCase(), to: NEW_PAYEE.toLowerCase() });
+    const events = ((await owner.get(p("/activity?action=obligation.&limit=200"))).json.events as Array<{ action: string; data: unknown }>).filter((e) => e.action === "obligation.payee_changed");
+    expect(events[0]?.data).toMatchObject({ from: PAYEE.toLowerCase(), to: NEW_PAYEE.toLowerCase() });
     const notes = (await admin.get(p("/notifications"))).json.notifications as Array<{ kind: string; title: string }>;
     expect(notes.some((n) => n.kind === "obligation.payee_changed" && n.title.includes("Design agency"))).toBe(true);
     // Saving the same address again does not restart the hold.

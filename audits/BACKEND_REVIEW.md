@@ -25,8 +25,8 @@ Severity: **High** = a single insider role (or an outsider) can bypass a financi
 | BE-07 | Medium | Testnet tokens (valued at $1) could be mixed into a mainnet organization's reserve | Fixed |
 | BE-11 | Medium | Cancelling a proposal does not revoke collected Safe signatures | Open (product change) |
 | BE-13 | Medium | Concurrent GET /alerts (and recommendation refreshes) returned 500 on a duplicate key | Fixed (reported by the lead's browser E2E suite) |
-| BE-16 | Medium | One admin can weaken approval/treasury policy for proposals already in flight | Open (governance design) |
-| BE-17 | Medium | Finance can change an obligation's payee address and then propose paying it | Open (product change) |
+| BE-16 | Medium | One admin can weaken approval/treasury policy for proposals already in flight | Fixed for approval policy (`3e57c556`); residual noted |
+| BE-17 | Medium | Finance can change an obligation's payee address and then propose paying it | Fixed: payee hold, audit, notification (`3e57c556`); residual noted |
 | BE-18 | Medium | RPC trust: owners, nonce, balances, receipts and smart-account signature checks come from the RPC | Accepted with recommendations |
 | BE-08 | Low | Structured actions were accepted as `z.any()` | Fixed |
 | BE-09 | Low | Copilot: recommendation and alert text reached the model unwrapped | Fixed |
@@ -167,7 +167,7 @@ Counts: 2 High, 10 Medium, 15 Low, 5 Info. Fixed: 2 High, 6 Medium, 7 Low (+1 In
 - **Reproduction:** An admin sets one tier `{ upToUsd: null, requiredApprovals: 1 }` with `allowSelfApproval: true` (or raises `maxDeployedBps`), then approves a pending large proposal.
 - **Impact:** One privileged insider removes the four-eyes control for proposals already in flight. Changes are versioned and audited, and Safe owners still sign.
 - **Remediation (recommended):** Require a second owner to approve policy changes that loosen controls, or apply them only to proposals created afterwards; notify owners on every policy change.
-- **Status:** Open (governance design)
+- **Status:** Fixed for the approval policy in `3e57c556`. Each proposal stores the approval policy in force at creation, and approval must satisfy both it and the current policy (`evaluateApprovalsStrictest`), so loosening never speeds up a proposal in flight. Approvals from removed or demoted members stop counting, and approval is re-checked before prepare and execution (`proposal.approval_lapsed`). **Residual:** a single owner or admin can still loosen treasury limits (for example `maxDeployedBps`), which apply at once to re-validation, and policy changes are not separately approved or pushed to owners. Tests: `apps/api/test/governance.test.ts`, `packages/core/test/governance.test.ts`.
 
 ### BE-17 · Payee address change, then payment
 
@@ -176,7 +176,7 @@ Counts: 2 High, 10 Medium, 15 Low, 5 Info. Fixed: 2 High, 6 Medium, 7 Low (+1 In
 - **Reproduction:** Finance edits an obligation's `recipientAddress` to their own address, then proposes the payment; it passes `recipient_matches`.
 - **Impact:** Classic payee-change fraud; still needs approvals and owner signatures.
 - **Remediation (recommended):** Flag payment proposals whose payee changed recently (the audit log has `obligation.updated` with `recipientAddress` from/to); require the approver to differ from the member who changed the payee; notify owners on payee changes.
-- **Status:** Open
+- **Status:** Fixed in `3e57c556`. Obligations record `recipient_set_at`. Payments to an address added or changed less than `newPayeeHoldHours` ago (approval policy, default 48, 0 disables) fail the `payee_hold` check, which also fails closed when the time is unknown. Changes are audited as `obligation.payee_changed` and notified to owners and admins. **Residual:** the approver is not yet required to differ from the member who changed the payee. Tests: `apps/api/test/governance.test.ts`.
 
 ### BE-18 · RPC trust
 
@@ -284,7 +284,7 @@ Outcome: **pass** = the control held before any change; **fixed** = it failed an
 | 57 | Provider outage | pass (fail closed: incomplete data blocks proposals; 500s are generic) | "does not leak RPC error details…"; review |
 | 58 | Alert flooding | pass (alerts de-duplicated by fingerprint, notifications by `(user, dedupe_key)`, email only for critical) | review of `services/notify.ts` |
 | 59 | Cancelled proposal executed with previously collected signatures | open (BE-11) | — |
-| 60 | Admin loosens policy for an in-flight proposal; finance changes payee then pays | open (BE-16, BE-17) | — |
+| 60 | Admin loosens policy for an in-flight proposal; finance changes payee then pays | blocked (BE-16, BE-17 fixed in `3e57c556`; residuals noted) | `governance.test.ts` |
 
 ## Test results (2026-10-11)
 
