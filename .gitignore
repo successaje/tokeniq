@@ -40,7 +40,6 @@ apps/e2e/.auth/
 npm-debug.log*
 pnpm-debug.log*
 
-# PWA build output
-apps/web/public/sw.js
+# PWA build output (apps/web/public/sw.js is hand-written source and is committed)
 apps/web/public/sw.js.map
 apps/web/public/swe-worker-*.js
