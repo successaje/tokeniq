@@ -197,6 +197,8 @@ beforeAll(async () => {
     });
   vendorObligation = (await ob({ title: "Hosting vendor", amount: "10000", firstDueDate: "2026-10-20", recipientAddress: PAYEE })).json.id;
   contractorObligation = (await ob({ title: "Contractor retainer", amount: "5000", firstDueDate: "2026-10-25", recipientAddress: PAYEE2 })).json.id;
+  // Established payees: their addresses were recorded well before the new-payee hold (governance.test.ts covers the hold).
+  await db.update(schema.obligations).set({ recipientSetAt: new Date(now.getTime() - 7 * 86_400_000) }).where(eq(schema.obligations.organizationId, orgA));
 }, 120_000);
 
 afterAll(async () => {

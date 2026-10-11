@@ -85,6 +85,11 @@ export const approvalPolicySchema = z.object({
   allowSelfApproval: z.boolean(),
   /** Proposals expire if not fully approved within this many hours. */
   proposalTtlHours: z.number().int().min(1).max(24 * 30),
+  /**
+   * Payments to a payee address that was added or changed less than this many hours ago are refused.
+   * A changed address is the classic invoice-fraud vector; the hold gives the team time to notice. 0 disables.
+   */
+  newPayeeHoldHours: z.number().int().min(0).max(24 * 14).default(48),
 });
 
 export type ApprovalTier = z.infer<typeof approvalTierSchema>;
@@ -123,6 +128,7 @@ export const DEFAULT_APPROVAL_POLICY: ApprovalPolicy = {
   ],
   allowSelfApproval: false,
   proposalTtlHours: 72,
+  newPayeeHoldHours: 48,
 };
 
 /** Starting policies offered during onboarding. */

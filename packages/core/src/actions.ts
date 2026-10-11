@@ -1,9 +1,9 @@
 import { applyBps, clampZero, formatBps, formatUsd, parseDecimal, ratioBps, toWad, type Bps, type Wad } from "./money";
 import { assessSuitability, liquidityLimit, type Opportunity, type PolicyCheck } from "./opportunities";
 import type { TreasuryPolicy } from "./policy";
-import type { ReserveAssessment } from "./reserve";
 import type { AccountRef, AssetRef, Position, PriceQuote, TreasurySnapshot } from "./treasury";
 import { exposureByVenue, marketValue } from "./treasury";
+import { pendingExposure, type PendingOutflow, type ReserveAssessment } from "./reserve";
 
 /**
  * A structured treasury action. This is the only shape that can move toward
@@ -25,6 +25,13 @@ export interface ValidationContext {
   opportunities: Opportunity[];
   /** Raw liquid balance of the action's asset in the action's account. */
   accountAssetBalanceRaw: bigint | null;
+  /**
+   * Active proposals that are not yet executed, excluding the one being validated. Their allocations
+   * count toward per-venue and per-protocol limits, as they already do toward the reserve.
+   */
+  pendingOutflows?: readonly PendingOutflow[];
+  /** Hold after a payee address is added or changed, in seconds (approval policy `newPayeeHoldHours`). */
+  payeeHoldSec?: number;
   /** Unsettled occurrence lookup for payments: `${obligationId}|${dueDate}` -> USD amount. */
   unsettledOccurrences?: Map<string, Wad>;
   /**
@@ -44,6 +51,8 @@ export interface PaymentTerms {
   recipient: string | null;
   chainId: number | null;
   assetSymbol: string | null;
+  /** When the payee address was last set or changed (unix seconds); null if unknown. */
+  recipientSetAt?: number | null;
 }
 
 /** Tolerance between the stated USD amount and the value of the token amount: 1%, at least $1. */
@@ -124,6 +133,7 @@ export function validateAction(action: TreasuryAction, ctx: ValidationContext): 
   }
 
   const { byProtocol, byVenue } = exposureByVenue(ctx.positions, ctx.accounts);
+  const pending = pendingExposure(ctx.pendingOutflows);
   let reserveAfter = reserve.available - reserve.pendingOutflows;
   let deployedAfter = treasury.allocated.total;
   let protocolShareBps: Bps | null = null;
@@ -143,14 +153,14 @@ export function validateAction(action: TreasuryAction, ctx: ValidationContext): 
       deployedAfter += action.amountUsd + reserve.pendingAllocations;
       const deployCap = applyBps(treasury.gross, policy.maxDeployedBps, "down");
       check("deploy_cap", "Within maximum deployed share", deployedAfter <= deployCap, `${formatUsd(deployedAfter)} deployed vs ${formatBps(policy.maxDeployedBps, 0)} limit (${formatUsd(deployCap)})`);
-      const protocolAfter = (byProtocol.get(opp.protocol) ?? 0n) + action.amountUsd;
+      const protocolAfter = (byProtocol.get(opp.protocol) ?? 0n) + (pending.byProtocol.get(opp.protocol) ?? 0n) + action.amountUsd;
       const protocolCap = applyBps(treasury.gross, policy.maxPerProtocolBps, "down");
       protocolShareBps = ratioBps(protocolAfter, treasury.gross);
-      check("protocol_cap", "Within per-protocol exposure limit", protocolAfter <= protocolCap, `${formatUsd(protocolAfter)} in ${opp.protocol} vs ${formatUsd(protocolCap)} limit`);
-      const venueAfter = (byVenue.get(opp.id) ?? 0n) + action.amountUsd;
+      check("protocol_cap", "Within per-protocol exposure limit", protocolAfter <= protocolCap, `${formatUsd(protocolAfter)} in ${opp.protocol}${pending.byProtocol.get(opp.protocol) ? " (including proposals in progress)" : ""} vs ${formatUsd(protocolCap)} limit`);
+      const venueAfter = (byVenue.get(opp.id) ?? 0n) + (pending.byVenue.get(opp.id) ?? 0n) + action.amountUsd;
       const venueCap = applyBps(treasury.gross, policy.maxPerVenueBps, "down");
       venueShareBps = ratioBps(venueAfter, treasury.gross);
-      check("venue_cap", "Within per-venue exposure limit", venueAfter <= venueCap, `${formatUsd(venueAfter)} in this venue vs ${formatUsd(venueCap)} limit`);
+      check("venue_cap", "Within per-venue exposure limit", venueAfter <= venueCap, `${formatUsd(venueAfter)} in this venue${pending.byVenue.get(opp.id) ? " (including proposals in progress)" : ""} vs ${formatUsd(venueCap)} limit`);
       const liqLimit = liquidityLimit(opp, policy);
       check(
         "venue_liquidity",
@@ -199,6 +209,22 @@ export function validateAction(action: TreasuryAction, ctx: ValidationContext): 
       payee !== null && ADDRESS_RE.test(action.recipient) && payee.toLowerCase() === action.recipient.toLowerCase(),
       payee === null ? "Record the payee's address on the obligation before proposing a payment" : `The obligation's payee is ${payee}`,
     );
+    const hold = ctx.payeeHoldSec ?? 0;
+    if (hold > 0 && payee !== null) {
+      // Unknown history counts as new: the hold fails closed.
+      const setAt = terms?.recipientSetAt ?? null;
+      const releasesAt = setAt === null ? null : setAt + hold;
+      check(
+        "payee_hold",
+        "Payee address is not newly added or changed",
+        releasesAt !== null && ctx.nowSec >= releasesAt,
+        releasesAt === null
+          ? "When this payee address was set is unknown; re-save it on the obligation to start the hold"
+          : ctx.nowSec >= releasesAt
+            ? `Address unchanged since ${new Date(setAt! * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC`
+            : `The payee address was added or changed at ${new Date(setAt! * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC. Payments to it are held until ${new Date(releasesAt * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC so the team can confirm the change out of band`,
+      );
+    }
     if (terms?.chainId != null) {
       check("payment_network", "Paid on the obligation's network", account?.chainId === terms.chainId, `The obligation is paid on chain ${terms.chainId}`);
     }

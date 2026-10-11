@@ -56,21 +56,31 @@ export function evaluateApprovals(input: {
   nowSec: number;
   records: ApprovalRecord[];
   cancelled?: boolean;
+  /** The deadline fixed when the proposal was created. Defaults to createdAt + the policy's TTL. */
+  expiresAt?: number;
+  /**
+   * Current members and roles. When given, decisions from people who have left stop counting, and an
+   * approval satisfies a role requirement only if both the role at the time and the current role do.
+   */
+  currentRoles?: ReadonlyMap<string, MemberRole>;
 }): ApprovalEvaluation {
   const tier = tierFor(input.policy, input.amountUsd);
-  const expiresAt = input.createdAt + input.policy.proposalTtlHours * 3600;
+  const expiresAt = input.expiresAt ?? input.createdAt + input.policy.proposalTtlHours * 3600;
+  const current = input.currentRoles;
   // Latest decision per member wins; ineligible decisions are ignored.
   const latest = new Map<string, ApprovalRecord>();
   for (const r of [...input.records].sort((a, b) => a.at - b.at)) {
     if (r.at >= expiresAt) continue;
     if (!APPROVER_ROLES.includes(r.role)) continue;
+    if (current && !APPROVER_ROLES.includes(current.get(r.memberId) ?? "viewer")) continue;
     if (!input.policy.allowSelfApproval && r.memberId === input.proposerId) continue;
     latest.set(r.memberId, r);
   }
   const decisions = [...latest.values()];
   const approvals = decisions.filter((d) => d.decision === "approve");
   const rejected = decisions.some((d) => d.decision === "reject");
-  const roleRequirementMet = tier.requiredRole === null || approvals.some((a) => roleSatisfies(a.role, tier.requiredRole!));
+  const roleRequirementMet =
+    tier.requiredRole === null || approvals.some((a) => roleSatisfies(a.role, tier.requiredRole!) && (!current || roleSatisfies(current.get(a.memberId)!, tier.requiredRole!)));
   const remaining = Math.max(0, tier.requiredApprovals - approvals.length);
 
   let state: InternalApprovalState;
@@ -95,6 +105,17 @@ export function evaluateApprovals(input: {
             : `Needs ${parts.join(" and ")}${input.policy.allowSelfApproval ? "" : " (the proposer cannot approve their own proposal)"}.`;
 
   return { state, tier, requiredApprovals: tier.requiredApprovals, approvals: approvals.length, remaining, roleRequirementMet, expiresAt, needs };
+}
+
+/**
+ * Evaluate against several approval policies (typically the one in force when the proposal was created
+ * and the current one) and return the least satisfied result. Loosening a policy therefore never speeds
+ * up a proposal already in flight; tightening it applies immediately.
+ */
+export function evaluateApprovalsStrictest(policies: ApprovalPolicy[], input: Omit<Parameters<typeof evaluateApprovals>[0], "policy">): ApprovalEvaluation {
+  const rank = (e: ApprovalEvaluation) => ({ cancelled: 0, rejected: 1, expired: 2, pending: 3, approved: 4 })[e.state];
+  const evals = policies.map((policy) => evaluateApprovals({ ...input, policy }));
+  return evals.sort((a, b) => rank(a) - rank(b) || b.remaining - a.remaining || Number(a.roleRequirementMet) - Number(b.roleRequirementMet))[0]!;
 }
 
 /** Owners satisfy any role requirement; admins satisfy admin/finance/approver; otherwise exact match. */

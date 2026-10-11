@@ -1,6 +1,18 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { buildExecTransactionData, encodeSafeSignatures, explorerTx, readSafeInfo, recoverSafeSigner, simulateSafeTransaction, type SafeInfo } from "@tokeniq/chain";
-import { canApprove, decimalString, evaluateApprovals, formatUsd, parseDecimal, validateAction, type ApprovalRecord, type MemberRole, type TreasuryAction } from "@tokeniq/core";
+import {
+  approvalPolicySchema,
+  canApprove,
+  decimalString,
+  evaluateApprovalsStrictest,
+  formatUsd,
+  parseDecimal,
+  validateAction,
+  type ApprovalPolicy,
+  type ApprovalRecord,
+  type MemberRole,
+  type TreasuryAction,
+} from "@tokeniq/core";
 import { and, asc, desc, eq, inArray, schema, sql } from "@tokeniq/db";
 import { getAddress, isAddressEqual, type Hex } from "viem";
 import type { App, Deps } from "../context.js";
@@ -71,7 +83,10 @@ function validationContext(state: OrgState, action: TreasuryAction) {
   const unsettled = new Map<string, bigint>();
   for (const o of state.reserve.obligations.occurrences) if (o.usd !== null) unsettled.set(`${o.obligationId}|${o.dueDate}`, o.usd);
   const paymentTerms = new Map(
-    state.obligationRows.map((o) => [o.id, { recipient: o.recipientAddress, chainId: o.recipientChainId, assetSymbol: o.paymentAsset }]),
+    state.obligationRows.map((o) => [
+      o.id,
+      { recipient: o.recipientAddress, chainId: o.recipientChainId, assetSymbol: o.paymentAsset, recipientSetAt: o.recipientSetAt ? Math.floor(o.recipientSetAt.getTime() / 1000) : null },
+    ]),
   );
   return {
     // The token being moved and its quote, so the engine can bind amountUsd to assetAmountRaw (withdrawals use the position).
@@ -86,6 +101,8 @@ function validationContext(state: OrgState, action: TreasuryAction) {
     opportunities: state.opportunities,
     accountAssetBalanceRaw: holding ? holding.raw : null,
     unsettledOccurrences: unsettled,
+    pendingOutflows: state.pendingOutflows,
+    payeeHoldSec: (state.approvalPolicy.newPayeeHoldHours ?? 48) * 3600,
   };
 }
 
@@ -99,6 +116,37 @@ function approvalRecords(rows: Array<typeof schema.approvals.$inferSelect>): App
   return rows.filter((r) => isRole(r.role)).map((r) => ({ memberId: r.userId, role: r.role as MemberRole, decision: r.decision as "approve" | "reject", at: Math.floor(r.createdAt.getTime() / 1000) }));
 }
 
+/** The approval policy stored with the proposal at creation, or null for proposals created before snapshots. */
+function policyAtCreation(p: ProposalRow): ApprovalPolicy | null {
+  const parsed = approvalPolicySchema.safeParse(p.approvalPolicy);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Self-approval is allowed only if both the creation-time and the current policy allow it. */
+function effectivePolicy(p: ProposalRow, current: ApprovalPolicy): ApprovalPolicy {
+  const snap = policyAtCreation(p);
+  return snap ? { ...current, allowSelfApproval: snap.allowSelfApproval && current.allowSelfApproval } : current;
+}
+
+/**
+ * Internal approval state of a proposal: evaluated under both the policy in force at creation and the
+ * current one (the stricter result wins), counting only people who are still members with a role that
+ * may approve, against the deadline fixed at creation.
+ */
+function evaluateProposal(p: ProposalRow, current: ApprovalPolicy, records: ApprovalRecord[], roles: ReadonlyMap<string, MemberRole>, nowSec: number) {
+  const snap = policyAtCreation(p);
+  return evaluateApprovalsStrictest(snap ? [snap, current] : [current], {
+    amountUsd: parseDecimal(p.amountUsd),
+    proposerId: p.proposerId,
+    createdAt: Math.floor(p.createdAt.getTime() / 1000),
+    expiresAt: Math.floor(p.expiresAt.getTime() / 1000),
+    nowSec,
+    records,
+    currentRoles: roles,
+    cancelled: p.status === "cancelled",
+  });
+}
+
 export function registerProposals(app: App, deps: Deps) {
   const { db } = deps;
 
@@ -106,6 +154,30 @@ export function registerProposals(app: App, deps: Deps) {
     const [p] = await db.select().from(schema.proposals).where(and(eq(schema.proposals.id, id), eq(schema.proposals.organizationId, orgId))).limit(1);
     if (!p) throw notFound("Proposal");
     return p;
+  }
+
+  /**
+   * Internal approval is re-checked before a transaction is prepared or released for execution: an approver
+   * may have left or been demoted, or the policy tightened, since the proposal was approved.
+   */
+  async function reconfirmApproval(p: ProposalRow, state: OrgState) {
+    const rows = await db.select().from(schema.approvals).where(eq(schema.approvals.proposalId, p.id));
+    const ev = evaluateProposal(p, state.approvalPolicy, approvalRecords(rows), await memberRoles(db, p.organizationId), state.nowSec);
+    if (ev.state === "approved") return;
+    const next: ProposalStatus = ev.state === "expired" ? "expired" : ev.state === "rejected" ? "rejected" : "pending_approval";
+    await db.transaction(async (tx) => {
+      await tx
+        .update(schema.proposals)
+        .set({ status: next })
+        .where(and(eq(schema.proposals.id, p.id), inArray(schema.proposals.status, ["approved", "awaiting_signatures", "ready_to_execute", "stale"])));
+      await audit(tx, { organizationId: p.organizationId, actorUserId: null, actorType: "system", action: "proposal.approval_lapsed", targetType: "proposal", targetId: p.id, data: { needs: ev.needs, status: next } });
+    });
+    throw conflict("approval_lapsed", `Internal approval no longer holds: ${ev.needs} The proposal is now ${next.replace(/_/g, " ")}. Nothing was signed or sent.`);
+  }
+
+  async function memberRoles(conn: Pick<typeof db, "select">, orgId: string): Promise<Map<string, MemberRole>> {
+    const rows = await conn.select({ userId: schema.members.userId, role: schema.members.role }).from(schema.members).where(eq(schema.members.organizationId, orgId));
+    return new Map(rows.filter((r) => isRole(r.role)).map((r) => [r.userId, r.role as MemberRole]));
   }
 
   async function setStatus(tx: Pick<typeof db, "update">, id: string, from: ProposalStatus[], to: ProposalStatus, extra: Partial<ProposalRow> = {}) {
@@ -214,6 +286,7 @@ export function registerProposals(app: App, deps: Deps) {
             validation: validationDto(validation),
             proposerId: user.id,
             idempotencyKey: input.idempotencyKey,
+            approvalPolicy: state.approvalPolicy,
             expiresAt: new Date(deps.now().getTime() + ttl * 3600_000),
           });
           if (recommendationId) {
@@ -278,9 +351,10 @@ export function registerProposals(app: App, deps: Deps) {
       const approvals = ids.length ? await db.select().from(schema.approvals).where(inArray(schema.approvals.proposalId, ids)) : [];
       const sigs = ids.length ? await db.select({ proposalId: schema.safeSignatures.proposalId, signer: schema.safeSignatures.signer }).from(schema.safeSignatures).where(inArray(schema.safeSignatures.proposalId, ids)) : [];
       const { approval: policy } = await getPolicies(db, m.organizationId);
+      const roles = await memberRoles(db, m.organizationId);
       return send(c, {
         proposals: rows.map(({ p, proposer }) => {
-          const ev = evaluateApprovals({ policy, amountUsd: parseDecimal(p.amountUsd), proposerId: p.proposerId, createdAt: Math.floor(p.createdAt.getTime() / 1000), nowSec: Math.floor(deps.now().getTime() / 1000), records: approvalRecords(approvals.filter((a) => a.proposalId === p.id)) });
+          const ev = evaluateProposal(p, policy, approvalRecords(approvals.filter((a) => a.proposalId === p.id)), roles, Math.floor(deps.now().getTime() / 1000));
           const mine = approvals.find((a) => a.proposalId === p.id && a.userId === user.id);
           return {
             id: p.id,
@@ -332,14 +406,14 @@ export function registerProposals(app: App, deps: Deps) {
         db.select({ c: schema.proposalComments, name: schema.users.name }).from(schema.proposalComments).innerJoin(schema.users, eq(schema.users.id, schema.proposalComments.userId)).where(eq(schema.proposalComments.proposalId, id)).orderBy(asc(schema.proposalComments.createdAt)),
         db.select().from(schema.safeSignatures).where(eq(schema.safeSignatures.proposalId, id)).orderBy(asc(schema.safeSignatures.createdAt)),
         db.select().from(schema.executions).where(eq(schema.executions.proposalId, id)).orderBy(asc(schema.executions.submittedAt)),
-        loadOrgState(db, m.organizationId, deps.now()),
+        loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id }),
       ]);
       const [proposer] = await db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, p.proposerId));
       const action = actionFromJson(p.action as ActionJson);
       const live = validateAction(action, validationContext(state, action));
-      const ev = evaluateApprovals({ policy: state.approvalPolicy, amountUsd: parseDecimal(p.amountUsd), proposerId: p.proposerId, createdAt: Math.floor(p.createdAt.getTime() / 1000), nowSec: state.nowSec, records: approvalRecords(approvalRows.map((r) => r.a)), cancelled: p.status === "cancelled" });
+      const ev = evaluateProposal(p, state.approvalPolicy, approvalRecords(approvalRows.map((r) => r.a)), await memberRoles(db, m.organizationId), state.nowSec);
       const account = state.accountRows.find((a) => a.id === p.accountId);
-      const you = canApprove({ role: m.role, memberId: user.id, proposerId: p.proposerId, policy: state.approvalPolicy });
+      const you = canApprove({ role: m.role, memberId: user.id, proposerId: p.proposerId, policy: effectivePolicy(p, state.approvalPolicy) });
       const myDecision = approvalRows.find((r) => r.a.userId === user.id)?.a.decision ?? null;
       return send(c, {
         id: p.id,
@@ -389,8 +463,8 @@ export function registerProposals(app: App, deps: Deps) {
       const { decision, comment } = c.req.valid("json");
       if (decision === "reject" && !comment) throw badRequest("comment_required", "Explain why you are rejecting so the proposer can act on it.");
       const p = await getProposal(m.organizationId, id);
-      const state = await loadOrgState(db, m.organizationId, deps.now());
-      const allowed = canApprove({ role: m.role, memberId: user.id, proposerId: p.proposerId, policy: state.approvalPolicy });
+      const state = await loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id });
+      const allowed = canApprove({ role: m.role, memberId: user.id, proposerId: p.proposerId, policy: effectivePolicy(p, state.approvalPolicy) });
       if (!allowed.allowed) throw new ApiError(403, "cannot_approve", allowed.reason);
       if (p.status !== "pending_approval") throw conflict("not_pending", `This proposal is ${p.status.replace(/_/g, " ")} and no longer accepts decisions.`);
       if (p.expiresAt <= deps.now()) throw conflict("expired", "This proposal expired before it was fully approved.");
@@ -419,14 +493,7 @@ export function registerProposals(app: App, deps: Deps) {
             .insert(schema.approvals)
             .values({ organizationId: m.organizationId, proposalId: id, userId: user.id, role: m.role, decision, comment: comment ?? null });
           const rows = await tx.select().from(schema.approvals).where(eq(schema.approvals.proposalId, id));
-          const ev = evaluateApprovals({
-            policy: state.approvalPolicy,
-            amountUsd: parseDecimal(p.amountUsd),
-            proposerId: p.proposerId,
-            createdAt: Math.floor(p.createdAt.getTime() / 1000),
-            nowSec: state.nowSec,
-            records: approvalRecords(rows),
-          });
+          const ev = evaluateProposal(p, state.approvalPolicy, approvalRecords(rows), await memberRoles(tx, m.organizationId), state.nowSec);
           if (ev.state === "approved") await setStatus(tx, id, ["pending_approval"], "approved");
           if (ev.state === "rejected") await setStatus(tx, id, ["pending_approval"], "rejected");
           await audit(tx, {
@@ -500,9 +567,10 @@ export function registerProposals(app: App, deps: Deps) {
       assertCan(m.role, "proposals.sign");
       const { id } = c.req.valid("param");
       const p = await getProposal(m.organizationId, id);
-      const state = await loadOrgState(db, m.organizationId, deps.now());
+      const state = await loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id });
       requireExecutionAllowed(state);
       if (!["approved", "awaiting_signatures", "stale"].includes(p.status)) throw conflict("not_approved", "The transaction can be prepared only after internal approval is complete.");
+      await reconfirmApproval(p, state);
       const action = actionFromJson(p.action as ActionJson);
       const live = validateAction(action, validationContext(state, action));
       if (!live.valid) throw new ApiError(422, "policy_check_failed", "The action no longer passes every policy check with current data. Create a new proposal from fresh figures.", validationDto(live));
@@ -549,7 +617,7 @@ export function registerProposals(app: App, deps: Deps) {
       const p = await getProposal(m.organizationId, id);
       if (p.status !== "awaiting_signatures" && p.status !== "ready_to_execute") throw conflict("not_signable", "This proposal is not collecting signatures.");
       if (!p.safeTxHash || !p.safeTx) throw conflict("not_prepared", "Prepare the transaction first.");
-      const state = await loadOrgState(db, m.organizationId, deps.now());
+      const state = await loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id });
       requireExecutionAllowed(state);
       const recovered = await recoverSafeSigner(p.safeTxHash as Hex, c.req.valid("json").signature as Hex);
       if (!recovered.ok) throw unprocessable("unsupported_signature", recovered.reason);
@@ -587,8 +655,9 @@ export function registerProposals(app: App, deps: Deps) {
       const { id } = c.req.valid("param");
       const p = await getProposal(m.organizationId, id);
       if (p.status !== "ready_to_execute") throw conflict("not_ready", "The proposal does not have enough owner signatures yet.");
-      const state = await loadOrgState(db, m.organizationId, deps.now());
+      const state = await loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id });
       requireExecutionAllowed(state);
+      await reconfirmApproval(p, state);
       const action = actionFromJson(p.action as ActionJson);
       const live = validateAction(action, validationContext(state, action));
       if (!live.valid) throw new ApiError(422, "policy_check_failed", "Conditions changed and the action no longer passes policy. Do not execute; cancel and re-propose.", validationDto(live));

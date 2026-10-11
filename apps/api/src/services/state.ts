@@ -99,7 +99,7 @@ export function accountFromRow(r: typeof schema.treasuryAccounts.$inferSelect, n
  * Load everything the engine needs for one organization and run the
  * treasury and reserve calculations. Pure reads; safe to call per request.
  */
-export async function loadOrgState(db: Database, orgId: string, now: Date): Promise<OrgState> {
+export async function loadOrgState(db: Database, orgId: string, now: Date, opts: { excludeProposalId?: string } = {}): Promise<OrgState> {
   const nowSec = Math.floor(now.getTime() / 1000);
   const asOf = toIsoDate(now);
 
@@ -116,7 +116,7 @@ export async function loadOrgState(db: Database, orgId: string, now: Date): Prom
       .from(schema.payments)
       .where(eq(schema.payments.organizationId, orgId)),
     db
-      .select({ id: schema.proposals.id, kind: schema.proposals.kind, amountUsd: schema.proposals.amountUsd })
+      .select({ id: schema.proposals.id, kind: schema.proposals.kind, status: schema.proposals.status, amountUsd: schema.proposals.amountUsd, action: schema.proposals.action, expiresAt: schema.proposals.expiresAt })
       .from(schema.proposals)
       .where(and(eq(schema.proposals.organizationId, orgId), inArray(schema.proposals.status, [...ACTIVE_PROPOSAL_STATUSES]))),
     db.select().from(schema.opportunities),
@@ -208,10 +208,17 @@ export async function loadOrgState(db: Database, orgId: string, now: Date): Prom
   const accounts = accountRows.map((r) => accountFromRow(r, nowSec));
   const obligations = obligationRows.map(obligationFromRow);
   const settled: SettledOccurrence[] = paymentRows.map((p) => ({ obligationId: p.obligationId, dueDate: p.dueDate }));
-  const pendingOutflows: PendingOutflow[] = proposalRows
-    .filter((p) => p.kind === "allocate")
-    .map((p) => ({ id: p.id, amount: parseDecimal(p.amountUsd), kind: "allocation" as const }));
   const opportunities = oppRows.map((r) => opportunityFromJson(r.data as OpportunityJson));
+  // Allocations in flight reduce what can still be deployed and count toward venue and protocol limits.
+  // A proposal being re-validated is left out so it is not counted against itself, and proposals still
+  // awaiting approval past their deadline no longer hold capital, whether or not a read has expired them yet.
+  const pendingOutflows: PendingOutflow[] = proposalRows
+    .filter((p) => p.kind === "allocate" && p.id !== opts.excludeProposalId && !(p.status === "pending_approval" && p.expiresAt <= now))
+    .map((p) => {
+      const venueId = (p.action as { opportunityId?: string }).opportunityId;
+      const protocol = venueId ? opportunities.find((o) => o.id === venueId)?.protocol : undefined;
+      return { id: p.id, amount: parseDecimal(p.amountUsd), kind: "allocation" as const, ...(venueId ? { venueId } : {}), ...(protocol ? { protocol } : {}) };
+    });
 
   const treasury = computeTreasury({ asOf: nowSec, accounts, holdings, positions, policy: policies.treasury, chainName });
   const stableHoldingsByCurrency: Partial<Record<Currency, Wad>> = {};

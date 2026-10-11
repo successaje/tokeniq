@@ -356,6 +356,9 @@ export const obligations = pgTable(
     trackFrom: date("track_from", { mode: "string" }).notNull(),
     counterparty: text("counterparty"),
     recipientAddress: text("recipient_address"),
+    /** When the payee address was last set or changed; payments to it are held for the policy's newPayeeHoldHours. */
+    recipientSetAt: timestamp("recipient_set_at", { withTimezone: true }),
+    recipientSetBy: text("recipient_set_by").references(() => users.id, { onDelete: "set null" }),
     recipientChainId: integer("recipient_chain_id"),
     paymentAsset: text("payment_asset"),
     invoiceNumber: text("invoice_number"),
@@ -499,6 +502,8 @@ export const proposals = pgTable(
     safeTxHash: text("safe_tx_hash"),
     proposerId: text("proposer_id").notNull().references(() => users.id, { onDelete: "restrict" }),
     idempotencyKey: text("idempotency_key").notNull(),
+    /** Approval policy in force at creation. Approval must satisfy both this and the current policy. */
+    approvalPolicy: jsonb("approval_policy"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

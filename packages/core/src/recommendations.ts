@@ -2,8 +2,8 @@ import { validateAction, type ActionValidation, type TreasuryAction, type Valida
 import { applyBps, clampZero, floorTo, formatBps, formatUsd, fromWad, minOf, parseDecimal, wad, type Wad } from "./money";
 import { assessSuitability, estimateYield, liquidityLimit, type Opportunity } from "./opportunities";
 import type { TreasuryPolicy } from "./policy";
-import type { ReserveAssessment } from "./reserve";
 import type { AccountRef, Holding, Position, TreasurySnapshot } from "./treasury";
+import { pendingExposure, type PendingOutflow, type ReserveAssessment } from "./reserve";
 import { exposureByVenue, marketValue } from "./treasury";
 
 export type RecommendationKind = "deploy_surplus" | "restore_reserve" | "reduce_concentration" | "hold";
@@ -44,6 +44,8 @@ export interface RecommendationInput {
   holdings: Holding[];
   positions: Position[];
   opportunities: Opportunity[];
+  /** Active proposals not yet executed (see ValidationContext.pendingOutflows). */
+  pendingOutflows?: readonly PendingOutflow[];
 }
 
 const STEP = wad(1000);
@@ -76,6 +78,7 @@ function ctxFor(input: RecommendationInput, accountAssetBalanceRaw: bigint | nul
     positions: input.positions,
     opportunities: input.opportunities,
     accountAssetBalanceRaw,
+    pendingOutflows: input.pendingOutflows,
   };
 }
 
@@ -96,10 +99,14 @@ function deploySurplus(input: RecommendationInput): Recommendation | null {
     .filter((s) => s.value > 0n);
   if (sources.length === 0) return null;
 
-  const { byVenue } = exposureByVenue(input.positions, input.accounts);
+  const exposure = exposureByVenue(input.positions, input.accounts);
+  const pending = pendingExposure(input.pendingOutflows);
+  const venueExposure = (id: string) => (exposure.byVenue.get(id) ?? 0n) + (pending.byVenue.get(id) ?? 0n);
+  const protocolExposureOf = (p: string) => (exposure.byProtocol.get(p) ?? 0n) + (pending.byProtocol.get(p) ?? 0n);
+  // Ranked by what borrowers pay after fees. Incentive rewards can stop at any time, so they only break ties.
   const ranked = input.opportunities
     .filter((o) => assessSuitability(o, policy, input.nowSec).suitable)
-    .sort((a, b) => b.apy.netBps - a.apy.netBps || (b.tvlUsd > a.tvlUsd ? 1 : b.tvlUsd < a.tvlUsd ? -1 : a.id.localeCompare(b.id)));
+    .sort((a, b) => b.apy.nativeBps - a.apy.nativeBps || b.apy.netBps - a.apy.netBps || (b.tvlUsd > a.tvlUsd ? 1 : b.tvlUsd < a.tvlUsd ? -1 : a.id.localeCompare(b.id)));
 
   for (const opp of ranked) {
     // v1 sizes USD-pegged assets 1:1 (consistent with the conservative reserve valuation).
@@ -109,10 +116,9 @@ function deploySurplus(input: RecommendationInput): Recommendation | null {
       .filter((s) => s.h.asset.chainId === opp.chainId && s.h.asset.address.toLowerCase() === opp.asset.address.toLowerCase())
       .sort((a, b) => (b.value > a.value ? 1 : -1))[0];
     if (!source) continue;
-    const venueRoom = clampZero(liquidityLimit(opp, policy) - (byVenue.get(opp.id) ?? 0n));
-    const venueCapRoom = clampZero(applyBps(treasury.gross, policy.maxPerVenueBps, "down") - (byVenue.get(opp.id) ?? 0n));
-    const protocolExposure = exposureByVenue(input.positions, input.accounts).byProtocol.get(opp.protocol) ?? 0n;
-    const protocolRoom = clampZero(applyBps(treasury.gross, policy.maxPerProtocolBps, "down") - protocolExposure);
+    const venueRoom = clampZero(liquidityLimit(opp, policy) - venueExposure(opp.id));
+    const venueCapRoom = clampZero(applyBps(treasury.gross, policy.maxPerVenueBps, "down") - venueExposure(opp.id));
+    const protocolRoom = clampZero(applyBps(treasury.gross, policy.maxPerProtocolBps, "down") - protocolExposureOf(opp.protocol));
     const raw = minOf(reserve.surplus.deployable, venueRoom, venueCapRoom, protocolRoom, source.value);
     const amountUsd = floorTo(raw, STEP);
     if (amountUsd < minAction) continue;
@@ -122,32 +128,34 @@ function deploySurplus(input: RecommendationInput): Recommendation | null {
     const validation = validateAction(action, ctxFor(input, source.h.raw, source.h));
     if (!validation.valid) continue;
 
-    const yearly = estimateYield(amountUsd, opp.apy.netBps, 365);
-    const monthly = estimateYield(amountUsd, opp.apy.netBps, 30);
+    // Estimates use the borrower-paid rate only; incentive rewards are mentioned separately.
+    const yearly = estimateYield(amountUsd, opp.apy.nativeBps, 365);
+    const monthly = estimateYield(amountUsd, opp.apy.nativeBps, 30);
     const alternatives = ranked
       .filter((o) => o.id !== opp.id)
       .slice(0, 2)
-      .map((o) => ({ title: `${o.name} (${formatBps(o.apy.netBps)} net)`, consequence: `Comparable venue; ${formatUsd(o.availableLiquidityUsd, { compact: true })} available liquidity` }));
+      .map((o) => ({ title: `${o.name} (${formatBps(o.apy.nativeBps)} before rewards)`, consequence: `Comparable venue; ${formatUsd(o.availableLiquidityUsd, { compact: true })} available liquidity` }));
     alternatives.push({ title: "Do nothing", consequence: `Keep ${formatUsd(amountUsd)} liquid. No protocol risk, and no yield (about ${formatUsd(monthly)} per 30 days at today's rate).` });
 
     return {
       fingerprint: `deploy:${opp.id}:${amountUsd.toString()}:${source.h.accountId}`,
       kind: "deploy_surplus",
       title: `Deploy ${formatUsd(amountUsd, { decimals: 0 })} into ${opp.name}`,
-      summary: `${formatUsd(reserve.surplus.deployable, { decimals: 0 })} is deployable after the protected reserve. This proposal uses part of it in the highest-yielding venue that passes every policy check.`,
+      summary: `${formatUsd(reserve.surplus.deployable, { decimals: 0 })} is deployable after the protected reserve. This proposal uses part of it in the venue that passes every policy check and pays the most before incentive rewards.`,
       trigger: reserve.surplus.explanation,
       objective: "Earn yield on capital that is not needed for obligations or the runway reserve, without breaching exposure limits.",
       evidence: [
         { label: "Protected reserve requirement", value: formatUsd(reserve.required), ref: "reserve" },
         { label: "Reserve-eligible capital", value: formatUsd(reserve.available), ref: "treasury" },
         { label: "Deployable surplus", value: formatUsd(reserve.surplus.deployable), ref: "reserve" },
-        { label: "Net APY", value: `${formatBps(opp.apy.netBps)} (${opp.apy.measurement.replace(/_/g, " ")})`, ref: `opportunity:${opp.id}` },
+        { label: "APY before rewards", value: `${formatBps(opp.apy.nativeBps)} (${opp.apy.measurement.replace(/_/g, " ")})`, ref: `opportunity:${opp.id}` },
+        ...(opp.apy.rewardsBps > 0 ? [{ label: "Incentive rewards (not counted)", value: formatBps(opp.apy.rewardsBps), ref: `opportunity:${opp.id}` }] : []),
         { label: "Venue available liquidity", value: formatUsd(opp.availableLiquidityUsd, { compact: true }), ref: `opportunity:${opp.id}` },
         { label: "Data source", value: `${opp.source.name}, fetched ${new Date(opp.source.fetchedAt * 1000).toISOString()}`, ref: `opportunity:${opp.id}` },
       ],
       action,
       validation,
-      upside: `About ${formatUsd(yearly, { decimals: 0 })} per year (${formatUsd(monthly, { decimals: 0 })} per 30 days) if the current ${formatBps(opp.apy.netBps)} net rate held. Rates change continuously; this is an estimate, not a forecast.`,
+      upside: `About ${formatUsd(yearly, { decimals: 0 })} per year (${formatUsd(monthly, { decimals: 0 })} per 30 days) if the current ${formatBps(opp.apy.nativeBps)} rate before rewards held${opp.apy.rewardsBps > 0 ? `; incentive rewards of ${formatBps(opp.apy.rewardsBps)} would add to this while they last` : ""}. Rates change continuously; this is an estimate, not a forecast.`,
       downside: [
         "Smart-contract, oracle or curator failure in the venue or its underlying markets could cause loss.",
         "Withdrawals depend on available liquidity; during stress, liquidity can fall to zero temporarily.",

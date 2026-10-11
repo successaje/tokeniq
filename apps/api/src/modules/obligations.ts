@@ -9,6 +9,7 @@ import { badRequest, notFound } from "../lib/errors.js";
 import { Address, body, clientInfo, errors, Id, IsoDateString, json, orgParams, requireUser } from "../lib/route.js";
 import { obligationFromRow, loadOrgState } from "../services/state.js";
 import { occurrenceDto } from "../services/dto.js";
+import { notifyRoles } from "../services/notify.js";
 
 const tags = ["Obligations"];
 
@@ -59,6 +60,8 @@ const ObligationSchema = z
     status: z.string(),
     counterparty: z.string().nullable(),
     recipientAddress: z.string().nullable(),
+    /** When the payee address was last set or changed. Payments to it are held for the policy's newPayeeHoldHours. */
+    recipientSetAt: z.string().nullable(),
     recipientChainId: z.number().nullable(),
     paymentAsset: z.string().nullable(),
     invoiceNumber: z.string().nullable(),
@@ -87,6 +90,7 @@ function toDto(r: Row, asOf: string, settled: Array<{ obligationId: string; dueD
     status: r.status,
     counterparty: r.counterparty,
     recipientAddress: r.recipientAddress,
+    recipientSetAt: r.recipientSetAt?.toISOString() ?? null,
     recipientChainId: r.recipientChainId,
     paymentAsset: r.paymentAsset,
     invoiceNumber: r.invoiceNumber,
@@ -193,6 +197,8 @@ export function registerObligations(app: App, deps: Deps) {
             organizationId: m.organizationId,
             ...input,
             recipientAddress: input.recipientAddress?.toLowerCase() ?? null,
+            recipientSetAt: input.recipientAddress ? deps.now() : null,
+            recipientSetBy: input.recipientAddress ? user.id : null,
             // History before today is never treated as owed, unless the first due date is earlier (an overdue one-off).
             trackFrom: compareIso(input.firstDueDate, today) < 0 ? input.firstDueDate : today,
             status: "active",
@@ -257,16 +263,32 @@ export function registerObligations(app: App, deps: Deps) {
       const { id } = c.req.valid("param");
       const input = c.req.valid("json");
       const before = await getRow(m.organizationId, id);
+      const recipient = input.recipientAddress === undefined ? undefined : (input.recipientAddress?.toLowerCase() ?? null);
+      // A new or changed payee address restarts the payment hold (approval policy newPayeeHoldHours).
+      const payeeChanged = recipient !== undefined && recipient !== (before.recipientAddress?.toLowerCase() ?? null);
       const row = await db.transaction(async (tx) => {
         const [r] = await tx
           .update(schema.obligations)
-          .set({ ...input, recipientAddress: input.recipientAddress === undefined ? undefined : (input.recipientAddress?.toLowerCase() ?? null) })
+          .set({ ...input, recipientAddress: recipient, ...(payeeChanged ? { recipientSetAt: recipient ? deps.now() : null, recipientSetBy: recipient ? user.id : null } : {}) })
           .where(and(eq(schema.obligations.id, id), eq(schema.obligations.organizationId, m.organizationId)))
           .returning();
         const changed = Object.fromEntries(Object.entries(input).map(([k, v]) => [k, { from: (before as Record<string, unknown>)[k] ?? null, to: v }]));
         await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: input.status === "cancelled" ? "obligation.cancelled" : "obligation.updated", targetType: "obligation", targetId: id, data: { changed }, ...clientInfo(c) });
+        if (payeeChanged) {
+          await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "obligation.payee_changed", targetType: "obligation", targetId: id, data: { from: before.recipientAddress, to: recipient }, ...clientInfo(c) });
+        }
         return r!;
       });
+      if (payeeChanged && before.recipientAddress) {
+        // Changed payment details are the classic invoice-fraud step: tell the people who can stop it.
+        await notifyRoles(deps, m.organizationId, ["owner", "admin"], {
+          kind: "obligation.payee_changed",
+          title: `Payee address changed: ${before.title}`,
+          body: `${before.recipientAddress} → ${recipient ?? "removed"}. Payments to the new address are held for the approval policy's waiting period. Confirm the change with the payee through a channel you already trust.`,
+          link: `/app/obligations/${id}`,
+          dedupeKey: `payee:${id}:${recipient ?? "none"}:${deps.now().getTime()}`,
+        }).catch((err) => deps.logger.warn({ err }, "payee change notification failed"));
+      }
       const settled = await settledFor(m.organizationId);
       return c.json(toDto(row, toIsoDate(deps.now()), settled), 200);
     },

@@ -50,6 +50,21 @@ export interface PendingOutflow {
    * through the obligation rule).
    */
   kind: "allocation" | "payment" | "other";
+  /** For allocations: the venue and protocol, so concentration limits count capital already on its way there. */
+  venueId?: string;
+  protocol?: string;
+}
+
+/** USD already committed to each venue and protocol by active allocation proposals. */
+export function pendingExposure(pending: readonly PendingOutflow[] | undefined): { byVenue: Map<string, Wad>; byProtocol: Map<string, Wad> } {
+  const byVenue = new Map<string, Wad>();
+  const byProtocol = new Map<string, Wad>();
+  for (const p of pending ?? []) {
+    if (p.kind !== "allocation") continue;
+    if (p.venueId) byVenue.set(p.venueId, (byVenue.get(p.venueId) ?? 0n) + p.amount);
+    if (p.protocol) byProtocol.set(p.protocol, (byProtocol.get(p.protocol) ?? 0n) + p.amount);
+  }
+  return { byVenue, byProtocol };
 }
 
 export interface UncertaintyReason {

@@ -306,6 +306,7 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         positions: s.positions,
         opportunities: s.opportunities,
         accountAssetBalanceRaw: source.raw,
+        pendingOutflows: s.pendingOutflows,
         actionAsset: { asset: source.asset, price: source.price },
       });
       return {
