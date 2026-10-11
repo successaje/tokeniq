@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/api/Dockerfile",
+    "watchPatterns": ["apps/api/**", "packages/core/**", "packages/chain/**", "packages/db/**", "pnpm-lock.yaml"]
+  },
+  "deploy": {
+    "preDeployCommand": ["node --import tsx ../../packages/db/src/migrate.ts"],
+    "healthcheckPath": "/api/health",
+    "healthcheckTimeout": 60,
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

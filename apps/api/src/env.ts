@@ -22,6 +22,8 @@ const schema = z.object({
   DEV_EXTRA_ORIGINS: z.string().default(""),
   /** Run background jobs in this process. Production runs a dedicated worker. */
   RUN_JOBS: bool.default(true),
+  /** Apply database migrations when the API starts (development). Production uses a release step. */
+  MIGRATE_ON_BOOT: bool.default(true),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 
   // Email. Without SMTP, development prints codes to the log and test mode keeps an in-memory outbox.

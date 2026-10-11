@@ -23,6 +23,8 @@ const csp = [
 
 const config: NextConfig = {
   reactStrictMode: true,
+  output: process.env.NEXT_STANDALONE === "1" ? "standalone" : undefined,
+  outputFileTracingRoot: process.env.NEXT_STANDALONE === "1" ? new URL("../../", import.meta.url).pathname : undefined,
   poweredByHeader: false,
   transpilePackages: ["@tokeniq/core"],
   typedRoutes: false,

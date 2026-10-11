@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/dist
+**/coverage
+packages/contracts/out
+packages/contracts/cache
+apps/e2e/test-results
+apps/e2e/playwright-report
+.env
+.env.*
+!.env.example
+.git

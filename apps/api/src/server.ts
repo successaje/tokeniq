@@ -12,7 +12,8 @@ import { createChainClients } from "./services/chains.js";
 
 const env = loadEnv();
 const logger = createLogger(env.LOG_LEVEL);
-await runMigrations(env.DATABASE_URL);
+// Development applies migrations at boot; production runs them as a release step (docs/DEPLOYMENT.md).
+if (env.MIGRATE_ON_BOOT) await runMigrations(env.DATABASE_URL);
 const handle = createDb(env.DATABASE_URL, { applicationName: "tokeniq-api" });
 const mailer = createMailer({ smtpUrl: env.SMTP_URL, from: env.EMAIL_FROM, nodeEnv: env.NODE_ENV, logger });
 const { clients, clientFor } = createChainClients(env);
