@@ -1,0 +1,5 @@
+packages/contracts/lib/
+packages/contracts/out/
+packages/contracts/cache/
+**/.next/
+pnpm-lock.yaml

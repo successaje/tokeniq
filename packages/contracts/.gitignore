@@ -1,0 +1,11 @@
+# Foundry build output
+out/
+cache/
+broadcast/
+lcov.info
+coverage/
+
+# Never commit keys or local env
+.env
+.env.*
+!.env.example

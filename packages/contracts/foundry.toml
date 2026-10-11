@@ -1,0 +1,45 @@
+# TokenIQ contracts — Foundry configuration.
+#
+# Compiler notes
+# - TreasuryReserveGuard uses EIP-1153 transient storage (TSTORE/TLOAD), which needs
+#   solc >= 0.8.24 and the `cancun` EVM version. Every chain it is deployed to must have
+#   Cancun activated (Base: yes, since the Ecotone upgrade, March 2024).
+# - Canonical Safe v1.5.0 bytecode was compiled by Safe with solc 0.7.6, optimizer disabled
+#   (see lib/safe-smart-account/CHANGELOG.md). Unit tests compile the *same v1.5.0 sources*
+#   with 0.8.28 (their pragma is `>=0.7.0 <0.9.0`). The Base fork test runs against the
+#   canonical, deployed 0.7.6 bytecode and asserts its code hashes.
+
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+bytecode_hash = "none"
+cbor_metadata = false
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "@safe-global/safe-smart-account/=lib/safe-smart-account/",
+]
+# The ABI export script and the deploy script read compiled artifacts only.
+fs_permissions = [{ access = "read", path = "./out" }]
+
+[fuzz]
+runs = 1000
+seed = "0x7e5a"
+
+[invariant]
+runs = 128
+depth = 64
+fail_on_revert = false
+show_metrics = true
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = false

@@ -1,0 +1,15 @@
+{
+  "name": "@tokeniq/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TreasuryReserveGuard: a Safe v1.5.0 module guard bounding automation (reserve floors, outflow limits, pause).",
+  "exports": {
+    "./abi/TreasuryReserveGuard": "./abi/TreasuryReserveGuard.ts"
+  },
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "typecheck": "echo no-ts",
+    "abi": "forge build && node scripts/export-abi.mjs"
+  }
+}

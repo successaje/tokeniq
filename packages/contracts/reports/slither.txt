@@ -1,0 +1,29 @@
+# slither 0.11.3 -- run from packages/contracts on 2026-10-11:
+# slither . --filter-paths "lib/|test/|script/" --exclude-dependencies
+# Triage: see REVIEW.md "Static analysis triage" (all results informational, all intended).
+
+INFO:Detectors:
+TreasuryReserveGuard.remainingOutflow(address) (src/TreasuryReserveGuard.sol#416-422) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= uint256(p.windowStart) + p.windowSeconds (src/TreasuryReserveGuard.sol#420)
+TreasuryReserveGuard._recordOutflow(address,TreasuryReserveGuard.TokenPolicy,uint256) (src/TreasuryReserveGuard.sol#437-452) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= start + p.windowSeconds (src/TreasuryReserveGuard.sol#442)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+TreasuryReserveGuard._checkMultiSendBatch(bytes) (src/TreasuryReserveGuard.sol#502-535) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#507-510)
+	- INLINE ASM (src/TreasuryReserveGuard.sol#522-527)
+TreasuryReserveGuard._checkApproval(address,bytes) (src/TreasuryReserveGuard.sol#538-560) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#549-551)
+	- INLINE ASM (src/TreasuryReserveGuard.sol#554-556)
+TreasuryReserveGuard._balanceOf(address) (src/TreasuryReserveGuard.sol#564-576) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#570-574)
+TreasuryReserveGuard._slice(bytes,uint256,uint256) (src/TreasuryReserveGuard.sol#586-591) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#588-590)
+TreasuryReserveGuard._tload(bytes32) (src/TreasuryReserveGuard.sol#602-606) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#603-605)
+TreasuryReserveGuard._tstore(bytes32,uint256) (src/TreasuryReserveGuard.sol#608-612) uses assembly
+	- INLINE ASM (src/TreasuryReserveGuard.sol#609-611)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Slither:. analyzed (11 contracts with 100 detectors), 8 result(s) found
