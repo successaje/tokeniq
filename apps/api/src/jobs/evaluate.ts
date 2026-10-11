@@ -5,6 +5,7 @@ import { reconcileAlerts } from "../modules/monitoring.js";
 import { refreshRecommendations } from "../modules/opportunities.js";
 import { notifyNewAlerts } from "../services/notify.js";
 import { loadOrgState } from "../services/state.js";
+import { degradedProviders } from "../services/providers.js";
 
 export const EVALUATE_ORG = "evaluate-org";
 export const EVALUATE_ALL = "evaluate-all";
@@ -12,7 +13,9 @@ export const EVALUATE_ALL = "evaluate-all";
 /** Re-run risk rules and recommendations for an organization after its data changes. */
 export async function evaluateOrg(deps: Deps, orgId: string) {
   const state = await loadOrgState(deps.db, orgId, deps.now());
-  const { opened } = await reconcileAlerts(deps, state);
+  const health = await deps.db.select().from(schema.providerHealth);
+  const sequencerDown = health.filter((h) => h.provider.startsWith("sequencer:") && h.status !== "ok").map((h) => Number(h.provider.split(":")[1]));
+  const { opened } = await reconcileAlerts(deps, state, { sequencerDown, degradedProviders: await degradedProviders(deps) });
   await refreshRecommendations(deps, state);
   if (opened.length && !state.isSample) await notifyNewAlerts(deps, orgId, opened);
 }

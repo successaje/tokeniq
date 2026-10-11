@@ -28,7 +28,7 @@ const schema = z.object({
 
   // Copilot
   ANTHROPIC_API_KEY: z.string().optional(),
-  COPILOT_MODEL: z.string().default("claude-sonnet-5-5"),
+  COPILOT_MODEL: z.string().default("claude-opus-5-5"),
 
   // Chain access. Defaults are public endpoints suitable for development only.
   RPC_URL_1: z.string().url().optional(),

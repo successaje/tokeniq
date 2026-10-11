@@ -1,5 +1,6 @@
 import { PgBoss } from "pg-boss";
 import type { Deps } from "../context.js";
+import { registerDataJobs } from "./data.js";
 import { registerEvaluateJobs } from "./evaluate.js";
 
 /**
@@ -13,6 +14,7 @@ export async function startJobs(deps: Deps): Promise<PgBoss> {
   await boss.start();
   deps.boss = boss;
   await registerEvaluateJobs(boss, deps);
+  await registerDataJobs(boss, deps);
   deps.logger.info("background jobs started");
   return boss;
 }
