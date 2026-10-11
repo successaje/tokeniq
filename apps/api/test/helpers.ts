@@ -20,7 +20,7 @@ export interface TestContext {
 }
 
 /** Fresh schema per test file: drop everything, migrate, build the app with an in-memory mail outbox. */
-export async function setup(): Promise<TestContext> {
+export async function setup(extraEnv: Record<string, string> = {}): Promise<TestContext> {
   const reset = createDb(TEST_DB, { max: 1 });
   await reset.db.execute(sql`drop schema if exists public cascade; drop schema if exists drizzle cascade; drop schema if exists pgboss cascade; create schema public;`);
   await reset.close();
@@ -33,6 +33,7 @@ export async function setup(): Promise<TestContext> {
     BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-0123456789",
     RUN_JOBS: "false",
     LOG_LEVEL: "fatal",
+    ...extraEnv,
   });
   const logger = createLogger("fatal");
   const handle = createDb(TEST_DB, { max: 5 });

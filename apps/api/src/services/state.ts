@@ -81,7 +81,8 @@ export function obligationFromRow(r: typeof schema.obligations.$inferSelect): Ob
   };
 }
 
-export function accountFromRow(r: typeof schema.treasuryAccounts.$inferSelect): AccountRef {
+/** `nowSec` lets simulated sample accounts always read as current: they are never synced from a chain. */
+export function accountFromRow(r: typeof schema.treasuryAccounts.$inferSelect, nowSec?: number): AccountRef {
   return {
     id: r.id,
     label: r.label,
@@ -90,7 +91,7 @@ export function accountFromRow(r: typeof schema.treasuryAccounts.$inferSelect): 
     kind: r.kind as AccountRef["kind"],
     verified: r.verifiedAt !== null,
     includeInTreasury: r.includeInTreasury && r.archivedAt === null,
-    lastSyncedAt: r.lastSyncedAt ? Math.floor(r.lastSyncedAt.getTime() / 1000) : null,
+    lastSyncedAt: r.verificationMethod === "sample" && nowSec !== undefined ? nowSec : r.lastSyncedAt ? Math.floor(r.lastSyncedAt.getTime() / 1000) : null,
   };
 }
 
@@ -204,7 +205,7 @@ export async function loadOrgState(db: Database, orgId: string, now: Date): Prom
   }
   if (isSample && !fx.EUR) fx.EUR = { usdPerUnit: parseDecimal("1.08"), asOf: now.toISOString(), source: "Sample workspace (simulated rate)" };
 
-  const accounts = accountRows.map(accountFromRow);
+  const accounts = accountRows.map((r) => accountFromRow(r, nowSec));
   const obligations = obligationRows.map(obligationFromRow);
   const settled: SettledOccurrence[] = paymentRows.map((p) => ({ obligationId: p.obligationId, dueDate: p.dueDate }));
   const pendingOutflows: PendingOutflow[] = proposalRows
@@ -221,6 +222,7 @@ export async function loadOrgState(db: Database, orgId: string, now: Date): Prom
   }
   const reserve = assessReserve({ asOf, policy: policies.treasury, treasury, obligations, settled, fx, pendingOutflows, stableHoldingsByCurrency });
 
+  if (isSample) lastObservedAt = nowSec;
   return {
     orgId,
     isSample,
