@@ -1083,6 +1083,12 @@ Each item states what the code does and why it differs from what you would expec
 
 Where an item is already tracked in `audits/BACKEND_REVIEW.md`, its id is given (for example, BE-21). These findings were checked against commit `0cbd6942` plus the web changes in progress in the working tree at the time of writing. Those web changes had already fixed four things this document would otherwise list: the reserve-ledger note on pending proposals, the offline banner wording, the lost-transaction-hash recovery, and `Money` accessible naming.
 
+**Status after this document was written**
+
+| Fixed in `3e57c556` (governance) | Fixed in `3641224a` (API) | Partly fixed | Still open |
+|---|---|---|---|
+| 5 approval policy mid-flight; 6 decisions outlive membership | 1 alerts from page views notified; 2 provider and sequencer alerts no longer flap; 13 `Idempotency-Key`; 14 undoing a one-off payment; 15 float validation; 16 backdated recurring obligations; 19 onboarding role check; 25 invitation list permission; 26 concurrent policy saves; 27 manual sync permission and limit; 29 email links carry the organization; 30 stale comment | 3 expired proposals stop holding capital at once, but are still marked expired lazily and not audited; 12 payee changes are held 48 hours, audited and notified, but there is still no payment-proposal screen; 18 one sample per person and samples can be deleted, but append-only records remain; 21 the API reports `emailSent` and the link (web handling in progress) | 4, 7, 8, 9, 10, 11, 17, 20, 22, 23, 24, 28, 31, and the web items being handled in the frontend review |
+
 **Notifications and expiry**
 
 1. **Alerts opened by a page view are never notified.** `GET /alerts` (`apps/api/src/modules/monitoring.ts`) runs `reconcileAlerts` and discards the list of newly opened alerts. Only the 10-minute job (`apps/api/src/jobs/evaluate.ts`) sends notifications, and only for alerts it opened itself. The app shell fetches `/alerts` on every page for the Risk badge (`staleTime` 60s), so whenever someone has the app open, new alerts are usually opened by the page read. Those alerts then produce no in-app notification and no critical email.

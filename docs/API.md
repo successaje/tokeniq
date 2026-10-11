@@ -25,15 +25,20 @@ The API is served under `/api`. Browsers reach it through the web app's same-ori
 | `429` | Rate limited (`retry-after` header) |
 | `503` | A dependency or feature is unavailable (`copilot_not_configured`, `chain_read_failed`, kill switches) |
 
-- **Idempotency.** `POST /proposals` requires an `idempotencyKey`. Repeating the same key returns the original proposal (`200`, `duplicate: true`).
+- **Idempotency.** Any organization-scoped JSON `POST` accepts an `Idempotency-Key` header (8–100 characters: letters, digits, `.`, `_`, `:`, `-`). Keys are per person and kept for 24 hours.
+  - A retry with the same key and body replays the first successful response, with the header `idempotent-replayed: true`.
+  - The same key with a different body gets `422 idempotency_key_reused`.
+  - A retry while the first request is still running gets `409 idempotency_in_progress`.
+  - Failed requests are not remembered, so they can be retried with the same key.
+  - `POST /proposals` also requires an `idempotencyKey` in the body. Repeating it returns the original proposal (`200`, `duplicate: true`).
 - **Kill switches.** `DISABLED_FEATURES` (comma-separated: `copilot`, `proposals`, `signatures`, `sync`, `opportunities`, `email`) disables features without a deploy. Disabled features return `503`.
 
 ## Roles
 
 | Permission | owner | admin | finance | approver | viewer |
 |---|---|---|---|---|---|
-| Read treasury, obligations, reports, copilot | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Manage organization, members, invitations | ✓ | ✓ |  |  |  |
+| Read treasury, obligations, reports, copilot; trigger an account sync (at most every 30 s per account) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Manage organization and onboarding, members, invitations (including listing them) | ✓ | ✓ |  |  |  |
 | Change treasury and approval policies | ✓ | ✓ |  |  |  |
 | Manage accounts, record obligations and payments | ✓ | ✓ | ✓ |  |  |
 | Create proposals, dismiss recommendations | ✓ | ✓ | ✓ |  |  |
@@ -72,11 +77,12 @@ Routes outside the OpenAPI document:
 | `PATCH` | `/api/v1/orgs/{orgId}/members/{memberId}` | Change a member's role |
 | `DELETE` | `/api/v1/orgs/{orgId}/members/{memberId}` | Remove a member (or leave the organization) |
 | `GET` | `/api/v1/orgs/{orgId}/invitations` | Pending invitations |
-| `POST` | `/api/v1/orgs/{orgId}/invitations` | Invite someone by email |
+| `POST` | `/api/v1/orgs/{orgId}/invitations` | Invite someone by email. Returns `emailSent` and `inviteUrl`, so the link can be shared by hand if the email failed |
 | `DELETE` | `/api/v1/orgs/{orgId}/invitations/{invitationId}` | Revoke an invitation |
 | `GET` | `/api/v1/invitations/{invitationId}` | View an invitation addressed to you |
 | `POST` | `/api/v1/invitations/{invitationId}/accept` | Accept an invitation |
-| `POST` | `/api/v1/sample-workspace` | Create a sample workspace with simulated data |
+| `POST` | `/api/v1/sample-workspace` | Open your sample workspace with simulated data: `201` when created, `200` with `created: false` when you already have one |
+| `DELETE` | `/api/v1/orgs/{orgId}/sample-workspace` | Delete a sample workspace you solely own (`409 not_sample_workspace` for real organizations) |
 
 ### Policies
 
@@ -114,7 +120,7 @@ Routes outside the OpenAPI document:
 | `POST` | `/api/v1/orgs/{orgId}/accounts` | Add a Safe or wallet (read-only until verified) |
 | `PATCH` | `/api/v1/orgs/{orgId}/accounts/{id}` | Rename, change purpose, or include/exclude from treasury maths |
 | `DELETE` | `/api/v1/orgs/{orgId}/accounts/{id}` | Stop tracking an account (history is kept) |
-| `POST` | `/api/v1/orgs/{orgId}/accounts/{id}/sync` | Read balances now |
+| `POST` | `/api/v1/orgs/{orgId}/accounts/{id}/sync` | Read balances now (`429 sync_rate_limited` with `retry-after` within 30 s of the last sync) |
 | `POST` | `/api/v1/orgs/{orgId}/accounts/{id}/verify/challenge` | Get a message to sign proving control of the account |
 | `POST` | `/api/v1/orgs/{orgId}/accounts/{id}/verify` | Submit the signed challenge |
 
@@ -150,6 +156,13 @@ Routes outside the OpenAPI document:
 | `POST` | `/api/v1/orgs/{orgId}/proposals/{id}/signatures` | Submit a Safe owner's signature over the safeTxHash |
 | `POST` | `/api/v1/orgs/{orgId}/proposals/{id}/execution-data` | Calldata for execTransaction with collected signatures (any wallet may submit it) |
 | `POST` | `/api/v1/orgs/{orgId}/proposals/{id}/executions` | Record a submitted execution transaction hash for tracking |
+
+Rules that apply across these endpoints:
+
+- **Re-checked, never trusted.** Each proposal is validated again with current data when it is read, prepared, signed and released for execution. It is never counted against itself. Allocations already in flight count toward venue and protocol limits.
+- **Approval policy at creation.** The approval policy in force when a proposal is created is stored with it, and approval must satisfy both that policy and the current one. Decisions count only from current members whose current role may approve.
+- **Lapsed approval.** If approval no longer holds at prepare or execution time, the request fails with `409 approval_lapsed` and the proposal returns to `pending_approval` (or `expired`).
+- **Payee hold.** Payment proposals fail the `payee_hold` check until the obligation's payee address has been unchanged for the approval policy's `newPayeeHoldHours` (default 48).
 
 ### Risk & activity
 

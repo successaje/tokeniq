@@ -35,8 +35,8 @@ Severity: **High** = a single insider role (or an outsider) can bypass a financi
 | BE-14 | Low | Concurrent creates with one idempotency key returned 500 | Fixed |
 | BE-15 | Low | Revoked sessions stay valid for up to 60 s (signed cookie cache) | Accepted, documented |
 | BE-19 | Low | Better Auth routes had no origin check for non-form content types | Fixed |
-| BE-20 | Low | Resource abuse: viewers can trigger syncs; unbounded sample workspaces, documents and copilot history | Open |
-| BE-21 | Low | `Idempotency-Key` header sent by the web app is ignored by the API | Open |
+| BE-20 | Low | Resource abuse: viewers can trigger syncs; unbounded sample workspaces, documents and copilot history | Partly fixed (`3641224a`): sync limited per account, one sample per person; documents and copilot history still unbounded |
+| BE-21 | Low | `Idempotency-Key` header sent by the web app is ignored by the API | Fixed (`3641224a`) |
 | BE-22 | Low | Two identical proposals prepared at the same nonce hit `proposals_safe_tx_hash_uq` (500) | Open |
 | BE-23 | Low | Control characters allowed in organization and user names used in emails and signed messages | Open |
 | BE-24 | Low | EUR obligations paid in EURC were verified without an amount check | Fixed |
