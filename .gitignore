@@ -1,48 +1,46 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-node_modules
 # dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-tokeniq-agent/bun.lock
-tokeniq-agent/node_modules
-tokeniq-agent/dist
-# testing
-/coverage
+node_modules/
+.pnpm-store/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+# builds
+.next/
+out/
+dist/
+build/
 *.tsbuildinfo
 next-env.d.ts
+coverage/
 
-.env.local
+# contracts
+packages/contracts/out/
+packages/contracts/cache/
+packages/contracts/broadcast/*/31337/
+packages/contracts/lcov.info
 
-package-lock.json
-yarn.lock
+# tests
+apps/e2e/test-results/
+apps/e2e/playwright-report/
+apps/e2e/.auth/
+
+# environment and secrets — never commit real values
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# PWA build output
+apps/web/public/sw.js
+apps/web/public/sw.js.map
+apps/web/public/swe-worker-*.js

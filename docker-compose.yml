@@ -1,0 +1,16 @@
+# Local infrastructure only. App processes run on the host with `pnpm dev`.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tokeniq
+      POSTGRES_PASSWORD: tokeniq
+      POSTGRES_DB: tokeniq
+    ports: ["5433:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tokeniq"]
+      interval: 5s
+      retries: 10
+volumes:
+  pgdata:

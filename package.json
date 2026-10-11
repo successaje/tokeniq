@@ -1,0 +1,24 @@
+{
+  "name": "tokeniq",
+  "private": true,
+  "version": "2.0.0-rc.0",
+  "description": "TokenIQ — treasury intelligence and operations for on-chain organizations.",
+  "packageManager": "pnpm@10.2.1",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter ./apps/web --filter ./apps/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --filter ./packages/* --filter ./apps/api test",
+    "test:e2e": "pnpm --filter ./apps/e2e test",
+    "db:generate": "pnpm --filter @tokeniq/db generate",
+    "db:migrate": "pnpm --filter @tokeniq/db migrate",
+    "contracts:test": "cd packages/contracts && forge test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "5.9.3"
+  }
+}
