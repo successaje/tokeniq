@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, MailCheck } from "lucide-react";
+import { Check, Copy, MailCheck, MailWarning } from "lucide-react";
 import { RadioGroup } from "radix-ui";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { api, ApiError, fieldErrors, orgPath } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { ROLE_DESCRIPTION, ROLE_LABEL, useOrg } from "@/lib/org";
-import type { InvitationDto, Role } from "@/lib/types";
+import type { InvitationCreatedDto, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "approver", "finance", "admin", "owner"];
 
@@ -21,7 +21,8 @@ export function inviteLink(id: string) {
   return `${typeof window === "undefined" ? "" : window.location.origin}/invite/${encodeURIComponent(id)}`;
 }
 
-export function CopyLinkButton({ id, size = "sm", variant = "ghost" }: { id: string; size?: "sm" | "md"; variant?: "ghost" | "secondary" }) {
+/** Copies the invitation link (the server's `inviteUrl` when known). The link is never logged. */
+export function CopyLinkButton({ id, url, label = "Copy link", size = "sm", variant = "ghost" }: { id: string; url?: string; label?: string; size?: "sm" | "md"; variant?: "ghost" | "secondary" }) {
   const [copied, setCopied] = useState(false);
   return (
     <Button
@@ -29,7 +30,7 @@ export function CopyLinkButton({ id, size = "sm", variant = "ghost" }: { id: str
       size={size}
       onClick={async () => {
         try {
-          await navigator.clipboard.writeText(inviteLink(id));
+          await navigator.clipboard.writeText(url ?? inviteLink(id));
           setCopied(true);
           setTimeout(() => setCopied(false), 1500);
         } catch {
@@ -38,7 +39,7 @@ export function CopyLinkButton({ id, size = "sm", variant = "ghost" }: { id: str
       }}
     >
       {copied ? <Check className="size-3.5 text-success" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
-      {copied ? "Copied" : "Copy link"}
+      {copied ? "Copied" : label}
     </Button>
   );
 }
@@ -52,7 +53,7 @@ export function InviteSheet({ open, onOpenChange, initial }: { open: boolean; on
   const [role, setRole] = useState<Role>("viewer");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [sent, setSent] = useState<InvitationDto | null>(null);
+  const [sent, setSent] = useState<InvitationCreatedDto | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -66,11 +67,13 @@ export function InviteSheet({ open, onOpenChange, initial }: { open: boolean; on
   const roles = ROLES.filter((r) => r !== "owner" || myRole === "owner");
 
   const invite = useMutation({
-    mutationFn: (body: { email: string; role: Role }) => api<InvitationDto>(orgPath(orgId, "/invitations"), { method: "POST", body }),
+    mutationFn: (body: { email: string; role: Role }) => api<InvitationCreatedDto>(orgPath(orgId, "/invitations"), { method: "POST", body }),
     onSuccess: (inv) => {
       setSent(inv);
       qc.invalidateQueries({ queryKey: ["org", orgId, "/invitations"] });
-      toast({ id: `invite-${inv.email}`, tone: "success", title: `Invitation sent to ${inv.email}`, description: `They join as ${ROLE_LABEL[inv.role]} after signing in with this address.` });
+      // emailSent is false when the email could not be sent; the invitation still exists. Never claim it was emailed.
+      if (inv.emailSent === false) toast({ id: `invite-${inv.email}`, tone: "warning", title: `Invitation created, but the email to ${inv.email} wasn't sent`, description: "Copy the invitation link and send it to them yourself." });
+      else toast({ id: `invite-${inv.email}`, tone: "success", title: `Invitation sent to ${inv.email}`, description: `They join as ${ROLE_LABEL[inv.role]} after signing in with this address.` });
     },
     onError: (err) => {
       const f = fieldErrors(err);
@@ -94,7 +97,7 @@ export function InviteSheet({ open, onOpenChange, initial }: { open: boolean; on
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title={sent ? "Invitation sent" : initial ? "Resend invitation" : "Invite a member"}
+      title={sent ? (sent.emailSent === false ? "Invitation created" : "Invitation sent") : initial ? "Resend invitation" : "Invite a member"}
       description={sent ? undefined : `They will join ${org.name} with the role you choose. You can change it later.`}
       footer={
         sent ? (
@@ -118,17 +121,26 @@ export function InviteSheet({ open, onOpenChange, initial }: { open: boolean; on
     >
       {sent ? (
         <div className="space-y-4">
-          <div className="flex gap-3">
-            <MailCheck className="mt-0.5 size-5 shrink-0 text-success" aria-hidden="true" />
-            <p className="text-sm text-text-2">
-              We emailed <strong className="font-medium text-text">{sent.email}</strong> a link to join as {ROLE_LABEL[sent.role]}. It expires on {new Date(sent.expiresAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}. Any earlier invitation to this address no longer works.
-            </p>
-          </div>
+          {sent.emailSent === false ? (
+            <Callout tone="warning" title="The email could not be sent">
+              The invitation for <strong className="font-medium text-text">{sent.email}</strong> to join as {ROLE_LABEL[sent.role]} was created, but TokenIQ couldn&apos;t send the email. Copy the invitation link below and send it to them yourself. It expires on {new Date(sent.expiresAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}.
+            </Callout>
+          ) : (
+            <div className="flex gap-3">
+              <MailCheck className="mt-0.5 size-5 shrink-0 text-success" aria-hidden="true" />
+              <p className="text-sm text-text-2">
+                We emailed <strong className="font-medium text-text">{sent.email}</strong> a link to join as {ROLE_LABEL[sent.role]}. It expires on {new Date(sent.expiresAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}. Any earlier invitation to this address no longer works.
+              </p>
+            </div>
+          )}
           <div className="rounded-[var(--radius-control)] border border-hairline bg-sunken p-3">
-            <div className="text-xs font-medium text-text-2">Invitation link</div>
-            <p className="mt-1 break-all font-mono text-xs text-text">{inviteLink(sent.id)}</p>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-text-2">
+              {sent.emailSent === false && <MailWarning className="size-3.5 text-warning" aria-hidden="true" />}
+              Invitation link
+            </div>
+            <p className="mt-1 break-all font-mono text-xs text-text">{sent.inviteUrl ?? inviteLink(sent.id)}</p>
             <div className="mt-2">
-              <CopyLinkButton id={sent.id} variant="secondary" />
+              <CopyLinkButton id={sent.id} url={sent.inviteUrl} label="Copy invitation link" variant="secondary" />
             </div>
             <p className="mt-2 text-xs text-text-3">Only the person signed in as {sent.email} can open it, so it is safe to share in your team chat.</p>
           </div>
@@ -151,7 +163,7 @@ export function InviteSheet({ open, onOpenChange, initial }: { open: boolean; on
                     "data-[state=checked]:border-accent data-[state=checked]:bg-accent-subtle/60",
                   )}
                 >
-                  <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border-strong/60 bg-surface" aria-hidden="true">
+                  <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border-strong bg-surface" aria-hidden="true">
                     <RadioGroup.Indicator className="size-2 rounded-full bg-accent" />
                   </span>
                   <span className="min-w-0">

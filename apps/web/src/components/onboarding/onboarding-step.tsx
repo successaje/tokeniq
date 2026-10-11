@@ -146,11 +146,27 @@ export function BackLink({ href, children = "Back" }: { href: string; children?:
   );
 }
 
-/** POST /onboarding: save progress (step) and/or completion; refreshes the membership list. */
-export function useSaveProgress(orgId: string) {
+type ProgressBody = { step?: "treasury" | "obligations" | "policy"; complete?: boolean };
+
+/**
+ * POST /onboarding records progress and completion, an organization setting (`org.manage`). Other roles
+ * never call it, and a 403 (role changed meanwhile) is not an error: there is just nothing to record.
+ */
+export async function recordOnboarding(org: Pick<OrgDto, "id" | "role">, body: ProgressBody): Promise<OrgDto | null> {
+  if (!can(org.role, "org.manage")) return null;
+  try {
+    return await api<OrgDto>(orgPath(org.id, "/onboarding"), { method: "POST", body });
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 403) return null;
+    throw e;
+  }
+}
+
+/** Save progress (step) and/or completion; refreshes the membership list. */
+export function useSaveProgress(org: Pick<OrgDto, "id" | "role">) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { step?: "treasury" | "obligations" | "policy"; complete?: boolean }) => api<OrgDto>(orgPath(orgId, "/onboarding"), { method: "POST", body }),
+    mutationFn: (body: ProgressBody) => recordOnboarding(org, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me"] }),
   });
 }

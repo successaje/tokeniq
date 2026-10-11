@@ -143,7 +143,7 @@ export function RiskView() {
             </ol>
             <p className="mt-3 text-xs text-text-3">
               Rules run on your latest balances, prices, obligations and venue data.{" "}
-              <Link href="/app/help#calculations" className="text-accent hover:underline">
+              <Link href="/app/help#calculations" className="text-accent underline underline-offset-2">
                 How calculations work
               </Link>
             </p>

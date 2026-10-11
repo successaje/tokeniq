@@ -96,9 +96,9 @@ export const INTEGRATIONS: Integration[] = [
   {
     name: "Email",
     kind: "Notifications",
-    does: "Sign-in codes, approval requests and alerts.",
+    does: "Sign-in codes, team invitations, and critical risk alerts to owners, admins and finance members.",
     status: "available",
-    notes: "Requires the deployment to configure an email provider; see the status page.",
+    notes: "Proposal and approval updates are in-app notifications only; they are not emailed. Email requires the deployment to configure a provider; see the status page.",
   },
   {
     name: "Copilot model provider",

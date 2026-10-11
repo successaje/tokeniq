@@ -266,7 +266,7 @@ function Inner({ orgId, account, explorerBase, onDone }: { orgId: string; accoun
                     {countdown.expired ? "Expired" : `Expires in ${countdown.label}`}
                   </span>
                 </div>
-                <pre tabIndex={0} aria-label="Message to sign" className="mt-1.5 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-[var(--radius-control)] border border-hairline bg-sunken p-3 font-mono text-[11.5px] leading-[1.55] text-text">
+                <pre tabIndex={0} role="region" aria-label="Message to sign" className="mt-1.5 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-[var(--radius-control)] border border-hairline bg-sunken p-3 font-mono text-[11.5px] leading-[1.55] text-text">
                   {challenge.message}
                 </pre>
                 <p className="mt-1.5 text-xs text-text-3">Check that the address and organization match before you sign. It can be used once.</p>

@@ -162,6 +162,7 @@ Rules that apply across these endpoints:
 - **Re-checked, never trusted.** Each proposal is validated again with current data when it is read, prepared, signed and released for execution. It is never counted against itself. Allocations already in flight count toward venue and protocol limits.
 - **Approval policy at creation.** The approval policy in force when a proposal is created is stored with it, and approval must satisfy both that policy and the current one. Decisions count only from current members whose current role may approve.
 - **Lapsed approval.** If approval no longer holds at prepare or execution time, the request fails with `409 approval_lapsed` and the proposal returns to `pending_approval` (or `expired`).
+- **Signature format.** `POST /signatures` takes a 65-byte owner signature over the `safeTxHash`: `v` 27/28 for EIP-712, or 31/32 for `eth_sign` (Safe's encoding). Wallets that return `v` 0/1 must be normalised by the client, because Safe reserves 0 and 1 for contract signatures and pre-approved hashes. The policy check is re-run before a signature is stored.
 - **Payee hold.** Payment proposals fail the `payee_hold` check until the obligation's payee address has been unchanged for the approval policy's `newPayeeHoldHours` (default 48).
 
 ### Risk & activity

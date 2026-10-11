@@ -143,11 +143,11 @@ export function HelpView() {
             </ol>
             <p className="mt-4 text-xs text-text-3">
               See your own numbers step by step under “How this is calculated” on the{" "}
-              <Link href="/app" className="text-accent hover:underline">
+              <Link href="/app" className="text-accent underline underline-offset-2">
                 Overview
               </Link>{" "}
               and on{" "}
-              <Link href="/app/reserves" className="text-accent hover:underline">
+              <Link href="/app/reserves" className="text-accent underline underline-offset-2">
                 Reserves
               </Link>
               .
@@ -171,7 +171,7 @@ export function HelpView() {
             </ol>
             <p className="mt-3 text-xs text-text-3">
               Change the approval tiers in{" "}
-              <Link href="/app/settings?tab=approvals" className="text-accent hover:underline">
+              <Link href="/app/settings?tab=approvals" className="text-accent underline underline-offset-2">
                 Settings → Approvals
               </Link>
               .

@@ -10,6 +10,7 @@ import { Field, Input } from "@/components/ui/field";
 import { Callout } from "@/components/ui/status";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
+import { safeNext } from "@/lib/sanitize";
 
 const WalletSignIn = dynamic(() => import("./wallet-sign-in").then((m) => m.WalletSignIn), { ssr: false, loading: () => <p className="text-sm text-text-2">Loading wallet options…</p> });
 
@@ -20,12 +21,6 @@ const REASONS: Record<string, string> = {
   signed_out: "You signed out.",
   invite: "Sign in with the email address the invitation was sent to.",
 };
-
-/** Only allow same-site relative redirects after sign-in. */
-function safeNext(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return "/app";
-  return next;
-}
 
 export function SignInFlow({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();

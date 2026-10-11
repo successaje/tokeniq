@@ -48,7 +48,7 @@ export function CheckboxChips<T extends string | number>({
               disabled={disabled}
               onChange={(e) => onChange(e.target.checked ? [...value, o.value] : value.filter((v) => v !== o.value))}
             />
-            <span aria-hidden="true" className={cn("flex size-3.5 items-center justify-center rounded-[3px] border", checked ? "border-accent bg-accent text-on-accent" : "border-border-strong/70")}>
+            <span aria-hidden="true" className={cn("flex size-3.5 items-center justify-center rounded-[3px] border", checked ? "border-accent bg-accent text-on-accent" : "border-border-strong")}>
               {checked && <Check className="size-3" strokeWidth={3} />}
             </span>
             {o.label}

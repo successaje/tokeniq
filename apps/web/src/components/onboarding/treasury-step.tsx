@@ -39,7 +39,7 @@ function TreasuryStepBody({ me, org, orgId }: { me: MeDto; org: OrgDto; orgId: s
   const meta = useMeta();
   const accounts = useQuery({ queryKey: ["org", orgId, "/accounts"], queryFn: ({ signal }) => api<{ accounts: TreasuryAccountDto[] }>(orgPath(orgId, "/accounts"), { signal }) });
   const add = useAddAccount(orgId);
-  const progress = useSaveProgress(orgId);
+  const progress = useSaveProgress(org);
   const [adding, setAdding] = useState(false);
   const [verifying, setVerifying] = useState<TreasuryAccountDto | null>(null);
   const allowed = can(org.role, "accounts.manage");

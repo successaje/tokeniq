@@ -322,7 +322,7 @@ function DecisionPanel({ rec, ctx }: { rec: RecommendationDto; ctx: Recommendati
               <FileCheck2 className="mt-0.5 size-3.5 shrink-0 text-text-3" aria-hidden="true" />
               <span>
                 Needs {needs}.{" "}
-                <Link href="/app/help#approvals" className="text-accent hover:underline">
+                <Link href="/app/help#approvals" className="text-accent underline underline-offset-2">
                   How approvals work
                 </Link>
               </span>

@@ -109,7 +109,7 @@ export function createApp(deps: Deps) {
     "/api/v1/*",
     rateLimit({
       windowMs: 60_000,
-      max: env.NODE_ENV === "test" ? 10_000 : 300,
+      max: env.API_RATE_LIMIT_PER_MINUTE ?? (env.NODE_ENV === "test" ? 10_000 : 300),
       key: (c) => (c.get("user") ? `user:${c.get("user")!.id}` : `ip:${c.get("clientIp") ?? "unknown"}`),
     }),
   );

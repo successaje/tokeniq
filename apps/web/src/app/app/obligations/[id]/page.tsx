@@ -27,7 +27,7 @@ import { ApiError, api, orgPath } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateLabel, dateTimeLabel, pct, relativeTime, shortAddress } from "@/lib/format";
 import { useCan, useOrg, useOrgQuery } from "@/lib/org";
-import type { ObligationDetailDto, ObligationDto, ObligationScheduleDto, OverviewDto } from "@/lib/types";
+import type { ApprovalPolicyDto, ObligationDetailDto, ObligationDto, ObligationScheduleDto, OverviewDto, PoliciesDto } from "@/lib/types";
 
 type StatusAction = "pause" | "resume" | "cancel" | "complete" | "reactivate";
 
@@ -70,6 +70,7 @@ export default function ObligationDetailPage() {
   const q = useOrgQuery<ObligationDetailDto>(`/obligations/${id}`, { retry: (n, err) => !(err instanceof ApiError && err.status === 404) && n < 2 });
   const schedule = useOrgQuery<ObligationScheduleDto>("/obligations/schedule?days=366");
   const overview = useOrgQuery<OverviewDto>("/treasury");
+  const policies = useOrgQuery<PoliciesDto>("/policies");
   const meta = useMetaIndex();
   const [editOpen, setEditOpen] = useState(false);
   const [payOpen, setPayOpen] = useState<{ dueDate: string | null } | null>(null);
@@ -258,6 +259,7 @@ export default function ObligationDetailPage() {
                         {chain ? chain.name : "Any network"}
                         {o.paymentAsset ? ` · paid in ${o.paymentAsset}` : ""}
                       </span>
+                      <PayeeHold setAt={o.recipientSetAt ?? null} holdHours={policies.data ? ((policies.data.approval as ApprovalPolicyDto).newPayeeHoldHours ?? 48) : null} />
                     </>
                   ) : (
                     <Muted>{o.paymentAsset ? `Paid in ${o.paymentAsset}; no address set` : "No address set. Add one so payments can be matched on-chain."}</Muted>
@@ -330,7 +332,7 @@ export default function ObligationDetailPage() {
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-3">
                           {p.txHash ? (
                             txUrl ? (
-                              <a href={txUrl} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 font-mono text-accent hover:underline">
+                              <a href={txUrl} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 font-mono text-accent underline underline-offset-2">
                                 {shortAddress(p.txHash, 6)} <ExternalLink className="size-3" aria-hidden="true" />
                                 <span className="sr-only">(opens block explorer)</span>
                               </a>
@@ -477,6 +479,22 @@ function BackLink() {
     <Link href="/app/obligations" className="mb-3 inline-flex items-center gap-1 text-[13px] text-text-2 hover:text-text">
       <ArrowLeft className="size-3.5" aria-hidden="true" /> Obligations
     </Link>
+  );
+}
+
+/**
+ * When the payee address was set and, under the approval policy's new-payee hold, until when payments
+ * to it are refused. A changed address is the classic invoice-fraud vector, so the date is shown plainly.
+ */
+function PayeeHold({ setAt, holdHours }: { setAt: string | null; holdHours: number | null }) {
+  if (!setAt) return null;
+  const until = holdHours ? new Date(Date.parse(setAt) + holdHours * 3_600_000).toISOString() : null;
+  const holding = until !== null && Date.parse(until) > Date.now();
+  return (
+    <span className={cn("mt-0.5 block text-xs", holding ? "font-medium text-warning" : "text-text-3")}>
+      Payee address set {dateTimeLabel(setAt)}
+      {holdHours === null ? "" : holdHours === 0 ? "; the approval policy has no new-payee hold." : holding ? `; payments to it are held until ${dateTimeLabel(until)}.` : `; the ${holdHours}-hour new-payee hold ended ${dateTimeLabel(until)}.`}
+    </span>
   );
 }
 

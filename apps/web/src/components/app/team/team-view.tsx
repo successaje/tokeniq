@@ -34,7 +34,8 @@ export function TeamView() {
   const { org, orgId, role: myRole } = useOrg();
   const canManage = useCan("members.manage");
   const members = useOrgQuery<{ members: MemberDto[] }>("/members");
-  const invitations = useOrgQuery<{ invitations: InvitationDto[] }>("/invitations");
+  // Pending invitations (invitee emails and roles) are visible to owners and admins only; the API returns 403 to others.
+  const invitations = useOrgQuery<{ invitations: InvitationDto[] }>("/invitations", { enabled: canManage });
   const qc = useQueryClient();
   const router = useRouter();
   const { toast } = useToast();
@@ -196,6 +197,7 @@ export function TeamView() {
             </CardBody>
           </Card>
 
+          {canManage && (
           <Card>
             <CardHeader title="Pending invitations" description="Invitations expire after 7 days. Resending sends a new link and the old one stops working." />
             <CardBody className="px-0 pb-1 pt-2 sm:px-0">
@@ -263,6 +265,7 @@ export function TeamView() {
               )}
             </CardBody>
           </Card>
+          )}
         </div>
 
         <Card className="h-fit">

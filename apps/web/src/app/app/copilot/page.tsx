@@ -63,15 +63,21 @@ export default function CopilotPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+    // An explicit "smooth" overrides the global reduced-motion CSS, so check the preference here.
+    const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    endRef.current?.scrollIntoView({ block: "end", behavior: reduce ? "auto" : "smooth" });
   }, [messages, activity]);
 
   async function openThread(id: string) {
     abortRef.current?.abort();
     setThreadId(id);
     setActivity(null);
-    const res = await api<{ messages: ChatMessage[] }>(orgPath(orgId, `/copilot/threads/${id}`));
-    setMessages(res.messages);
+    try {
+      const res = await api<{ messages: ChatMessage[] }>(orgPath(orgId, `/copilot/threads/${encodeURIComponent(id)}`));
+      setMessages(res.messages);
+    } catch (err) {
+      setMessages([{ id: crypto.randomUUID(), role: "assistant", text: "", tools: [], error: `Couldn't open this conversation: ${(err as Error).message}` }]);
+    }
   }
 
   function newThread() {
@@ -186,13 +192,13 @@ export default function CopilotPage() {
                     : "An Anthropic API key has not been set for this TokenIQ deployment. Every figure the copilot uses comes from TokenIQ's deterministic engine and is available directly:"}
                   <ul className="mt-2 list-disc space-y-1 pl-5">
                     <li>
-                      <Link className="text-accent hover:underline" href="/app">Overview</Link>: what is deployable and why
+                      <Link className="text-accent underline underline-offset-2" href="/app">Overview</Link>: what is deployable and why
                     </li>
                     <li>
-                      <Link className="text-accent hover:underline" href="/app/reserves#scenarios">Reserves</Link>: stress scenarios such as depegs or new expenses
+                      <Link className="text-accent underline underline-offset-2" href="/app/reserves#scenarios">Reserves</Link>: stress scenarios such as depegs or new expenses
                     </li>
                     <li>
-                      <Link className="text-accent hover:underline" href="/app/recommendations">Recommendations</Link>: policy-checked actions with full reasoning
+                      <Link className="text-accent underline underline-offset-2" href="/app/recommendations">Recommendations</Link>: policy-checked actions with full reasoning
                     </li>
                   </ul>
                 </Callout>
@@ -265,7 +271,7 @@ export default function CopilotPage() {
                 maxLength={4000}
                 disabled={!!unavailable}
                 placeholder={unavailable ? "Copilot unavailable" : "Ask about reserves, obligations, venues or risk…"}
-                className="max-h-40 min-h-10 flex-1 resize-none rounded-[var(--radius-control)] border border-border-strong/50 bg-surface px-3 py-2 text-sm text-text placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-[var(--focus)] disabled:bg-sunken"
+                className="max-h-40 min-h-10 flex-1 resize-none rounded-[var(--radius-control)] border border-border-strong bg-surface px-3 py-2 text-sm text-text placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-[var(--focus)] disabled:bg-sunken"
               />
               {busy ? (
                 <Button type="button" variant="secondary" size="icon" onClick={() => abortRef.current?.abort()} aria-label="Stop generating">

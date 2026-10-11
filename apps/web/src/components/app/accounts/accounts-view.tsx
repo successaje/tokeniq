@@ -99,7 +99,11 @@ export function AccountsView() {
       else if (!r.ok) toast({ id: `sync-${a.id}`, tone: "danger", title: `Couldn't read ${a.label}`, description: r.failures[0] ?? "The network didn't respond. The previous balances are kept and marked stale." });
       else toast({ id: `sync-${a.id}`, tone: r.failures.length ? "warning" : "success", title: `${a.label} synced`, description: `${r.balances} balance${r.balances === 1 ? "" : "s"} read at block #${r.blockNumber}${r.failures.length ? ` · ${r.failures.length} read${r.failures.length === 1 ? "" : "s"} failed` : ""}.` });
     },
-    onError: (e, a) => toast({ id: `sync-${a.id}`, tone: "danger", title: `Couldn't sync ${a.label}`, description: e.message }),
+    onError: (e, a) =>
+      // 429 sync_rate_limited carries a precise message ("…synced N seconds ago. Try again in M seconds."); show it as is.
+      e instanceof ApiError && e.code === "sync_rate_limited"
+        ? toast({ id: `sync-${a.id}`, tone: "info", title: `${a.label} was synced moments ago`, description: e.message })
+        : toast({ id: `sync-${a.id}`, tone: "danger", title: `Couldn't sync ${a.label}`, description: e instanceof ApiError && e.status === 403 ? "Your role can't sync accounts." : e.message }),
   });
 
   const include = useMutation({

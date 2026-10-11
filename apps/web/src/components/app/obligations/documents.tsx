@@ -56,7 +56,7 @@ function Sha({ sha }: { sha: string }) {
       </span>
       <button
         type="button"
-        className="rounded p-0.5 text-text-3 hover:text-text"
+        className="-my-1 inline-flex size-6 items-center justify-center rounded text-text-3 hover:text-text"
         aria-label={copied ? "Copied" : "Copy full SHA-256 fingerprint"}
         onClick={async () => {
           await navigator.clipboard.writeText(sha);
@@ -143,7 +143,7 @@ export function ObligationDocuments({ obligationId, documents, canUpload }: { ob
       )}
       {canUpload && (
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <input ref={input} type="file" accept={ACCEPT.join(",")} className="sr-only" id={`doc-${obligationId}`} onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} disabled={!!uploading} tabIndex={-1} />
+          <input ref={input} type="file" accept={ACCEPT.join(",")} className="sr-only" id={`doc-${obligationId}`} aria-label="Attach document" aria-hidden="true" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} disabled={!!uploading} tabIndex={-1} />
           <Button variant="secondary" size="sm" onClick={() => input.current?.click()} loading={!!uploading} loadingLabel="Uploading">
             {!uploading && <Upload className="size-4" aria-hidden="true" />}
             Attach document

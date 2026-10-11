@@ -34,7 +34,7 @@ export default function PrivacyPage() {
       <ul>
         <li>To provide the service you asked for (performance of a contract).</li>
         <li>To keep it secure, prevent abuse and keep an audit trail your organization relies on (legitimate interests).</li>
-        <li>To send sign-in codes, approval requests and alerts you have enabled.</li>
+        <li>To send sign-in codes, team invitations and critical risk alerts by email, and to show in-app notifications such as approval requests.</li>
         <li>To meet legal obligations.</li>
       </ul>
       <p>We do not sell personal data and do not use it for advertising.</p>

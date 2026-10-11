@@ -62,7 +62,7 @@ export function SiteFooter() {
         <div className="grid items-center gap-4 border-t border-hairline py-6 text-xs text-text-3 lg:grid-cols-12">
           <p className="lg:col-span-8">
             <span className="font-medium text-text-2">Networks</span> · {NETWORKS.join(" · ")} <span className="text-text-3">· Testnets: {TESTNETS.join(", ")}</span> ·{" "}
-            <Link href="/integrations" className="text-accent hover:underline">
+            <Link href="/integrations" className="text-accent underline underline-offset-2 hover:decoration-2">
               Support details
             </Link>
           </p>

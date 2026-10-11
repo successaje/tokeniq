@@ -85,7 +85,7 @@ export function OccurrencePicker({
                   )}
                 >
                   <input type="radio" name={name} value={k} checked={checked} onChange={() => onChange(k)} className="sr-only" />
-                  <span aria-hidden="true" className={cn("flex size-4 shrink-0 items-center justify-center rounded-full border", checked ? "border-accent" : "border-border-strong/70")}>
+                  <span aria-hidden="true" className={cn("flex size-4 shrink-0 items-center justify-center rounded-full border", checked ? "border-accent" : "border-border-strong")}>
                     <span className={cn("size-2 rounded-full bg-accent", checked ? "opacity-100" : "opacity-0")} />
                   </span>
                   <span className="min-w-0 flex-1">

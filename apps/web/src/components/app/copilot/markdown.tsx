@@ -8,20 +8,25 @@ import { Fragment, type ReactNode } from "react";
  * cited records. Links to arbitrary URLs are not rendered as links.
  */
 
+// Citation ids come from model output, which can be steered by untrusted text in the
+// data it reads. They are only ever placed inside fixed in-app paths, encoded.
 const REF_ROUTES: Record<string, (id: string) => string> = {
   treasury: () => "/app/treasury",
   reserve: () => "/app/reserves",
   policy: () => "/app/reserves",
   scenario: () => "/app/reserves#scenarios",
-  obligation: (id) => `/app/obligations/${id}`,
+  obligation: (id) => `/app/obligations/${encodeURIComponent(id)}`,
   account: () => "/app/accounts",
   position: () => "/app/allocations",
-  recommendation: (id) => `/app/recommendations#${id}`,
+  recommendation: (id) => `/app/recommendations#${encodeURIComponent(id)}`,
   opportunity: () => "/app/opportunities",
   alert: () => "/app/risk",
-  proposal: (id) => `/app/approvals/${id}`,
+  proposal: (id) => `/app/approvals/${encodeURIComponent(id)}`,
   activity: () => "/app/activity",
 };
+
+/** Record ids are UUIDs or simple slugs; anything else is shown as plain text, not linked. */
+const SAFE_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
 
 const REF_LABEL: Record<string, string> = {
   treasury: "Treasury",
@@ -43,7 +48,7 @@ function RefChip({ refId }: { refId: string }) {
   const id = rest.join(":");
   const route = REF_ROUTES[kind ?? ""];
   const label = REF_LABEL[kind ?? ""] ?? "Source";
-  if (!route) return <span className="text-text-3">[{label}]</span>;
+  if (!route || (id !== "" && (!SAFE_ID.test(id) || id.includes("..")))) return <span className="text-text-3">[{label}]</span>;
   return (
     <Link href={route(id)} className="mx-0.5 inline-flex items-center rounded-[var(--radius-chip)] bg-accent-subtle px-1.5 align-baseline text-[11px] font-medium text-accent no-underline hover:underline" title={`Source: ${refId}`}>
       {label}

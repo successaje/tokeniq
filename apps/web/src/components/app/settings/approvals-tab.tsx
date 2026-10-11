@@ -22,6 +22,9 @@ import { boundLabel, describeTiers } from "./approval-text";
 const MAX_TIERS = 6;
 const APPROVER_ROLES: ApproverRole[] = ["owner", "admin", "finance", "approver"];
 const ANY = "any";
+/** Mirrors approvalPolicySchema.newPayeeHoldHours in @tokeniq/core. */
+const DEFAULT_PAYEE_HOLD_HOURS = 48;
+const MAX_PAYEE_HOLD_HOURS = 24 * 14;
 
 interface DraftTier {
   key: string;
@@ -35,6 +38,7 @@ interface Draft {
   tiers: DraftTier[];
   allowSelfApproval: boolean;
   proposalTtlHours: string;
+  newPayeeHoldHours: string;
 }
 
 let seq = 0;
@@ -46,6 +50,7 @@ function toDraft(p: ApprovalPolicyDto): Draft {
     tiers: sorted.map((t) => ({ key: key(), upToUsd: t.upToUsd ?? "", requiredApprovals: String(t.requiredApprovals), requiredRole: t.requiredRole })),
     allowSelfApproval: p.allowSelfApproval,
     proposalTtlHours: String(p.proposalTtlHours),
+    newPayeeHoldHours: String(p.newPayeeHoldHours ?? DEFAULT_PAYEE_HOLD_HOURS),
   };
 }
 
@@ -54,6 +59,8 @@ function toPolicy(d: Draft): ApprovalPolicyDto {
     tiers: d.tiers.map((t, i) => ({ upToUsd: i === d.tiers.length - 1 ? null : t.upToUsd.trim(), requiredApprovals: Number(t.requiredApprovals), requiredRole: t.requiredRole })),
     allowSelfApproval: d.allowSelfApproval,
     proposalTtlHours: Number(d.proposalTtlHours),
+    // Always sent, so a save never drops it back to the server default.
+    newPayeeHoldHours: Number(d.newPayeeHoldHours),
   };
 }
 
@@ -77,6 +84,8 @@ function validate(d: Draft): Record<string, string> {
   });
   const ttl = Number(d.proposalTtlHours);
   if (!/^\d+$/.test(d.proposalTtlHours) || ttl < 1 || ttl > 720) e.proposalTtlHours = "Between 1 and 720 hours (30 days)";
+  const hold = Number(d.newPayeeHoldHours);
+  if (!/^\d+$/.test(d.newPayeeHoldHours) || hold > MAX_PAYEE_HOLD_HOURS) e.newPayeeHoldHours = `Between 0 and ${MAX_PAYEE_HOLD_HOURS} hours (14 days)`;
   return e;
 }
 
@@ -111,7 +120,7 @@ export function ApprovalsTab() {
     if (!draft) return false;
     const m = /^tiers\.(\d+)\.(\w+)$/.exec(k);
     if (m) return String((draft.tiers[Number(m[1])] as unknown as Record<string, unknown>)?.[m[2]!] ?? "") !== "";
-    return k === "proposalTtlHours" ? draft.proposalTtlHours !== "" : false;
+    return k === "proposalTtlHours" ? draft.proposalTtlHours !== "" : k === "newPayeeHoldHours" ? draft.newPayeeHoldHours !== "" : false;
   };
   const shownErrors = submitted ? { ...live, ...errors } : { ...Object.fromEntries(Object.entries(live).filter(([k]) => typed(k))), ...errors };
   const dirty = !!draft && !!server && JSON.stringify(toPolicy(draft)) !== normalize(server);
@@ -319,6 +328,19 @@ export function ApprovalsTab() {
                   </div>
                 )}
               </Field>
+              <Field
+                label="Hold payments to new or changed payee addresses"
+                hint={`Payments to a payee address added or changed less than this many hours ago are refused, so the team can catch a swapped address. 0 turns the hold off (max ${MAX_PAYEE_HOLD_HOURS}).`}
+                error={shownErrors.newPayeeHoldHours}
+                className="sm:col-span-2"
+              >
+                {(p) => (
+                  <div className="relative sm:max-w-xs">
+                    <Input {...p} inputMode="numeric" className="pr-14" value={draft.newPayeeHoldHours} onChange={(e) => setDraft({ ...draft, newPayeeHoldHours: e.target.value.replace(/\D/g, "").slice(0, 3) })} />
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-text-3">hours</span>
+                  </div>
+                )}
+              </Field>
             </fieldset>
 
             {canEdit && (
@@ -348,7 +370,8 @@ export function ApprovalsTab() {
           <CardBody className="pt-2">
             {preview ? <p className="text-sm text-text">{preview}</p> : <p className="text-sm text-text-3">Fix the highlighted fields to see the preview.</p>}
             <p className="mt-2 text-xs text-text-2">
-              {draft.allowSelfApproval ? "The proposer's own approval counts." : "The proposer's own approval does not count."} Proposals expire after {draft.proposalTtlHours || "—"} hours without full approval.
+              {draft.allowSelfApproval ? "The proposer's own approval counts." : "The proposer's own approval does not count."} Proposals expire after {draft.proposalTtlHours || "—"} hours without full approval.{" "}
+              {draft.newPayeeHoldHours === "0" ? "Payments to a new or changed payee address are not held." : `Payments to a new or changed payee address are held for ${draft.newPayeeHoldHours || "—"} hours.`}
             </p>
             {warnings.length > 0 && (
               <ul className="mt-3 space-y-1.5">
@@ -366,7 +389,7 @@ export function ApprovalsTab() {
           <CardBody className="space-y-2 pt-2 text-[13px] text-text-2">
             <p>Internal approval is a recorded decision inside TokenIQ. It never moves funds.</p>
             <p>After approval, the Safe owners still sign the transaction in their own wallets, up to your Safe&apos;s threshold, and someone executes it on-chain.</p>
-            <Link href="/app/help#approvals" className="inline-flex items-center gap-1 text-accent hover:underline">
+            <Link href="/app/help#approvals" className="inline-flex items-center gap-1 text-accent underline underline-offset-2">
               How approvals, signatures and execution fit together <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
           </CardBody>

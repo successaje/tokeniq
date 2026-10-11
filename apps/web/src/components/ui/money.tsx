@@ -17,16 +17,20 @@ export interface MoneyProps {
 
 /**
  * The single way to show a USD amount. Exact by default; compact values keep the
- * full figure in the accessible name and title.
+ * full figure for assistive tech (an sr-only text node, since aria-label is not
+ * allowed on a plain span) and in the title.
  */
 export function Money({ value, compact, decimals = 2, signed, approximate, className, source, tabular = true }: MoneyProps) {
   const shown = usd(value, { compact, decimals, signed });
   const full = usd(value, { decimals: 2, signed });
   const label = `${approximate ? "approximately " : ""}${full}${source ? `, ${source}` : ""}`;
   return (
-    <span className={cn(tabular && "num", "whitespace-nowrap", className)} title={compact || source ? `${full}${source ? ` · ${source}` : ""}` : undefined} aria-label={label}>
-      {approximate && <span aria-hidden="true">≈ </span>}
-      <span aria-hidden="true">{shown}</span>
+    <span className={cn(tabular && "num", "whitespace-nowrap", className)} title={compact || source ? `${full}${source ? ` · ${source}` : ""}` : undefined}>
+      <span aria-hidden="true">
+        {approximate && "≈ "}
+        {shown}
+      </span>
+      <span className="sr-only">{label}</span>
     </span>
   );
 }

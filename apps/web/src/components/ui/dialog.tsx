@@ -58,6 +58,7 @@ export function ConfirmDialog({
   confirmText,
   tone = "primary",
   loading,
+  confirmDisabled,
   onConfirm,
 }: {
   open: boolean;
@@ -69,6 +70,8 @@ export function ConfirmDialog({
   confirmText?: string;
   tone?: "primary" | "danger";
   loading?: boolean;
+  /** Keep the confirm button disabled, e.g. until a required reason is entered. */
+  confirmDisabled?: boolean;
   onConfirm: () => void;
 }) {
   const [typed, setTyped] = useState("");
@@ -90,7 +93,7 @@ export function ConfirmDialog({
             <DialogClose asChild>
               <Button variant="secondary">Cancel</Button>
             </DialogClose>
-            <Button variant={tone === "danger" ? "danger" : "primary"} disabled={!ready} loading={loading} onClick={onConfirm}>
+            <Button variant={tone === "danger" ? "danger" : "primary"} disabled={!ready || confirmDisabled} loading={loading} onClick={onConfirm} className="h-auto min-h-9 justify-center whitespace-normal py-1.5 text-center">
               {confirmLabel}
             </Button>
           </>
@@ -100,7 +103,7 @@ export function ConfirmDialog({
         {confirmText && (
           <label className="mt-3 block text-[13px] text-text-2">
             Type <span className="font-mono font-medium text-text">{confirmText}</span> to confirm
-            <input value={typed} onChange={(e) => setTyped(e.target.value)} className="mt-1.5 block h-9 w-full rounded-[var(--radius-control)] border border-border-strong/50 bg-surface px-3 font-mono text-sm" autoComplete="off" />
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} className="mt-1.5 block h-9 w-full rounded-[var(--radius-control)] border border-border-strong bg-surface px-3 font-mono text-sm" autoComplete="off" />
           </label>
         )}
       </DialogContent>

@@ -183,7 +183,7 @@ function EventRow({ e, ctx }: { e: ActivityEventDto; ctx: DescribeContext }) {
             {d.href && (
               <>
                 {" "}
-                <Link href={d.href} className="whitespace-nowrap text-accent hover:underline">
+                <Link href={d.href} className="whitespace-nowrap text-accent underline underline-offset-2">
                   View
                 </Link>
               </>

@@ -392,6 +392,22 @@ describe("financial integrity: Safe signatures and execution", () => {
     expect(approvedHash.json.error.code).toBe("unsupported_signature");
   });
 
+  it("FR-05: refuses signatures once the action no longer passes policy, and stores nothing", async () => {
+    const { db } = ctx.deps;
+    const [row] = await db.select().from(schema.opportunities).where(eq(schema.opportunities.id, VENUE_ID));
+    const data = row!.data as { source: { fetchedAt: number } };
+    // Venue data a day old fails the freshness check.
+    await db.update(schema.opportunities).set({ data: { ...data, source: { ...data.source, fetchedAt: data.source.fetchedAt - 86_400 } } }).where(eq(schema.opportunities.id, VENUE_ID));
+    try {
+      const res = await approver.post(p(`/proposals/${id}/signatures`), { signature: await sign(owners[0]!, safeTxHash) });
+      expect(res.status).toBe(422);
+      expect(res.json.error.code).toBe("policy_check_failed");
+      expect(await db.select().from(schema.safeSignatures).where(eq(schema.safeSignatures.proposalId, id))).toHaveLength(0);
+    } finally {
+      await db.update(schema.opportunities).set({ data: row!.data }).where(eq(schema.opportunities.id, VENUE_ID));
+    }
+  });
+
   it("counts each owner once and only for the current safeTxHash (re-prepare after a nonce change)", async () => {
     const first = await approver.post(p(`/proposals/${id}/signatures`), { signature: await sign(owners[0]!, safeTxHash) });
     expect(first.json).toMatchObject({ signatures: 1, ready: false });

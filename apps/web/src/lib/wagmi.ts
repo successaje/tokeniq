@@ -15,7 +15,8 @@ export const wagmiConfig = createConfig({
   ssr: true,
   connectors: [
     injected({ shimDisconnect: true }),
-    safe({ allowedDomains: [/app\.safe\.global$/], debug: false }),
+    // Exact origin: the regex is tested against the parent frame's origin ("https://app.safe.global").
+    safe({ allowedDomains: [/^https:\/\/app\.safe\.global$/], debug: false }),
     ...(WC_PROJECT_ID ? [walletConnect({ projectId: WC_PROJECT_ID, showQrModal: true, metadata: { name: "TokenIQ", description: "Treasury intelligence for on-chain organizations", url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000", icons: [] } })] : []),
   ],
   transports: {

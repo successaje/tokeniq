@@ -44,7 +44,7 @@ function Overview({ d }: { d: OverviewDto }) {
   const { buckets, total, shortfall } = useMemo(() => bucketsFromReserve(reserve), [reserve]);
   const due30 = reserve.obligations.occurrences.filter((o) => o.usd && !o.overdue && Date.parse(`${o.dueDate}T00:00:00Z`) <= Date.parse(`${d.asOf}T00:00:00Z`) + 30 * 86_400_000);
   const due30Total = wadToString(due30.reduce((s, o) => s + parseDecimal(o.usd ?? "0"), 0n));
-  const sentence = `Of ${usd(treasury.gross, { compact: true })} tracked, ${usd(reserve.required, { compact: true })} is protected by policy, ${usd(reserve.obligations.total, { compact: true })} is owed in the next ${d.policy.obligationHorizonDays} days, and ${usd(reserve.surplus.deployable, { compact: true })} could be deployed.`;
+  const sentence = `Of ${usd(treasury.gross, { compact: true })} tracked, ${usd(reserve.required, { compact: true })} is protected by policy, ${usd(reserve.obligations.total, { compact: true })} is owed in the next ${d.policy.obligationHorizonDays} days${d.policy.obligationBufferBps > 0 ? ` (protected with a ${d.policy.obligationBufferBps / 100}% buffer)` : ""}, and ${usd(reserve.surplus.deployable, { compact: true })} could be deployed.`;
 
   return (
     <div>
@@ -76,7 +76,7 @@ function Overview({ d }: { d: OverviewDto }) {
         </Callout>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* The answer */}
         <Card className="xl:col-span-8">
           <CardBody className="sm:p-6">
@@ -148,16 +148,24 @@ function Overview({ d }: { d: OverviewDto }) {
   );
 }
 
+/**
+ * One term/description group. Inside a <dl> each group must be a <div>, so the
+ * link lives in the <dd> and stretches over the whole row for pointer users.
+ */
 function Kpi({ label, value, meta, href, tone }: { label: string; value: React.ReactNode; meta?: string; href: string; tone?: "warning" }) {
   return (
-    <Link href={href} className="group flex items-center gap-3 px-4 py-3 hover:bg-sunken/60 sm:px-5">
-      <div className="min-w-0 flex-1">
-        <dt className="text-xs font-medium text-text-2">{label}</dt>
-        <dd className="mt-0.5 text-xl font-medium tracking-tight text-text">{value}</dd>
-        {meta && <dd className={cn("mt-0.5 truncate text-xs", tone === "warning" ? "text-warning" : "text-text-3")}>{meta}</dd>}
-      </div>
-      <ArrowRight className="size-4 shrink-0 text-text-3 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
-    </Link>
+    // dt/dd must be direct children of the group <div>; the arrow lives inside the link, positioned against the row.
+    <div className="group relative px-4 py-3 pr-10 hover:bg-sunken/60 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-[-2px] has-[a:focus-visible]:outline-[var(--focus)] sm:px-5 sm:pr-11">
+      <dt className="text-xs font-medium text-text-2">{label}</dt>
+      <dd className="mt-0.5 text-xl font-medium tracking-tight text-text">
+        <Link href={href} className="outline-none after:absolute after:inset-0 after:content-['']">
+          {value}
+          <span className="sr-only"> — open {label.toLowerCase()}</span>
+          <ArrowRight className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-text-3 opacity-0 transition-opacity group-hover:opacity-100 sm:right-5" aria-hidden="true" />
+        </Link>
+      </dd>
+      {meta && <dd className={cn("mt-0.5 truncate text-xs", tone === "warning" ? "text-warning" : "text-text-3")}>{meta}</dd>}
+    </div>
   );
 }
 
@@ -323,7 +331,7 @@ function OverviewSkeleton() {
     <div role="status" aria-live="polite">
       <span className="sr-only">Calculating treasury metrics…</span>
       <Skeleton className="mb-6 h-8 w-48" />
-      <div className="grid gap-4 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <Skeleton className="h-72 xl:col-span-8" />
         <Skeleton className="h-72 xl:col-span-4" />
         <Skeleton className="h-64 xl:col-span-8" />

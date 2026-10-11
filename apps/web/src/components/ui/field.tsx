@@ -3,10 +3,12 @@
 import { isAddress, getAddress } from "viem";
 import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
+import { normalizeAmountInput } from "@/lib/sanitize";
 
 export const inputClass =
-  "block w-full rounded-[var(--radius-control)] border border-border-strong/50 bg-surface px-3 text-sm text-text placeholder:text-text-3 " +
-  "transition-colors duration-[var(--dur-fast)] hover:border-border-strong focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--focus)] " +
+  // Full-strength border: an input's boundary must reach 3:1 against the surface (WCAG 1.4.11); 50% opacity measured 1.67:1.
+  "block w-full rounded-[var(--radius-control)] border border-border-strong bg-surface px-3 text-sm text-text placeholder:text-text-3 " +
+  "transition-colors duration-[var(--dur-fast)] hover:border-text-3 focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--focus)] " +
   "disabled:cursor-not-allowed disabled:bg-sunken disabled:text-text-3 aria-[invalid=true]:border-danger";
 
 export interface FieldProps {
@@ -53,11 +55,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   return <textarea ref={ref} className={cn(inputClass, "min-h-20 py-2 leading-5", className)} {...props} />;
 });
 
-const DECIMAL_RE = /^\d*(\.\d*)?$/;
-
 /**
  * Amount entry that only ever holds a plain decimal string (no floats, no
- * locale separators) so values reach the API exactly as typed.
+ * locale separators) so values reach the API exactly as typed. Input that would
+ * change meaning (a decimal comma, too many decimals, letters) is not accepted.
  */
 export function AmountInput({
   value,
@@ -75,8 +76,8 @@ export function AmountInput({
         autoComplete="off"
         value={value}
         onChange={(e) => {
-          const v = e.target.value.replace(/,/g, "").trim();
-          if (v === "" || (DECIMAL_RE.test(v) && (v.split(".")[1]?.length ?? 0) <= maxDecimals)) onChange(v);
+          const v = normalizeAmountInput(e.target.value, maxDecimals);
+          if (v !== null) onChange(v);
         }}
         className={cn(inputClass, "num h-9 pr-14 text-right")}
       />

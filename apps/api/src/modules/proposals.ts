@@ -619,6 +619,10 @@ export function registerProposals(app: App, deps: Deps) {
       if (!p.safeTxHash || !p.safeTx) throw conflict("not_prepared", "Prepare the transaction first.");
       const state = await loadOrgState(db, m.organizationId, deps.now(), { excludeProposalId: id });
       requireExecutionAllowed(state);
+      // Owners should not sign something that would no longer pass policy (execution-data checks again).
+      const action = actionFromJson(p.action as ActionJson);
+      const live = validateAction(action, validationContext(state, action));
+      if (!live.valid) throw new ApiError(422, "policy_check_failed", "Conditions changed and the action no longer passes every policy check. Nothing was signed; cancel and re-propose from fresh figures.", validationDto(live));
       const recovered = await recoverSafeSigner(p.safeTxHash as Hex, c.req.valid("json").signature as Hex);
       if (!recovered.ok) throw unprocessable("unsupported_signature", recovered.reason);
       const { safe } = await liveSafe(state, p.accountId);

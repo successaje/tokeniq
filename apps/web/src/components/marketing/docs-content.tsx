@@ -256,7 +256,7 @@ export const DOC_PAGES: DocPage[] = [
         </p>
         <ul>
           <li>
-            <strong>Pending</strong> means proposals that are approved or awaiting signatures. They are treated as already spent so the same money is never proposed twice.
+            <strong>Pending</strong> means allocation and payment proposals that are still active: awaiting internal approval, Safe signatures or execution. They are treated as already spent so the same money is never proposed twice.
           </li>
           <li>
             <strong>Max deployed</strong> caps the share of the whole treasury that may sit in protocols (default {formatBps(DEFAULT_TREASURY_POLICY.maxDeployedBps, 0)}).

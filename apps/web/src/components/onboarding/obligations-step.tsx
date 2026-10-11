@@ -18,7 +18,7 @@ import { cn } from "@/lib/cn";
 import { dateLabel, usd } from "@/lib/format";
 import type { ObligationDto, ObligationInputDto, OrgDto, PoliciesDto } from "@/lib/types";
 import { amountLabel } from "@/components/app/payments/amount";
-import { BackLink, OnboardingStep, StepActions } from "./onboarding-step";
+import { BackLink, OnboardingStep, recordOnboarding, StepActions } from "./onboarding-step";
 import { can } from "./use-onboarding-org";
 
 const CATEGORIES = [
@@ -173,7 +173,7 @@ function ObligationsBody({ org, orgId }: { org: OrgDto; orgId: string }) {
           throw Object.assign(e as Error, { rowKey: r.key });
         }
       }
-      await api(orgPath(orgId, "/onboarding"), { method: "POST", body: { step: "obligations" } });
+      await recordOnboarding(org, { step: "obligations" });
       return policyNote;
     },
     onSuccess: (policyNote) => {

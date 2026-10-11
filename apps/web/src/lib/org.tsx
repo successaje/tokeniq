@@ -62,11 +62,12 @@ export function useOrgQuery<T>(path: string, opts: Omit<UseQueryOptions<T>, "que
 }
 
 /** Client-side mirror of the server permission matrix, for hiding controls only. The API enforces it. */
-const CAN: Record<string, Role[]> = {
+const CAN = {
   "org.manage": ["owner", "admin"],
   "members.manage": ["owner", "admin"],
   "accounts.manage": ["owner", "admin", "finance"],
   "accounts.verify": ["owner", "admin", "finance", "approver"],
+  "accounts.sync": ["owner", "admin", "finance", "approver", "viewer"],
   "obligations.write": ["owner", "admin", "finance"],
   "payments.record": ["owner", "admin", "finance"],
   "policy.write": ["owner", "admin"],
@@ -74,12 +75,15 @@ const CAN: Record<string, Role[]> = {
   "proposals.create": ["owner", "admin", "finance"],
   "proposals.approve": ["owner", "admin", "finance", "approver"],
   "proposals.sign": ["owner", "admin", "finance", "approver"],
+  "proposals.execute": ["owner", "admin", "finance", "approver"],
   "alerts.manage": ["owner", "admin", "finance", "approver"],
-};
+} as const satisfies Record<string, readonly Role[]>;
 
-export function useCan(permission: keyof typeof CAN) {
+export type Permission = keyof typeof CAN;
+
+export function useCan(permission: Permission) {
   const { role } = useOrg();
-  return CAN[permission]!.includes(role);
+  return (CAN[permission] as readonly Role[]).includes(role);
 }
 
 export const ROLE_LABEL: Record<Role, string> = { owner: "Owner", admin: "Admin", finance: "Finance", approver: "Approver", viewer: "Viewer" };

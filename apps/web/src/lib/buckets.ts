@@ -42,7 +42,7 @@ export function bucketsFromReserve(r: ReserveLike): { buckets: Bucket[]; total: 
   const reserve = coveredRequirement - obligations;
   const held = max0(available - coveredRequirement - deployable);
   const buckets: Bucket[] = [
-    { key: "obligations", label: "Upcoming obligations", value: wadToString(obligations), description: "Payments due within the policy horizon, plus the safety buffer" },
+    { key: "obligations", label: "Upcoming obligations + buffer", value: wadToString(obligations), description: "Payments due within the policy horizon, plus the safety buffer" },
     { key: "reserve", label: "Protected reserve", value: wadToString(reserve), description: "The rest of the policy requirement, such as operating runway or a fixed floor" },
     { key: "deployable", label: "Deployable surplus", value: wadToString(deployable), description: "May be allocated to vetted venues, with approval" },
     {

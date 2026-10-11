@@ -38,7 +38,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
-        run: pnpm -r --filter ./packages/core --filter ./packages/chain --filter ./packages/db --filter ./apps/api typecheck
+        run: pnpm -r --filter ./packages/core --filter ./packages/chain --filter ./packages/db --filter ./apps/api --filter ./apps/e2e typecheck
       - name: Core engine tests
         run: pnpm --filter @tokeniq/core test
       - name: Chain package tests (offline)
@@ -59,9 +59,81 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @tokeniq/web typecheck
+      - name: Web unit tests (signing checks, link sanitising)
+        run: pnpm --filter @tokeniq/web test
       - run: pnpm --filter @tokeniq/web build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+  e2e:
+    name: Browser end to end and accessibility (Playwright + axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tokeniq
+          POSTGRES_PASSWORD: tokeniq
+          POSTGRES_DB: tokeniq_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tokeniq" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://tokeniq:tokeniq@localhost:5432/tokeniq_e2e
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm --filter @tokeniq/e2e exec playwright install --with-deps chromium
+      - name: Journeys, security checks, axe (light and dark), phone layouts
+        run: pnpm --filter @tokeniq/e2e test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/e2e/playwright-report
+            apps/e2e/test-results
+          retention-days: 7
+
+  fork:
+    name: Controlled execution on a Base fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tokeniq
+          POSTGRES_PASSWORD: tokeniq
+          POSTGRES_DB: tokeniq_fork
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tokeniq" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: pnpm install --frozen-lockfile
+      - name: Safe, approvals, signatures and execution against forked Base
+        env:
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          TEST_DATABASE_URL: postgres://tokeniq:tokeniq@localhost:5432/tokeniq_fork
+          FORK_E2E: "1"
+        run: |
+          if [ -z "$BASE_RPC_URL" ]; then echo "BASE_RPC_URL secret not set; the fork test needs a reliable Base RPC. Skipping."; exit 0; fi
+          pnpm --filter @tokeniq/api exec vitest run test/fork-execution.test.ts
 
   contracts:
     name: Contracts (Foundry)

@@ -24,12 +24,11 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 
 function Row({ label, children, hint }: { label: string; children: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="py-1">
-      <div className="flex items-baseline justify-between gap-4 text-[13px]">
-        <dt className="text-text-2">{label}</dt>
-        <dd className="num text-right font-medium text-text">{children}</dd>
-      </div>
-      {hint && <p className="text-xs text-text-3">{hint}</p>}
+    // dt/dd must be direct children of the group <div>; the hint is a second <dd> on its own line.
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4 py-1 text-[13px]">
+      <dt className="text-text-2">{label}</dt>
+      <dd className="num text-right font-medium text-text">{children}</dd>
+      {hint && <dd className="basis-full text-xs text-text-3">{hint}</dd>}
     </div>
   );
 }
@@ -180,7 +179,7 @@ export function OpportunitySheet({ venue: o, open, missing, onOpenChange }: { ve
                 return (
                   <li key={a.name + a.url} className="text-[13px]">
                     {href ? (
-                      <a href={href} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-accent hover:underline">
+                      <a href={href} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-accent underline underline-offset-2">
                         {a.name} <ExternalLink className="size-3" aria-hidden="true" />
                       </a>
                     ) : (

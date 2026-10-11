@@ -176,11 +176,12 @@ function BigMoney({ value }: { value: string }) {
   const full = usd(value, { decimals: 2 });
   const [whole, cents] = full.split(".");
   return (
-    <span className="whitespace-nowrap" aria-label={full}>
+    <span className="whitespace-nowrap">
       <span aria-hidden="true">{whole}</span>
       <span aria-hidden="true" className="text-text-3">
         .{cents}
       </span>
+      <span className="sr-only">{full}</span>
     </span>
   );
 }

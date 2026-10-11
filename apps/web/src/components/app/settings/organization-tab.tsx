@@ -13,7 +13,8 @@ import { Callout, StatusBadge } from "@/components/ui/status";
 import { useToast } from "@/components/ui/toast";
 import { api, ApiError, fieldErrors, orgPath } from "@/lib/api";
 import { dateLabel } from "@/lib/format";
-import { ROLE_LABEL, useCan, useOrg, useOrgQuery } from "@/lib/org";
+import { ConfirmDialog } from "@/components/ui/dialog";
+import { rememberOrg, ROLE_LABEL, useCan, useOrg, useOrgQuery } from "@/lib/org";
 import type { OrgDto } from "@/lib/types";
 
 export function OrganizationTab() {
@@ -123,14 +124,15 @@ export function OrganizationTab() {
                   {org.slug}
                 </dd>
               </div>
-              {org.isSample && (
-                <div className="pt-1">
-                  <StatusBadge tone="warning">Sample workspace: simulated data, nothing can execute</StatusBadge>
-                </div>
-              )}
             </dl>
+            {org.isSample && (
+              <div className="pt-3">
+                <StatusBadge tone="warning">Sample workspace: simulated data, nothing can execute</StatusBadge>
+              </div>
+            )}
           </CardBody>
         </Card>
+        {org.isSample && org.role === "owner" && <DeleteSampleCard orgId={orgId} name={org.name} />}
         <Card>
           <CardHeader title="Treasury policy" description="Reserve rules, exposure limits, allowed venues and autonomy." />
           <CardBody className="pt-2">
@@ -143,5 +145,50 @@ export function OrganizationTab() {
         </Card>
       </div>
     </div>
+  );
+}
+
+/**
+ * A sample workspace's sole owner can delete it (DELETE /sample-workspace). Real organizations cannot be
+ * deleted; the API refuses them. Afterwards the person lands in another organization, or onboarding.
+ */
+function DeleteSampleCard({ orgId, name }: { orgId: string; name: string }) {
+  const { me } = useOrg();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const del = useMutation({
+    mutationFn: () => api<{ ok: boolean }>(orgPath(orgId, "/sample-workspace"), { method: "DELETE" }),
+    onSuccess: () => {
+      const next = me.organizations.find((o) => o.id !== orgId);
+      if (next) rememberOrg(next.id);
+      qc.clear();
+      // A full load: nothing cached from the deleted workspace survives.
+      window.location.href = next ? "/app" : "/onboarding";
+    },
+  });
+  return (
+    <Card>
+      <CardHeader title="Delete this sample workspace" description="Removes the simulated accounts, obligations and proposals. Your real organizations are not affected." />
+      <CardBody className="pt-2">
+        <Button variant="secondary" size="sm" className="text-danger" onClick={() => setOpen(true)}>
+          Delete sample workspace
+        </Button>
+      </CardBody>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v) del.reset();
+        }}
+        title="Delete the sample workspace?"
+        description={`“${name}” and all its simulated data will be removed for everyone in it. This cannot be undone; you can open a new sample from onboarding later.`}
+        consequences={del.error ? <Callout tone="danger">{(del.error as Error).message}</Callout> : undefined}
+        confirmLabel="Delete sample workspace"
+        confirmText="DELETE"
+        tone="danger"
+        loading={del.isPending}
+        onConfirm={() => del.mutate()}
+      />
+    </Card>
   );
 }

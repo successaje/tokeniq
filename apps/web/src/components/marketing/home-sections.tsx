@@ -456,7 +456,7 @@ export function IntegrationsSection() {
           </>
         }
       >
-        <div className="flex flex-wrap gap-2" aria-label="Supported networks">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Supported networks">
           {["Ethereum", "Base", "Arbitrum One", "OP Mainnet"].map((n) => (
             <span key={n} className="inline-flex h-9 items-center gap-2 rounded-[var(--radius-control)] border border-hairline bg-surface px-3 text-[13px] font-medium text-text">
               <Link2 className="size-3.5 text-text-3" aria-hidden="true" />

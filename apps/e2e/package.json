@@ -1,0 +1,19 @@
+{
+  "name": "@tokeniq/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "@types/node": "^24.0.0",
+    "@types/smtp-server": "^3.5.10",
+    "postgres": "^3.4.7",
+    "smtp-server": "3.19.21",
+    "tsx": "^4.20.0",
+    "typescript": "5.9.3"
+  }
+}

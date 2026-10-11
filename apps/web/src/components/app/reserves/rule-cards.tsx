@@ -53,15 +53,13 @@ export function RuleCards({ reserve, policy }: { reserve: ReserveDto; policy: Po
             <dl className="mt-3 flex-1 space-y-1.5 border-t border-hairline px-4 py-3 text-[13px] sm:px-5">
               {r.id === "floor" && (
                 <>
-                  <Row label="Minimum reserve (policy)" value={usd(policy.minimumReserveUsd)} />
-                  {!r.enabled && <p className="text-xs text-text-3">A fixed floor protects a minimum balance even when burn and obligations are small.</p>}
+                  <Row label="Minimum reserve (policy)" value={usd(policy.minimumReserveUsd)} note={!r.enabled ? "A fixed floor protects a minimum balance even when burn and obligations are small." : undefined} />
                 </>
               )}
               {r.id === "runway" && (
                 <>
                   <Row label="Months of runway (policy)" value={policy.runwayMonths === 0 ? "Off" : String(policy.runwayMonths)} />
-                  <Row label="Monthly burn used" value={<Money value={reserve.burn.used} />} />
-                  <p className="text-xs text-text-3">{BURN_BASIS[reserve.burn.basis]}</p>
+                  <Row label="Monthly burn used" value={<Money value={reserve.burn.used} />} note={BURN_BASIS[reserve.burn.basis]} />
                 </>
               )}
               {r.id === "obligations" && (
@@ -73,8 +71,12 @@ export function RuleCards({ reserve, policy }: { reserve: ReserveDto; policy: Po
                     return <Row key={c} sub label={`${c === "invoiced" ? "Invoiced" : c === "committed" ? "Committed" : "Estimates"}${excluded ? " (excluded)" : ""}`} value={<Money value={v} className={excluded ? "text-text-3 line-through decoration-text-3" : undefined} />} />;
                   })}
                   {reserve.obligations.overdue !== "0" && <Row sub label="of which overdue" value={<Money value={reserve.obligations.overdue} className="text-danger" />} />}
-                  <Row label={`Buffer (${pct(policy.obligationBufferBps, 0)})`} value={<Money value={subtract(r.amount, reserve.obligations.total)} />} />
-                  {reserve.obligations.unconvertible > 0 && <p className="text-xs text-warning">{reserve.obligations.unconvertible} due date(s) have no USD rate and are not included.</p>}
+                  <Row
+                    label={`Buffer (${pct(policy.obligationBufferBps, 0)})`}
+                    value={<Money value={subtract(r.amount, reserve.obligations.total)} />}
+                    note={reserve.obligations.unconvertible > 0 ? `${reserve.obligations.unconvertible} due date(s) have no USD rate and are not included.` : undefined}
+                    noteTone="warning"
+                  />
                 </>
               )}
             </dl>
@@ -89,11 +91,13 @@ function subtract(a: string, b: string) {
   return wadToString(parseDecimal(a, 18, "down") - parseDecimal(b, 18, "down"));
 }
 
-function Row({ label, value, sub }: { label: string; value: ReactNode; sub?: boolean }) {
+/** One dt/dd group; an optional note is a second <dd> (a <p> may not sit directly in a <dl>). */
+function Row({ label, value, sub, note, noteTone }: { label: string; value: ReactNode; sub?: boolean; note?: ReactNode; noteTone?: "warning" }) {
   return (
-    <div className={cn("flex items-baseline justify-between gap-3", sub && "pl-3 text-xs")}>
+    <div className={cn("flex flex-wrap items-baseline justify-between gap-x-3", sub && "pl-3 text-xs")}>
       <dt className={sub ? "text-text-3" : "text-text-2"}>{label}</dt>
       <dd className="num text-right text-text">{value}</dd>
+      {note && <dd className={cn("mt-1.5 basis-full text-xs", noteTone === "warning" ? "text-warning" : "text-text-3")}>{note}</dd>}
     </div>
   );
 }

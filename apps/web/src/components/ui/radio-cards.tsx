@@ -63,7 +63,7 @@ export function RadioCards<T extends string>({
               "data-[disabled]:cursor-not-allowed data-[disabled]:bg-sunken data-[disabled]:hover:border-hairline",
             )}
           >
-            <span aria-hidden="true" className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border-strong/70 bg-surface group-data-[state=checked]:border-accent group-data-[disabled]:opacity-50">
+            <span aria-hidden="true" className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border-strong bg-surface group-data-[state=checked]:border-accent group-data-[disabled]:opacity-50">
               <span className="size-2 rounded-full bg-accent opacity-0 group-data-[state=checked]:opacity-100" />
             </span>
             <span className="min-w-0 flex-1">

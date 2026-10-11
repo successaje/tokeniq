@@ -10,10 +10,12 @@ import { Freshness } from "@/components/ui/identity";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Sheet } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { api, orgPath } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
 import { relativeTime } from "@/lib/format";
+import { isAppPath } from "@/lib/sanitize";
 import { OrgProvider, ROLE_LABEL, useMe, useOrg } from "@/lib/org";
 import { useTheme } from "@/lib/theme";
 import type { AlertDto, OverviewDto } from "@/lib/types";
@@ -91,8 +93,9 @@ function NavLink({ item, pathname, badge, onNavigate, compact }: { item: NavItem
       <Icon className={cn("size-4 shrink-0", active ? "text-accent" : "text-text-3 group-hover:text-text-2")} aria-hidden="true" />
       <span className="truncate">{item.label}</span>
       {!!badge && (
-        <span className="num ml-auto rounded-full bg-accent px-1.5 text-[11px] font-semibold leading-[18px] text-on-accent" aria-label={`${badge} need attention`}>
-          {badge}
+        <span className="num ml-auto rounded-full bg-accent px-1.5 text-[11px] font-semibold leading-[18px] text-on-accent">
+          <span aria-hidden="true">{badge}</span>
+          <span className="sr-only">, {badge} need attention</span>
         </span>
       )}
     </Link>
@@ -140,10 +143,24 @@ function OrgSwitcher() {
   );
 }
 
+/**
+ * Wallet connections are remembered per browser (wagmi and WalletConnect storage).
+ * Forget them on sign-out so the next person on this browser doesn't start with the
+ * previous user's wallet connected. Unrecorded execution hashes are kept on purpose.
+ */
+function forgetWalletConnections() {
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith("wagmi.") || k.startsWith("wc@2")) localStorage.removeItem(k);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 function AccountMenu() {
   const { me } = useOrg();
   const { pref, setPref } = useTheme();
   const qc = useQueryClient();
+  const { toast } = useToast();
   const initials = (me.user.name || me.user.email).slice(0, 2).toUpperCase();
   return (
     <Menu>
@@ -177,8 +194,18 @@ function AccountMenu() {
         </MenuItem>
         <MenuItem
           onSelect={async () => {
-            await authClient.signOut();
+            let failed = false;
+            try {
+              failed = !!(await authClient.signOut())?.error;
+            } catch {
+              failed = true;
+            }
+            if (failed) {
+              toast({ id: "sign-out", tone: "danger", title: "Couldn't sign out", description: "TokenIQ didn't confirm the sign-out, so your session may still be active. Check your connection and try again." });
+              return;
+            }
             qc.clear();
+            forgetWalletConnections();
             window.location.href = "/login?reason=signed_out";
           }}
         >
@@ -192,6 +219,7 @@ function AccountMenu() {
 function NotificationsButton() {
   const { orgId } = useOrg();
   const qc = useQueryClient();
+  const router = useRouter();
   const q = useQuery({ queryKey: ["org", orgId, "/notifications"], queryFn: () => api<{ notifications: Array<{ id: string; title: string; body: string | null; link: string | null; readAt: string | null; createdAt: string }>; unread: number }>(orgPath(orgId, "/notifications")), refetchInterval: 120_000 });
   const unread = q.data?.unread ?? 0;
   return (
@@ -213,7 +241,7 @@ function NotificationsButton() {
         <MenuLabel>Notifications</MenuLabel>
         {(q.data?.notifications.length ?? 0) === 0 && <div className="px-2 py-4 text-center text-[13px] text-text-2">You're up to date. Alerts and approval requests appear here.</div>}
         {q.data?.notifications.slice(0, 8).map((n) => (
-          <MenuItem key={n.id} onSelect={() => n.link && (window.location.href = n.link)}>
+          <MenuItem key={n.id} onSelect={() => n.link && isAppPath(n.link) && router.push(n.link)}>
             <span className={cn("mt-1 size-1.5 shrink-0 self-start rounded-full", n.readAt ? "bg-transparent" : "bg-accent")} aria-hidden="true" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-medium">{n.title}</span>
@@ -318,7 +346,8 @@ function ShellFrame({ children }: { children: ReactNode }) {
           )}
         </header>
 
-        <main id="main" className="mx-auto w-full max-w-[1440px] px-4 pb-28 pt-5 sm:px-6 lg:pb-12">
+        {/* Keyed by organization: switching remounts the page, so no page-local state (a copilot thread, a half-filled form) carries over to another organization. */}
+        <main key={orgId} id="main" className="mx-auto w-full max-w-[1440px] px-4 pb-28 pt-5 sm:px-6 lg:pb-12">
           {children}
         </main>
       </div>
@@ -335,8 +364,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
                 <Icon className="size-5" aria-hidden="true" />
                 {item.label}
                 {!!badge && (
-                  <span className="num absolute right-[22%] top-2 rounded-full bg-accent px-1 text-[10px] font-semibold leading-4 text-on-accent" aria-label={`${badge} need attention`}>
-                    {badge}
+                  <span className="num absolute right-[22%] top-2 rounded-full bg-accent px-1 text-[10px] font-semibold leading-4 text-on-accent">
+                    <span aria-hidden="true">{badge}</span>
+                    <span className="sr-only">, {badge} need attention</span>
                   </span>
                 )}
               </Link>

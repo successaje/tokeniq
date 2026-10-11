@@ -26,6 +26,8 @@ const schema = z.object({
    * audit records. Unset = leftmost X-Forwarded-For entry, which clients can spoof.
    */
   TRUSTED_PROXY_COUNT: z.coerce.number().int().min(0).max(10).optional(),
+  /** Requests per signed-in user (or IP before sign-in) per minute under /api/v1. Default 300. */
+  API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(10).max(100_000).optional(),
   /** Run background jobs in this process. Production runs a dedicated worker. */
   RUN_JOBS: bool.default(true),
   /** Apply database migrations when the API starts (development). Production uses a release step. */

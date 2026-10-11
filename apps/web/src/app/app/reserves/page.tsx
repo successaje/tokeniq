@@ -274,20 +274,23 @@ function CoverageBar({ reserve, thinBps }: { reserve: OverviewDto["reserve"]; th
 
 const clamp = (v: bigint) => (v < 0n ? 0n : v);
 
+/** A dt/dd group. With `href`, the link sits inside the <dd> (a link may not wrap dt/dd) and stretches over the group. */
 function Stat({ label, value, meta, href }: { label: string; value: ReactNode; meta?: string; href?: string }) {
-  const body = (
-    <>
+  return (
+    <div className={cn(href && "relative -m-1.5 rounded-[var(--radius-control)] p-1.5 hover:bg-sunken has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-[var(--focus)]")}>
       <dt className="text-xs font-medium text-text-2">{label}</dt>
-      <dd className="mt-0.5 text-xl font-medium tracking-tight text-text">{value}</dd>
+      <dd className="mt-0.5 text-xl font-medium tracking-tight text-text">
+        {href ? (
+          <Link href={href} className="outline-none after:absolute after:inset-0 after:content-['']">
+            {value}
+            <span className="sr-only"> — open {label.toLowerCase()}</span>
+          </Link>
+        ) : (
+          value
+        )}
+      </dd>
       {meta && <dd className="mt-0.5 text-xs text-text-3">{meta}</dd>}
-    </>
-  );
-  return href ? (
-    <Link href={href} className="group -m-1.5 block rounded-[var(--radius-control)] p-1.5 hover:bg-sunken">
-      {body}
-    </Link>
-  ) : (
-    <div>{body}</div>
+    </div>
   );
 }
 

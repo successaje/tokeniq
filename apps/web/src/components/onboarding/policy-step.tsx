@@ -17,7 +17,7 @@ import { Stepper } from "@/components/ui/stepper";
 import { ApiError, api, orgPath } from "@/lib/api";
 import { pct, usd } from "@/lib/format";
 import type { OrgDto, PoliciesDto, PolicyDto } from "@/lib/types";
-import { BackLink, OnboardingStep, StepActions } from "./onboarding-step";
+import { BackLink, OnboardingStep, recordOnboarding, StepActions } from "./onboarding-step";
 import { can } from "./use-onboarding-org";
 
 type PresetId = "conservative" | "balanced" | "growth";
@@ -92,7 +92,7 @@ function PolicyBody({ org, orgId }: { org: OrgDto; orgId: string }) {
       if (changed && allowed) {
         await api(orgPath(orgId, "/policies/treasury"), { method: "PUT", body: { policy: next, reason: "Onboarding: initial policy", expectedVersion: data.treasuryVersion } });
       }
-      return api<OrgDto>(orgPath(orgId, "/onboarding"), { method: "POST", body: { step: "policy", complete: true } });
+      return recordOnboarding(org, { step: "policy", complete: true });
     },
     onMutate: () => setProblem(null),
     onSuccess: async () => {

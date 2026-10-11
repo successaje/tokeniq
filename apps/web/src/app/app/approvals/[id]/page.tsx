@@ -5,8 +5,11 @@ import { ArrowLeft, Check, CircleDashed, ExternalLink, Loader2, X } from "lucide
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { verifySafeTx } from "@/components/app/approvals/safe-tx";
+import { SafeTxReviewPanel } from "@/components/app/approvals/safe-tx-review";
 import { PROPOSAL_STATUS, ProposalStatusBadge } from "@/components/app/approvals/status";
+import { useMetaIndex } from "@/components/app/treasury/meta";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
@@ -18,9 +21,9 @@ import { Callout, StatusBadge } from "@/components/ui/status";
 import { useToast } from "@/components/ui/toast";
 import { api, ApiError, orgPath } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { dateTimeLabel, pct, relativeTime, shortAddress } from "@/lib/format";
+import { dateTimeLabel, pct, relativeTime, shortAddress, tokenAmount, usd } from "@/lib/format";
 import { useCan, useOrg, useOrgQuery } from "@/lib/org";
-import type { PolicyCheck, ProposalDetail } from "@/lib/types";
+import type { MetaTokenDto, OpportunitiesResponse, OverviewDto, PolicyCheck, ProposalDetail } from "@/lib/types";
 
 const SignPanel = dynamic(() => import("@/components/app/approvals/wallet-actions").then((m) => m.SignPanel), { ssr: false, loading: () => <Skeleton className="h-24" /> });
 const ExecutePanel = dynamic(() => import("@/components/app/approvals/wallet-actions").then((m) => m.ExecutePanel), { ssr: false, loading: () => <Skeleton className="h-24" /> });
@@ -62,7 +65,7 @@ function Checks({ checks }: { checks: PolicyCheck[] }) {
     <ul className="space-y-1.5">
       {checks.map((c) => (
         <li key={c.id} className="flex gap-2 text-[13px]">
-          {c.status === "pass" ? <Check className="mt-0.5 size-3.5 shrink-0 text-success" aria-label="Pass" /> : c.status === "fail" ? <X className="mt-0.5 size-3.5 shrink-0 text-danger" aria-label="Fail" /> : <CircleDashed className="mt-0.5 size-3.5 shrink-0 text-warning" aria-label="Warning" />}
+          {c.status === "pass" ? <Check className="mt-0.5 size-3.5 shrink-0 text-success" role="img" aria-label="Pass" /> : c.status === "fail" ? <X className="mt-0.5 size-3.5 shrink-0 text-danger" role="img" aria-label="Fail" /> : <CircleDashed className="mt-0.5 size-3.5 shrink-0 text-warning" role="img" aria-label="Warning" />}
           <span>
             <span className="text-text">{c.label}</span>
             <span className="block text-xs text-text-3">{c.detail}</span>
@@ -79,7 +82,15 @@ export default function ProposalPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const canSign = useCan("proposals.sign");
+  const canExecute = useCan("proposals.execute");
   const q = useOrgQuery<ProposalDetail>(`/proposals/${id}`, { refetchInterval: (query) => (query.state.data?.status === "submitted" ? 10_000 : false) });
+  const meta = useMetaIndex();
+  // Only for naming the destination in confirmations; already cached by most screens.
+  const opportunities = useOrgQuery<OpportunitiesResponse>("/opportunities", { staleTime: 60_000, enabled: q.data?.kind === "allocate" });
+  const overview = useOrgQuery<OverviewDto>("/treasury", { staleTime: 30_000, enabled: q.data?.kind === "withdraw" });
+  // Independent check of the prepared Safe transaction; signing and submission are blocked unless it passes.
+  // Needs the token list, so it stays null (blocked) until /meta has loaded.
+  const check = useMemo(() => (q.data?.safeTx && meta.query.data ? verifySafeTx(q.data, meta.tokens) : null), [q.data, meta.query.data, meta.tokens]);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
   const [comment, setComment] = useState("");
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -145,6 +156,7 @@ export default function ProposalPage() {
   const signState: StepState = ["awaiting_signatures", "stale"].includes(s) ? "current" : ["ready_to_execute", "submitted", "executed", "failed"].includes(s) ? "done" : s === "approved" ? "current" : "todo";
   const execState: StepState = s === "executed" ? "done" : s === "failed" ? "failed" : s === "submitted" || s === "ready_to_execute" ? "current" : "todo";
   const closed = ["executed", "cancelled", "rejected", "expired"].includes(s);
+  const dest = describeDestination(p, opportunities.data, overview.data, meta.query.data?.tokens ?? []);
 
   return (
     <div>
@@ -159,6 +171,7 @@ export default function ProposalPage() {
           </div>
           <p className="mt-1 text-sm text-text-2">{PROPOSAL_STATUS[s].description}</p>
           <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-text-3">
+            <span>{meta.chains.get(p.chainId)?.name ?? `Chain ${p.chainId}`}</span>
             <span>Proposed by {p.proposer.isYou ? "you" : p.proposer.name}</span>
             <span>{dateTimeLabel(p.createdAt)}</span>
             {s === "pending_approval" && <span>Approval deadline {relativeTime(p.expiresAt)}</span>}
@@ -232,45 +245,31 @@ export default function ProposalPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="rounded-[var(--radius-card)] bg-sunken p-3 text-[13px]">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-text-2">Safe</span>
-                        <AddressText address={p.safeTx.safeAddress} />
+                    {check ? (
+                      <SafeTxReviewPanel p={p} check={check} chainName={meta.chains.get(p.chainId)?.name ?? null} tokens={meta.query.data?.tokens ?? []} />
+                    ) : (
+                      <div className="rounded-[var(--radius-card)] bg-sunken p-3 text-[13px] text-text-2">
+                        {meta.query.isError ? "Couldn't load the token list needed to check this transaction. Signing and submission stay blocked until it loads; reload the page to retry." : "Checking the prepared transaction…"}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-text-2">Nonce</span>
-                        <span className="num font-mono text-[12.5px]">{p.safeTx.nonce}</span>
+                    )}
+                    {p.simulation && (
+                      <div>
+                        {p.simulation.success ? <StatusBadge tone="success">Simulation passed at block {p.simulation.blockNumber}</StatusBadge> : <StatusBadge tone="danger">Simulation failed: {p.simulation.error}</StatusBadge>}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-text-2">Safe transaction hash</span>
-                        <span className="font-mono text-[12.5px]" title={p.safeTxHash ?? ""}>{p.safeTxHash ? shortAddress(p.safeTxHash, 8) : "—"}</span>
-                      </div>
-                      <div className="mt-3 text-xs font-medium text-text-2">What the Safe will do</div>
-                      <ol className="mt-1 list-decimal space-y-1 pl-5 text-text">
-                        {p.safeTx.calls.map((c, i) => (
-                          <li key={i}>
-                            {c.description} <span className="font-mono text-xs text-text-3">→ {shortAddress(c.to)}</span>
-                          </li>
-                        ))}
-                      </ol>
-                      {p.simulation && (
-                        <div className="mt-3">
-                          {p.simulation.success ? <StatusBadge tone="success">Simulation passed at block {p.simulation.blockNumber}</StatusBadge> : <StatusBadge tone="danger">Simulation failed: {p.simulation.error}</StatusBadge>}
-                        </div>
-                      )}
-                    </div>
+                    )}
+                    <h4 className="text-xs font-medium text-text-2">Safe owners at preparation ({p.safeTx.threshold} must sign)</h4>
                     <ul className="space-y-1 text-[13px]">
                       {p.safeTx.owners.map((o) => {
                         const signed = p.signatures.find((x) => x.signer.toLowerCase() === o.toLowerCase());
                         return (
-                          <li key={o} className="flex items-center justify-between gap-2">
-                            <AddressText address={o} />
+                          <li key={o} className="flex flex-wrap items-start justify-between gap-2">
+                            <AddressText address={o} full className="min-w-0" />
                             {signed ? <StatusBadge tone="success">Signed {relativeTime(signed.at)}</StatusBadge> : <span className="text-xs text-text-3">Not signed</span>}
                           </li>
                         );
                       })}
                     </ul>
-                    {s === "awaiting_signatures" && !p.isSample && canSign && <SignPanel orgId={orgId} p={p} onDone={refresh} />}
+                    {s === "awaiting_signatures" && !p.isSample && canSign && (p.validationNow.valid ? <SignPanel orgId={orgId} p={p} check={check} onDone={refresh} /> : <p className="text-[13px] text-text-2">Signing is unavailable because the action no longer passes policy.</p>)}
                     {s === "stale" && canSign && (
                       <Button size="sm" onClick={() => prepare.mutate()} loading={prepare.isPending}>
                         Prepare again with the new nonce
@@ -286,9 +285,9 @@ export default function ProposalPage() {
                     {p.executions.map((e) => (
                       <li key={e.txHash} className="flex flex-wrap items-center gap-2">
                         <StatusBadge tone={e.status === "confirmed" ? "success" : e.status === "reverted" ? "danger" : "info"}>{e.status === "confirmed" ? "Confirmed" : e.status === "reverted" ? "Reverted" : "Submitted — confirming"}</StatusBadge>
-                        <span className="font-mono text-xs">{shortAddress(e.txHash, 8)}</span>
+                        <AddressText address={e.txHash} full kind="hash" className="text-xs" />
                         {e.explorer && (
-                          <a href={e.explorer} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-xs text-accent hover:underline">
+                          <a href={e.explorer} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-xs text-accent underline underline-offset-2">
                             View on explorer <ExternalLink className="size-3" aria-hidden="true" />
                           </a>
                         )}
@@ -296,8 +295,8 @@ export default function ProposalPage() {
                     ))}
                   </ul>
                 )}
-                {s === "ready_to_execute" && !p.isSample && <ExecutePanel orgId={orgId} p={p} onDone={refresh} />}
-                {s === "submitted" && <p className="mt-2 text-[13px] text-text-2">TokenIQ checks the receipt and the Safe's execution event every minute and waits for enough confirmations before marking this executed.</p>}
+                {s === "ready_to_execute" && !p.isSample && canExecute && (p.validationNow.valid ? <ExecutePanel orgId={orgId} p={p} check={check} onDone={refresh} /> : <p className="text-[13px] text-text-2">Submission is unavailable because the action no longer passes policy.</p>)}
+                {s === "submitted" && <p className="mt-2 text-[13px] text-text-2">Submitted is not executed. TokenIQ checks the receipt and the Safe's execution event every minute and waits for enough confirmations before marking this executed.</p>}
                 {s === "executed" && <p className="text-[13px] text-text-2">Balances were re-read after confirmation. See the account and allocations pages for the reconciled position.</p>}
               </Step>
             </ol>
@@ -310,8 +309,8 @@ export default function ProposalPage() {
             <CardBody className="space-y-2 pt-3 text-[13px]">
               <Row label="Type" value={p.kind === "allocate" ? "Allocate to venue" : p.kind === "withdraw" ? "Withdraw from position" : "Payment"} />
               {p.account && <Row label="From" value={<span className="text-right">{p.account.label}<AddressText address={p.account.address} className="block" /></span>} />}
-              <Row label="Token amount" value={<span className="num font-mono text-xs">{p.action.assetAmountRaw} base units</span>} />
-              {p.recommendationId && <Row label="Source" value={<Link className="text-accent hover:underline" href={`/app/recommendations#${p.recommendationId}`}>Recommendation</Link>} />}
+              <Row label="Token amount" value={<ProposalTokenAmount p={p} tokens={meta.query.data?.tokens ?? []} />} />
+              {p.recommendationId && <Row label="Source" value={<Link className="text-accent underline underline-offset-2" href={`/app/recommendations#${p.recommendationId}`}>Recommendation</Link>} />}
               <Row label="Created" value={dateTimeLabel(p.createdAt)} />
             </CardBody>
           </Card>
@@ -356,22 +355,50 @@ export default function ProposalPage() {
       <ConfirmDialog
         open={decision !== null}
         onOpenChange={(v) => !v && setDecision(null)}
-        title={decision === "approve" ? "Approve this proposal?" : "Reject this proposal?"}
+        title={decision === "approve" ? `Approve ${usd(p.amountUsd)} ${dest.verb}?` : `Reject ${usd(p.amountUsd)} ${dest.verb}?`}
         description={decision === "approve" ? "This records your internal approval. It does not sign or move anything; Safe owners still sign in their wallets." : "The proposer will see your reason. The proposal closes."}
         consequences={
           <div className="space-y-3">
-            <p>
-              <span className="font-medium text-text">{p.title}</span> · <Money value={p.amountUsd} />
-            </p>
+            <p className="font-medium text-text">{p.title}</p>
+            <dl className="space-y-1.5 rounded-[var(--radius-control)] bg-sunken p-3 text-[13px]">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <dt className="text-text-2">Amount</dt>
+                <dd className="text-right">
+                  <Money value={p.amountUsd} className="font-medium text-text" />
+                  {dest.token && <span className="block text-xs text-text-3">{dest.token}</span>}
+                </dd>
+              </div>
+              {p.account && (
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <dt className="text-text-2">From</dt>
+                  <dd className="min-w-0 text-right text-text">
+                    {dest.from}
+                    {dest.fromAddress && <AddressText address={dest.fromAddress} full className="block text-[12px]" />}
+                  </dd>
+                </div>
+              )}
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <dt className="text-text-2">To</dt>
+                <dd className="min-w-0 text-right text-text">
+                  {dest.to}
+                  {dest.toAddress && <AddressText address={dest.toAddress} full className="block text-[12px]" />}
+                </dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <dt className="text-text-2">Network</dt>
+                <dd className="text-right text-text">{meta.chains.get(p.chainId)?.name ?? `Chain ${p.chainId}`}</dd>
+              </div>
+            </dl>
             <Field label={decision === "reject" ? "Reason (required)" : "Comment"} optional={decision === "approve"}>
               {(f) => <Textarea {...f} value={comment} onChange={(e) => setComment(e.target.value)} maxLength={1000} />}
             </Field>
             {decide.error && <Callout tone="danger">{(decide.error as ApiError).message}</Callout>}
           </div>
         }
-        confirmLabel={decision === "approve" ? "Approve" : "Reject"}
+        confirmLabel={`${decision === "approve" ? "Approve" : "Reject"} ${usd(p.amountUsd)} ${dest.short}`}
         tone={decision === "reject" ? "danger" : "primary"}
         loading={decide.isPending}
+        confirmDisabled={decision === "reject" && !comment.trim()}
         onConfirm={() => decision && (decision === "approve" || comment.trim()) && decide.mutate(decision)}
       />
       <ConfirmDialog
@@ -385,6 +412,42 @@ export default function ProposalPage() {
         onConfirm={() => cancel.mutate()}
       />
     </div>
+  );
+}
+
+/**
+ * Where the money goes, in words, for confirmations: "to 0x12ab…cd34" for payments, "into <venue>" for
+ * allocations, "back to <account>" for withdrawals. Full addresses are shown in the dialog body.
+ */
+function describeDestination(p: ProposalDetail, opps: OpportunitiesResponse | undefined, overview: OverviewDto | undefined, tokens: MetaTokenDto[]) {
+  const from = p.account?.label ?? "The source account";
+  const a = p.action;
+  if (p.kind === "payment") {
+    const t = a.assetSymbol ? tokens.find((x) => x.chainId === p.chainId && x.symbol === a.assetSymbol) : undefined;
+    const r = a.recipient ?? null;
+    return { verb: r ? `payment to ${shortAddress(r)}` : "payment", short: r ? `to ${shortAddress(r)}` : "payment", from, fromAddress: p.account?.address ?? null, to: "Payee", toAddress: r, token: t ? `${tokenAmount(a.assetAmountRaw, t.decimals, t.decimals)} ${t.symbol}` : `${a.assetAmountRaw} base units` };
+  }
+  if (p.kind === "allocate") {
+    const o = opps?.opportunities.find((x) => x.id === a.opportunityId);
+    const name = o?.name ?? "the venue";
+    return { verb: `into ${name}`, short: `into ${name}`, from, fromAddress: p.account?.address ?? null, to: name, toAddress: o?.address ?? null, token: o ? `${tokenAmount(a.assetAmountRaw, o.asset.decimals, o.asset.decimals)} ${o.asset.symbol}` : `${a.assetAmountRaw} base units` };
+  }
+  const pos = overview?.positions.find((x) => x.id === a.positionId);
+  return { verb: `withdrawal to ${from}`, short: `withdrawal to ${from}`, from: pos?.venueName ?? "The position", fromAddress: null, to: from, toAddress: p.account?.address ?? null, token: pos ? `${tokenAmount(a.assetAmountRaw, pos.decimals, pos.decimals)} ${pos.symbol}` : `${a.assetAmountRaw} base units` };
+}
+
+/** Exact token amount (every decimal) with its raw base units; raw only when the token is unknown. */
+function ProposalTokenAmount({ p, tokens }: { p: ProposalDetail; tokens: MetaTokenDto[] }) {
+  const t = p.action.assetSymbol ? tokens.find((x) => x.chainId === p.chainId && x.symbol === p.action.assetSymbol) : undefined;
+  return (
+    <span className="num">
+      {t && (
+        <span className="block">
+          {tokenAmount(p.action.assetAmountRaw, t.decimals, t.decimals)} {t.symbol}
+        </span>
+      )}
+      <span className="block font-mono text-xs text-text-3">{p.action.assetAmountRaw} base units</span>
+    </span>
   );
 }
 

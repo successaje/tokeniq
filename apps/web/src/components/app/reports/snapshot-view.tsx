@@ -205,7 +205,7 @@ export function SnapshotView() {
           <div className="mt-3 rounded-[var(--radius-control)] bg-sunken px-4 py-2">
             <Line label="Requirement" note="The strictest enabled rule" value={<Money value={r.required} />} strong />
             <Line label="Reserve-eligible capital" value={<Money value={r.available} />} />
-            {r.pendingOutflows !== "0" && <Line sign="−" label="Pending proposals" note="Approved or awaiting signature, counted as spent" value={<Money value={r.pendingOutflows} />} />}
+            {r.pendingOutflows !== "0" && <Line sign="−" label="Pending proposals" note="In active proposals (awaiting approval, signatures or execution), counted as spent" value={<Money value={r.pendingOutflows} />} />}
             <Line label="Coverage" value={r.coverageBps === null ? "No requirement" : pct(r.coverageBps, 0)} />
             {r.status === "shortfall" && <Line label="Shortfall" value={<Money value={r.shortfall} className="text-danger" />} />}
             <Line label="Runway covered" note={r.burn.basis === "none" ? "No monthly burn estimate" : `At ${usd(r.burn.used)} per month`} value={r.runwayCoveredMonths ? `${r.runwayCoveredMonths} months` : "—"} />

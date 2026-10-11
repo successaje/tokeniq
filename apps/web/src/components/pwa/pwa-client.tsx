@@ -10,7 +10,8 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
  * - When a new worker is waiting, offers "Reload" which tells it to skipWaiting,
  *   then reloads once the new worker takes control.
  * - Shows an offline banner from navigator.onLine events and marks
- *   <html data-offline="true"> so screens can disable actions.
+ *   <html data-offline="true"> (no screen reads it yet; requests simply fail
+ *   with a network error, and nothing is queued for later).
  *
  * Mount once per layout: the marketing layout mounts it; the app shell can too.
  */
@@ -96,9 +97,9 @@ export function PwaClient() {
         <div role="status" className="pointer-events-auto flex w-full max-w-lg items-start gap-3 rounded-[var(--radius-card)] border border-warning/35 bg-raised p-3 text-sm shadow-[var(--shadow-float)]">
           <WifiOff className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
           <p className="min-w-0 flex-1 text-text">
-            <span className="font-medium">You’re offline.</span> <span className="text-text-2">Figures shown may be out of date; actions are disabled.</span>
+            <span className="font-medium">You’re offline.</span> <span className="text-text-2">Figures shown may be out of date. Nothing can be approved, signed or saved until you reconnect.</span>
           </p>
-          <button type="button" onClick={() => setDismissedOffline(true)} className="rounded p-0.5 text-text-3 hover:text-text" aria-label="Dismiss offline notice">
+          <button type="button" onClick={() => setDismissedOffline(true)} className="-m-1 inline-flex size-6 shrink-0 items-center justify-center rounded text-text-3 hover:text-text" aria-label="Dismiss offline notice">
             <X className="size-3.5" aria-hidden="true" />
           </button>
         </div>
@@ -112,7 +113,7 @@ export function PwaClient() {
           <button type="button" onClick={applyUpdate} className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-control)] bg-accent px-3 text-[13px] font-medium text-on-accent hover:bg-accent-hover">
             Reload
           </button>
-          <button type="button" onClick={() => setWaiting(null)} className="rounded p-0.5 text-text-3 hover:text-text" aria-label="Dismiss update notice">
+          <button type="button" onClick={() => setWaiting(null)} className="-m-1 inline-flex size-6 shrink-0 items-center justify-center rounded text-text-3 hover:text-text" aria-label="Dismiss update notice">
             <X className="size-3.5" aria-hidden="true" />
           </button>
         </div>

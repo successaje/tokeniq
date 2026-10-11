@@ -168,6 +168,8 @@ export interface ObligationDto {
   counterparty: string | null;
   recipientAddress: string | null;
   recipientChainId: number | null;
+  /** When the payee address was last added or changed (ISO), or null. Drives the new-payee hold. */
+  recipientSetAt?: string | null;
   paymentAsset: string | null;
   invoiceNumber: string | null;
   notes: string | null;
@@ -511,6 +513,12 @@ export interface InvitationDto {
   createdAt: string;
 }
 
+/** POST /invitations: the invitation exists even when `emailSent` is false; `inviteUrl` can then be shared by hand. */
+export interface InvitationCreatedDto extends InvitationDto {
+  emailSent: boolean;
+  inviteUrl: string;
+}
+
 /** GET /api/v1/invitations/{id}: only returned to the addressee. */
 export interface InvitationDetailDto {
   id: string;
@@ -536,6 +544,8 @@ export interface ApprovalPolicyDto {
   tiers: ApprovalTierDto[];
   allowSelfApproval: boolean;
   proposalTtlHours: number;
+  /** Payments to a payee address added or changed less than this many hours ago are refused; 0 disables. Default 48, max 336. */
+  newPayeeHoldHours?: number;
 }
 
 export type ProposalStatus =

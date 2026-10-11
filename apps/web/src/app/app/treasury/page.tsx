@@ -118,15 +118,24 @@ function Balances({ d }: { d: OverviewDto }) {
   );
 }
 
+/** A dt/dd group. With `href`, the link sits inside the <dd> (a link may not wrap dt/dd) and stretches over the group. */
 function Kpi({ label, value, meta, href, tone, className }: { label: string; value: ReactNode; meta?: ReactNode; href?: string; tone?: "warning"; className?: string }) {
-  const body = (
-    <>
+  return (
+    <div className={cn("px-4 py-3 sm:px-5", href && "relative hover:bg-sunken/60 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-[-2px] has-[a:focus-visible]:outline-[var(--focus)]", className)}>
       <dt className="text-xs font-medium text-text-2">{label}</dt>
-      <dd className={cn("mt-0.5 text-xl font-medium tracking-tight", tone === "warning" ? "text-warning" : "text-text")}>{value}</dd>
+      <dd className={cn("mt-0.5 text-xl font-medium tracking-tight", tone === "warning" ? "text-warning" : "text-text")}>
+        {href ? (
+          <Link href={href} className="outline-none after:absolute after:inset-0 after:content-['']">
+            {value}
+            <span className="sr-only"> — open {label.toLowerCase()}</span>
+          </Link>
+        ) : (
+          value
+        )}
+      </dd>
       {meta && <dd className="mt-0.5 text-xs text-text-3">{meta}</dd>}
-    </>
+    </div>
   );
-  return <div className={cn("px-4 py-3 sm:px-5", className)}>{href ? <Link href={href} className="-m-1 block rounded-[var(--radius-control)] p-1 hover:bg-sunken/60">{body}</Link> : body}</div>;
 }
 
 function BreakdownCard({ t, className }: { t: OverviewDto["treasury"]; className?: string }) {

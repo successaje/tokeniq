@@ -206,7 +206,7 @@ export function ScenariosPanel({ overview }: { overview: OverviewDto }) {
               {shocks.map((s, i) => (
                 <span key={i} className="inline-flex items-center gap-1 rounded-[var(--radius-chip)] bg-sunken py-1 pl-2 pr-1 text-xs text-text">
                   {describeShock(s, venueName)}
-                  <button type="button" onClick={() => setShocks((l) => l.filter((_, j) => j !== i))} className="rounded p-0.5 text-text-3 hover:text-text" aria-label={`Remove: ${describeShock(s, venueName)}`}>
+                  <button type="button" onClick={() => setShocks((l) => l.filter((_, j) => j !== i))} className="-my-1 inline-flex size-6 items-center justify-center rounded text-text-3 hover:text-text" aria-label={`Remove: ${describeShock(s, venueName)}`}>
                     <X className="size-3" aria-hidden="true" />
                   </button>
                 </span>

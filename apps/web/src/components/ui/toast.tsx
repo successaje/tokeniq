@@ -71,7 +71,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   </T.Action>
                 )}
               </div>
-              <T.Close className="self-start rounded p-0.5 text-text-3 hover:text-text" aria-label="Dismiss notification">
+              <T.Close className="-m-1 inline-flex size-6 shrink-0 items-center justify-center self-start rounded text-text-3 hover:text-text" aria-label="Dismiss notification">
                 <X className="size-3.5" aria-hidden="true" />
               </T.Close>
             </T.Root>

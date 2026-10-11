@@ -6,27 +6,60 @@ import { cn } from "@/lib/cn";
 import { relativeTime, shortAddress } from "@/lib/format";
 import { Tooltip } from "./tooltip";
 
-export function AddressText({ address, explorer, full = false, className }: { address: string; explorer?: string | null; full?: boolean; className?: string }) {
+/**
+ * "0x1234abcd…" split into 4-character groups after the 0x prefix. The gaps are
+ * margins, not spaces, so selecting and copying yields the exact value.
+ */
+function GroupedHex({ value }: { value: string }) {
+  const body = value.startsWith("0x") ? value.slice(2) : value;
+  const groups = body.match(/.{1,4}/g) ?? [];
+  return (
+    <span className="select-all break-all">
+      {value.startsWith("0x") && <span className="mr-[0.3em]">0x</span>}
+      {groups.map((g, i) => (
+        <span key={i} className="mr-[0.3em] inline-block last:mr-0">
+          {g}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * An address or hash. Truncated by default; `full` shows the whole value as
+ * wrapping, selectable text, grouped in 4-character blocks so it can be compared
+ * with a wallet or hardware device (never only in a tooltip).
+ */
+export function AddressText({ address, explorer, full = false, kind = "address", className }: { address: string; explorer?: string | null; full?: boolean; kind?: "address" | "hash"; className?: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <span className={cn("inline-flex min-w-0 items-center gap-1 font-mono text-[12.5px] text-text-2", className)}>
-      <span className={full ? "break-all" : "truncate"} title={address}>
-        {full ? address : shortAddress(address)}
-      </span>
+    <span className={cn("inline-flex min-w-0 items-center gap-1 font-mono text-[12.5px] text-text-2", full && "items-start", className)}>
+      {full ? (
+        <GroupedHex value={address} />
+      ) : (
+        <span className="truncate" title={address}>
+          {shortAddress(address)}
+        </span>
+      )}
       <button
         type="button"
         onClick={async () => {
-          await navigator.clipboard.writeText(address);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1500);
+          try {
+            await navigator.clipboard.writeText(address);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          } catch {
+            /* clipboard blocked: the full value is still selectable when shown */
+          }
         }}
-        className="rounded p-0.5 text-text-3 hover:text-text"
-        aria-label={copied ? "Copied" : `Copy address ${address}`}
+        // 24px target (WCAG 2.5.8) without changing the line height.
+        className="-my-1 inline-flex size-6 shrink-0 items-center justify-center rounded text-text-3 hover:text-text"
+        aria-label={copied ? "Copied" : `Copy ${kind} ${address}`}
       >
         {copied ? <Check className="size-3.5 text-success" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
       </button>
       {explorer && (
-        <a href={explorer} target="_blank" rel="noreferrer noopener" className="rounded p-0.5 text-text-3 hover:text-text" aria-label="Open in block explorer">
+        <a href={explorer} target="_blank" rel="noreferrer noopener" className="-my-1 inline-flex size-6 shrink-0 items-center justify-center rounded text-text-3 hover:text-text" aria-label="Open in block explorer">
           <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       )}

@@ -37,12 +37,14 @@ export function ProjectionChart({ points, floor, events = [], height = 220, titl
   const [active, setActive] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
 
+  // The measured wrapper only exists once there are enough points, so re-attach when that changes.
+  const measurable = points.length >= 2;
   useEffect(() => {
     if (!wrap.current) return;
     const ro = new ResizeObserver(([e]) => e && setWidth(Math.max(280, Math.floor(e.contentRect.width))));
     ro.observe(wrap.current);
     return () => ro.disconnect();
-  }, []);
+  }, [measurable]);
 
   const m = { top: 12, right: 12, bottom: 28, left: 56 };
   const iw = width - m.left - m.right;
@@ -89,7 +91,8 @@ export function ProjectionChart({ points, floor, events = [], height = 220, titl
           role="img"
           aria-label={summary}
           tabIndex={0}
-          className="block touch-pan-y outline-none focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+          // max-w-full: the measured width must never be what sizes the container (a grid's auto column would grow to fit it).
+          className="block max-w-full touch-pan-y outline-none focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") setActive((i) => Math.min(points.length - 1, (i ?? -1) + 1));
             else if (e.key === "ArrowLeft") setActive((i) => Math.max(0, (i ?? points.length) - 1));

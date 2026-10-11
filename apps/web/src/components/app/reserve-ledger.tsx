@@ -36,7 +36,7 @@ export function ReserveLedger({ reserve, treasury, defaultOpen = false, maxDeplo
       <Collapsible.Content className="mt-3 rounded-[var(--radius-card)] bg-sunken px-4 py-2 text-[13px]">
         {line("Reserve-eligible stablecoins", reserve.available, { note: "Liquid stablecoins in verified accounts, valued at the oracle price but never above $1, after policy haircuts" })}
         {line(<>Policy requirement {binding && <span className="text-text-3">· {binding.label.toLowerCase()} rule</span>}</>, reserve.required, { sign: "−", note: binding?.explanation ?? "No requirement is set" })}
-        {reserve.pendingOutflows !== "0" && line("Pending proposals", reserve.pendingOutflows, { sign: "−", note: "Approved or awaiting signature; counted as already spent" })}
+        {reserve.pendingOutflows !== "0" && line("Pending proposals", reserve.pendingOutflows, { sign: "−", note: "In active proposals (awaiting approval, signatures or execution); counted as already spent" })}
         {line("Available after the reserve", reserve.surplus.afterReserve, { sign: "=", strong: true })}
         {reserve.surplus.limitedBy === "deployment_cap" && line("Room under the maximum-deployed limit", reserve.surplus.capRemaining, { note: `${maxDeployedBps !== undefined ? pct(maxDeployedBps, 0) : "Policy"} of the total treasury, minus what is already deployed` })}
         {line("Deployable surplus", reserve.surplus.deployable, { sign: "=", strong: true, note: reserve.surplus.explanation })}

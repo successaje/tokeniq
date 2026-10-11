@@ -20,7 +20,9 @@ export function BucketSwatch({ k, className }: { k: BucketKey; className?: strin
 /**
  * 100% bar of reserve-eligible capital. Segments are separated by a 2px surface
  * gap and carry pattern (hatch / ticks / solid) so identity never depends on
- * colour. Each segment is focusable and announces its value and share.
+ * colour. The bar is one image whose name lists every segment; segments are not
+ * separate targets (a thin segment can't meet the 24px target size), and the
+ * legend below carries the same values as text. Hover still highlights.
  */
 export function AllocationBar({
   buckets,
@@ -50,25 +52,25 @@ export function AllocationBar({
     onHighlight?.(k);
   };
   const activeBucket = visible.find((b) => b.key === active);
+  const summary =
+    visible.length === 0
+      ? "No reserve-eligible capital"
+      : `Allocation of ${usd(total)} reserve-eligible capital: ${visible.map((b) => `${b.label} ${usd(b.value)}, ${sharePct(b.value, total).toFixed(1)}%`).join("; ")}`;
 
   return (
     <div className={className}>
       <div className="relative">
-        <div role="group" aria-label={`Allocation of ${usd(total)} reserve-eligible capital`} className={cn("flex w-full gap-[2px] overflow-hidden rounded-[6px] bg-surface", size === "lg" ? "h-11" : "h-7")}>
-          {visible.length === 0 && <div className="h-full w-full rounded-[6px] bg-sunken" aria-label="No reserve-eligible capital" role="img" />}
+        <div role="img" aria-label={summary} className={cn("flex w-full gap-[2px] overflow-hidden rounded-[6px] bg-surface", size === "lg" ? "h-11" : "h-7")}>
+          {visible.length === 0 && <div className="h-full w-full rounded-[6px] bg-sunken" />}
           {visible.map((b, i) => {
             const pct = sharePct(b.value, total);
             return (
-              <button
+              <div
                 key={b.key}
-                type="button"
-                aria-label={`${b.label}: ${usd(b.value)}, ${pct.toFixed(1)}% of reserve-eligible capital`}
                 onMouseEnter={() => set(b.key)}
                 onMouseLeave={() => set(null)}
-                onFocus={() => set(b.key)}
-                onBlur={() => set(null)}
                 className={cn(
-                  "h-full min-w-[6px] transition-[flex-grow,opacity] duration-[var(--dur-base)] ease-[var(--ease-out)] focus-visible:outline-offset-[-2px]",
+                  "h-full min-w-[6px] transition-[flex-grow,opacity] duration-[var(--dur-base)] ease-[var(--ease-out)]",
                   fill[b.key],
                   i === 0 && "rounded-l-[6px]",
                   i === visible.length - 1 && !hasShortfall && "rounded-r-[6px]",
@@ -80,7 +82,7 @@ export function AllocationBar({
           })}
         </div>
         {activeBucket && (
-          <div role="status" className="pointer-events-none absolute left-0 top-full z-10 mt-2 rounded-[var(--radius-control)] bg-text px-2.5 py-1.5 text-xs text-canvas shadow-[var(--shadow-float)]">
+          <div aria-hidden="true" className="pointer-events-none absolute left-0 top-full z-10 mt-2 rounded-[var(--radius-control)] bg-text px-2.5 py-1.5 text-xs text-canvas shadow-[var(--shadow-float)]">
             <span className="font-medium">{activeBucket.label}</span> · <span className="num">{usd(activeBucket.value)}</span> · {sharePct(activeBucket.value, total).toFixed(1)}%
             <div className="mt-0.5 max-w-xs opacity-80">{activeBucket.description}</div>
           </div>
