@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { wad } from "../src/money.js";
 import { assessReserve, projectCashflow } from "../src/reserve.js";
 import { computeTreasury } from "../src/treasury.js";
-import { ETH_BASE, holding, NOW, obligation, policy, position, quote, SAFE, TODAY, usdc, USDC_BASE, WATCH } from "./fixtures.js";
+import { ETH_BASE, holding, NOW, obligation, policy, position, quote, SAFE, TODAY, usdc, USDC_BASE, WATCH } from "./fixtures";
 
 function treasuryOf(liquidUsdc: number, opts: { positions?: number; watch?: number; price?: string } = {}) {
   const holdings = [holding(SAFE.id, USDC_BASE, usdc(liquidUsdc), quote(opts.price ?? "1"))];

@@ -1,9 +1,9 @@
-import { parseDecimal, pow10, type Wad } from "./money.js";
-import type { FxTable, Obligation, SettledOccurrence } from "./obligations.js";
-import type { TreasuryPolicy } from "./policy.js";
-import { assessReserve, type PendingOutflow, type ReserveAssessment } from "./reserve.js";
-import { computeTreasury, type AccountRef, type Holding, type Position, type TreasurySnapshot } from "./treasury.js";
-import type { IsoDate } from "./dates.js";
+import { parseDecimal, pow10, type Wad } from "./money";
+import type { FxTable, Obligation, SettledOccurrence } from "./obligations";
+import type { TreasuryPolicy } from "./policy";
+import { assessReserve, type PendingOutflow, type ReserveAssessment } from "./reserve";
+import { computeTreasury, type AccountRef, type Holding, type Position, type TreasurySnapshot } from "./treasury";
+import type { IsoDate } from "./dates";
 
 /**
  * Hypothetical changes applied on top of the current state. Scenarios never

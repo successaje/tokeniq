@@ -5,6 +5,7 @@ import { registerOpportunities } from "./opportunities.js";
 import { registerOrganizations } from "./organizations.js";
 import { registerPolicies } from "./policies.js";
 import { registerReports } from "./reports.js";
+import { registerSample } from "./sample.js";
 import { registerStatus } from "./status.js";
 import { registerTreasury } from "./treasury.js";
 
@@ -17,4 +18,5 @@ export function registerModules(app: App, deps: Deps) {
   registerOpportunities(app, deps);
   registerMonitoring(app, deps);
   registerReports(app, deps);
+  registerSample(app, deps);
 }

@@ -1,5 +1,5 @@
-import { addDays, addMonths, compareIso, parseIsoDate, type IsoDate } from "./dates.js";
-import { mulDiv, sum, WAD, type Wad } from "./money.js";
+import { addDays, addMonths, compareIso, parseIsoDate, type IsoDate } from "./dates";
+import { mulDiv, sum, WAD, type Wad } from "./money";
 
 export const CURRENCIES = ["USD", "EUR"] as const;
 export type Currency = (typeof CURRENCIES)[number];

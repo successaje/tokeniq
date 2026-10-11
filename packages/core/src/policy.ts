@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { parseDecimal, WAD_DECIMALS } from "./money.js";
+import { parseDecimal, WAD_DECIMALS } from "./money";
 
 /** A non-negative decimal string with up to 18 fractional digits, e.g. "125000" or "99.5". */
 export const decimalString = z

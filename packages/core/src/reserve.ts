@@ -1,4 +1,4 @@
-import { addDays, compareIso, type IsoDate } from "./dates.js";
+import { addDays, compareIso, type IsoDate } from "./dates";
 import {
   applyBps,
   clampZero,
@@ -13,7 +13,7 @@ import {
   WAD,
   type Bps,
   type Wad,
-} from "./money.js";
+} from "./money";
 import {
   expandOccurrences,
   itemizedMonthlyBurn,
@@ -23,9 +23,9 @@ import {
   type ObligationCertainty,
   type Occurrence,
   type SettledOccurrence,
-} from "./obligations.js";
-import type { TreasuryPolicy } from "./policy.js";
-import type { TreasurySnapshot } from "./treasury.js";
+} from "./obligations";
+import type { TreasuryPolicy } from "./policy";
+import type { TreasurySnapshot } from "./treasury";
 
 export type ReserveRuleId = "floor" | "runway" | "obligations";
 

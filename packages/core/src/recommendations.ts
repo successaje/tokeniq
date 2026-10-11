@@ -1,10 +1,10 @@
-import { validateAction, type ActionValidation, type TreasuryAction, type ValidationContext } from "./actions.js";
-import { applyBps, clampZero, floorTo, formatBps, formatUsd, fromWad, minOf, parseDecimal, wad, type Wad } from "./money.js";
-import { assessSuitability, estimateYield, liquidityLimit, type Opportunity } from "./opportunities.js";
-import type { TreasuryPolicy } from "./policy.js";
-import type { ReserveAssessment } from "./reserve.js";
-import type { AccountRef, Holding, Position, TreasurySnapshot } from "./treasury.js";
-import { exposureByVenue, marketValue } from "./treasury.js";
+import { validateAction, type ActionValidation, type TreasuryAction, type ValidationContext } from "./actions";
+import { applyBps, clampZero, floorTo, formatBps, formatUsd, fromWad, minOf, parseDecimal, wad, type Wad } from "./money";
+import { assessSuitability, estimateYield, liquidityLimit, type Opportunity } from "./opportunities";
+import type { TreasuryPolicy } from "./policy";
+import type { ReserveAssessment } from "./reserve";
+import type { AccountRef, Holding, Position, TreasurySnapshot } from "./treasury";
+import { exposureByVenue, marketValue } from "./treasury";
 
 export type RecommendationKind = "deploy_surplus" | "restore_reserve" | "reduce_concentration" | "hold";
 

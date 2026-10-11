@@ -1,5 +1,5 @@
-import { parseDecimal, type Wad } from "./money.js";
-import type { ApprovalPolicy, ApprovalTier } from "./policy.js";
+import { parseDecimal, type Wad } from "./money";
+import type { ApprovalPolicy, ApprovalTier } from "./policy";
 
 export type MemberRole = "owner" | "admin" | "finance" | "approver" | "viewer";
 

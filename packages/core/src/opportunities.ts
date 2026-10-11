@@ -1,6 +1,6 @@
-import { applyBps, parseDecimal, type Bps, type Wad } from "./money.js";
-import type { ProtocolId, TreasuryPolicy } from "./policy.js";
-import type { AssetRef } from "./treasury.js";
+import { applyBps, parseDecimal, type Bps, type Wad } from "./money";
+import type { ProtocolId, TreasuryPolicy } from "./policy";
+import type { AssetRef } from "./treasury";
 
 /**
  * A capital-allocation venue as observed from a data source at a point in time.

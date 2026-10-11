@@ -1,5 +1,5 @@
-import type { Currency } from "./obligations.js";
-import { applyBps, mulDiv, pow10, ratioBps, sum, valueOf, type Bps, type Wad } from "./money.js";
+import type { Currency } from "./obligations";
+import { applyBps, mulDiv, pow10, ratioBps, sum, valueOf, type Bps, type Wad } from "./money";
 
 export type AssetClass = "stablecoin" | "native" | "volatile";
 

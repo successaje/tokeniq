@@ -1,9 +1,9 @@
-import { applyBps, clampZero, formatBps, formatUsd, parseDecimal, ratioBps, type Bps, type Wad } from "./money.js";
-import { assessSuitability, liquidityLimit, type Opportunity, type PolicyCheck } from "./opportunities.js";
-import type { TreasuryPolicy } from "./policy.js";
-import type { ReserveAssessment } from "./reserve.js";
-import type { AccountRef, Position, TreasurySnapshot } from "./treasury.js";
-import { exposureByVenue } from "./treasury.js";
+import { applyBps, clampZero, formatBps, formatUsd, parseDecimal, ratioBps, type Bps, type Wad } from "./money";
+import { assessSuitability, liquidityLimit, type Opportunity, type PolicyCheck } from "./opportunities";
+import type { TreasuryPolicy } from "./policy";
+import type { ReserveAssessment } from "./reserve";
+import type { AccountRef, Position, TreasurySnapshot } from "./treasury";
+import { exposureByVenue } from "./treasury";
 
 /**
  * A structured treasury action. This is the only shape that can move toward

@@ -62,6 +62,7 @@ export function overviewDto(state: OrgState) {
     lastObservedAt: state.lastObservedAt ? new Date(state.lastObservedAt * 1000).toISOString() : null,
     policyVersion: state.policyVersion,
     autonomy: state.policy.autonomy,
+    policy: state.policy,
     treasury: treasuryDto(state.treasury),
     reserve: reserveDto(state.reserve),
     projection: { points: cashflowDto(projection.points), lowest: { date: projection.lowest.date, balance: wadToString(projection.lowest.balance) }, firstNegative: projection.firstNegative, reserveFloor: wadToString(state.reserve.required) },

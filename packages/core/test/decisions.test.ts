@@ -8,7 +8,7 @@ import { assessReserve } from "../src/reserve.js";
 import { evaluateRisks } from "../src/risk.js";
 import { runScenario } from "../src/scenarios.js";
 import { computeTreasury } from "../src/treasury.js";
-import { holding, NOW, obligation, opportunity, policy, position, quote, SAFE, TODAY, usdc, USDC_BASE, WATCH } from "./fixtures.js";
+import { holding, NOW, obligation, opportunity, policy, position, quote, SAFE, TODAY, usdc, USDC_BASE, WATCH } from "./fixtures";
 
 const obligations = [obligation({ id: "payroll", amount: wad(40_000), firstDueDate: "2025-10-25", recurrence: { freq: "monthly", interval: 1 } })];
 

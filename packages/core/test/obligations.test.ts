@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { addDays, addMonths, diffDays, parseIsoDate } from "../src/dates.js";
 import { wad } from "../src/money.js";
 import { dueDatesBetween, expandOccurrences, itemizedMonthlyBurn, nextDueDate } from "../src/obligations.js";
-import { obligation } from "./fixtures.js";
+import { obligation } from "./fixtures";
 
 describe("calendar arithmetic", () => {
   it("clamps month ends but keeps the anchor day", () => {

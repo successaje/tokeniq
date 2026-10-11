@@ -1,0 +1,276 @@
+@import "tailwindcss";
+
+/*
+ * TokenIQ design tokens — "Ledger Grid".
+ * One accent (petrol) that means "deployable / actionable", semantic status
+ * colours that are never reused for data, and three bucket colours that only
+ * ever mean Reserve, Obligations and Deployable. Light and dark are separate,
+ * deliberately chosen palettes (docs/DESIGN_SYSTEM.md lists every contrast ratio).
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --canvas: #fafaf9;
+  --surface: #ffffff;
+  --sunken: #f2f3f2;
+  --raised: #ffffff;
+  --hairline: #e3e5e4;
+  --border-strong: #8a9396;
+  --text: #0f1416;
+  --text-2: #4a5458;
+  --text-3: #636d71;
+  --accent: #0e6470;
+  --accent-hover: #0b5560;
+  --accent-subtle: #e4f1f2;
+  --on-accent: #ffffff;
+  --success: #1e7a46;
+  --success-subtle: #e7f4ec;
+  --warning: #995700;
+  --warning-subtle: #fdf3e3;
+  --danger: #b42318;
+  --danger-subtle: #fdeceb;
+  --info: #2f5fb3;
+  --info-subtle: #eaf0fb;
+  --bucket-reserve: #475c6b;
+  --bucket-obligations: #b07018;
+  --bucket-deployable: #0e7c8a;
+  --chart-grid: #eceeed;
+  --focus: #0e6470;
+  --shadow-float: 0 1px 2px rgb(15 20 22 / 0.06), 0 8px 24px rgb(15 20 22 / 0.08);
+  --overlay: rgb(15 20 22 / 0.4);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #0c0f10;
+    --surface: #14181a;
+    --sunken: #101315;
+    --raised: #1b2023;
+    --hairline: #262c30;
+    --border-strong: #5f6a70;
+    --text: #ecefee;
+    --text-2: #a9b2b5;
+    --text-3: #87929a;
+    --accent: #5cbac6;
+    --accent-hover: #74c6d0;
+    --accent-subtle: #123a40;
+    --on-accent: #062a2f;
+    --success: #4cc38a;
+    --success-subtle: #12301f;
+    --warning: #e2a23b;
+    --warning-subtle: #332410;
+    --danger: #f2786d;
+    --danger-subtle: #3a1714;
+    --info: #7ea9f2;
+    --info-subtle: #16233a;
+    --bucket-reserve: #7487a6;
+    --bucket-obligations: #c08a30;
+    --bucket-deployable: #3fa2af;
+    --chart-grid: #1f2528;
+    --focus: #5cbac6;
+    --shadow-float: 0 0 0 1px #262c30, 0 8px 24px rgb(0 0 0 / 0.5);
+    --overlay: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --canvas: #0c0f10;
+  --surface: #14181a;
+  --sunken: #101315;
+  --raised: #1b2023;
+  --hairline: #262c30;
+  --border-strong: #5f6a70;
+  --text: #ecefee;
+  --text-2: #a9b2b5;
+  --text-3: #87929a;
+  --accent: #5cbac6;
+  --accent-hover: #74c6d0;
+  --accent-subtle: #123a40;
+  --on-accent: #062a2f;
+  --success: #4cc38a;
+  --success-subtle: #12301f;
+  --warning: #e2a23b;
+  --warning-subtle: #332410;
+  --danger: #f2786d;
+  --danger-subtle: #3a1714;
+  --info: #7ea9f2;
+  --info-subtle: #16233a;
+  --bucket-reserve: #7487a6;
+  --bucket-obligations: #c08a30;
+  --bucket-deployable: #3fa2af;
+  --chart-grid: #1f2528;
+  --focus: #5cbac6;
+  --shadow-float: 0 0 0 1px #262c30, 0 8px 24px rgb(0 0 0 / 0.5);
+  --overlay: rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-raised: var(--raised);
+  --color-hairline: var(--hairline);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+  --color-reserve: var(--bucket-reserve);
+  --color-obligations: var(--bucket-obligations);
+  --color-deployable: var(--bucket-deployable);
+  --color-chart-grid: var(--chart-grid);
+
+  --radius-chip: 4px;
+  --radius-control: 6px;
+  --radius-card: 8px;
+  --radius-sheet: 12px;
+
+  --shadow-float: var(--shadow-float);
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
+:root {
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 280ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--canvas);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01" 0;
+  }
+  ::selection {
+    background: var(--accent-subtle);
+    color: var(--text);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Numbers that must align use tabular figures. */
+  .num,
+  [data-numeric],
+  td.num,
+  input[inputmode="decimal"] {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Safe-area aware padding for the installed PWA. */
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+}
+
+@layer utilities {
+  /* Hatched fill for the protected reserve: identity never depends on colour alone. */
+  .hatch-reserve {
+    background-color: var(--bucket-reserve);
+    background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.22) 0 2px, transparent 2px 6px);
+  }
+  .ticks-obligations {
+    background-color: var(--bucket-obligations);
+    background-image: repeating-linear-gradient(90deg, transparent 0 9px, rgb(255 255 255 / 0.35) 9px 10px);
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--sunken) 0%, var(--hairline) 50%, var(--sunken) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+@media (forced-colors: active) {
+  .hatch-reserve,
+  .ticks-obligations {
+    forced-color-adjust: none;
+  }
+}
+
+/* Overlay and panel entrance (opacity/transform only; disabled under reduced motion above). */
+@keyframes tq-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tq-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes tq-slide-in {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+}
+[role="dialog"][data-state="open"] {
+  animation: tq-rise-in var(--dur-base) var(--ease-out);
+}
+.fixed.inset-0[data-state="open"] {
+  animation: tq-fade-in var(--dur-base) var(--ease-out);
+}
