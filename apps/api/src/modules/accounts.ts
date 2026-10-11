@@ -5,12 +5,17 @@ import { getAddress, isAddressEqual } from "viem";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
 import { assertCan } from "../lib/authz.js";
-import { badRequest, conflict, notFound, unavailable, unprocessable } from "../lib/errors.js";
-import { Address, body, clientInfo, errors, Id, json, orgParams, requireUser, send } from "../lib/route.js";
+import { ApiError, badRequest, conflict, notFound, unavailable, unprocessable } from "../lib/errors.js";
+import { windowCounter } from "../lib/rate-limit.js";
+import { Address, body, clientInfo, ErrorSchema, errors, Id, json, orgParams, requireUser, send } from "../lib/route.js";
 import { syncAccount } from "../services/sync.js";
 
 const tags = ["Accounts"];
 const PURPOSES = ["operating", "reserve", "grants", "other"] as const;
+/** Manual syncs read the chain on demand, so each account may be synced at most once per 30 seconds (BE-20). */
+const SYNC_COOLDOWN_MS = 30_000;
+
+const syncTooSoon = (message: string, retryAfterSec: number) => new ApiError(429, "sync_rate_limited", message, { retryAfterSec });
 
 function accountDto(a: typeof schema.treasuryAccounts.$inferSelect) {
   return {
@@ -55,6 +60,9 @@ function challengeMessage(input: { orgName: string; orgId: string; kind: string;
 
 export function registerAccounts(app: App, deps: Deps) {
   const { db } = deps;
+  // Claims a manual sync per account in this process: covers double clicks that race past the lastSyncedAt
+  // check, and failing syncs, which do not move lastSyncedAt.
+  const manualSyncs = windowCounter(SYNC_COOLDOWN_MS);
 
   async function getAccount(orgId: string, id: string) {
     const [a] = await db.select().from(schema.treasuryAccounts).where(and(eq(schema.treasuryAccounts.id, id), eq(schema.treasuryAccounts.organizationId, orgId), isNull(schema.treasuryAccounts.archivedAt))).limit(1);
@@ -180,13 +188,34 @@ export function registerAccounts(app: App, deps: Deps) {
   );
 
   app.openapi(
-    createRoute({ method: "post", path: "/api/v1/orgs/{orgId}/accounts/{id}/sync", tags, summary: "Read balances now", request: { params: orgParams.extend({ id: Id }) }, responses: { 200: json(z.any()), ...errors } }),
+    createRoute({
+      method: "post",
+      path: "/api/v1/orgs/{orgId}/accounts/{id}/sync",
+      tags,
+      summary: "Read balances now",
+      description: "Refused with `429 sync_rate_limited` (and `Retry-After`) when the account was synced, or a manual sync was requested, within the last 30 seconds.",
+      request: { params: orgParams.extend({ id: Id }) },
+      responses: { 200: json(z.any()), ...errors, 429: json(ErrorSchema, "Synced too recently") },
+    }),
     async (c) => {
       const m = c.get("member");
+      assertCan(m.role, "accounts.sync");
       if (deps.env.disabled.has("sync")) throw unavailable("sync_disabled", "Balance sync is temporarily disabled by an operator.");
       const { id } = c.req.valid("param");
       const a = await getAccount(m.organizationId, id);
       if (a.verificationMethod === "sample") throw conflict("sample_workspace", "Sample accounts hold simulated balances and are not read from the chain.");
+      // lastSyncedAt is the block time of the last successful read, by anyone (including the 5-minute job).
+      const age = a.lastSyncedAt ? Math.max(0, deps.now().getTime() - a.lastSyncedAt.getTime()) : Infinity;
+      if (age < SYNC_COOLDOWN_MS) {
+        const retry = Math.ceil((SYNC_COOLDOWN_MS - age) / 1000);
+        c.header("retry-after", String(retry));
+        throw syncTooSoon(`This account was synced ${Math.floor(age / 1000)} seconds ago. Try again in ${retry} seconds.`, retry);
+      }
+      const claim = manualSyncs(`${m.organizationId}:${a.id}`, 1);
+      if (claim.limited) {
+        c.header("retry-after", String(claim.retryAfterSec));
+        throw syncTooSoon(`A sync of this account was requested less than 30 seconds ago. Try again in ${claim.retryAfterSec} seconds.`, claim.retryAfterSec);
+      }
       const result = await syncAccount(deps, a);
       await deps.boss?.send("evaluate-org", { orgId: m.organizationId }, { singletonKey: m.organizationId, singletonSeconds: 30 }).catch(() => undefined);
       return send(c, result);

@@ -1,5 +1,5 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import { addDays, decimalString, parseDecimal, projectCashflow, runScenario, wadToString, type ScenarioShock } from "@tokeniq/core";
+import { addDays, decimalString, parseDecimal, projectCashflow, runScenario, WAD, wadToString, type ScenarioShock } from "@tokeniq/core";
 import { and, eq, gte, schema, sql } from "@tokeniq/db";
 import { chainName, explorerAddress } from "@tokeniq/chain";
 import type { App, Deps } from "../context.js";
@@ -9,6 +9,8 @@ import { cashflowDto, reserveDto, treasuryDto } from "../services/dto.js";
 import { loadOrgState, type OrgState } from "../services/state.js";
 
 const tags = ["Treasury"];
+/** Scenario depeg prices run from 0 to 2 USD per unit, compared as exact wads (decimalString rules out negatives). */
+const MAX_DEPEG_PRICE = 2n * WAD;
 
 function holdingsDto(state: OrgState) {
   const byAccount = new Map(state.accountRows.map((a) => [a.id, a]));
@@ -175,7 +177,8 @@ export function registerTreasury(app: App, deps: Deps) {
               },
             };
           case "depeg":
-            if (Number(s.price) > 2) throw badRequest("invalid_price", "Scenario price must be between 0 and 2");
+            // Never a float: Number("2.000000000000000001") is 2 and would pass.
+            if (parseDecimal(s.price) > MAX_DEPEG_PRICE) throw badRequest("invalid_price", "Scenario price must be between 0 and 2");
             return s;
           default:
             return s;

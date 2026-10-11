@@ -1,5 +1,5 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import { addDays, compareIso, decimalString, expandOccurrences, nextDueDate, toIsoDate, wadToString } from "@tokeniq/core";
+import { addDays, compareIso, decimalString, expandOccurrences, initialTrackFrom, nextDueDate, parseDecimal, toIsoDate, wadToString } from "@tokeniq/core";
 import { and, asc, desc, eq, schema } from "@tokeniq/db";
 import { createHash } from "node:crypto";
 import type { App, Deps } from "../context.js";
@@ -30,7 +30,8 @@ const ObligationInput = z
     title: z.string().trim().min(2).max(120),
     category: z.enum(CATEGORIES),
     direction: z.enum(["outflow", "inflow"]).default("outflow"),
-    amount: decimalString.refine((v) => Number(v) > 0, "Amount must be greater than zero"),
+    // Exact comparison: decimalString has already checked the format, so parseDecimal cannot throw here.
+    amount: decimalString.refine((v) => /^\d+(\.\d{1,18})?$/.test(v) && parseDecimal(v) > 0n, "Amount must be greater than zero"),
     currency: z.enum(["USD", "EUR"]).default("USD"),
     firstDueDate: IsoDateString,
     recurrence: RecurrenceSchema,
@@ -199,8 +200,8 @@ export function registerObligations(app: App, deps: Deps) {
             recipientAddress: input.recipientAddress?.toLowerCase() ?? null,
             recipientSetAt: input.recipientAddress ? deps.now() : null,
             recipientSetBy: input.recipientAddress ? user.id : null,
-            // History before today is never treated as owed, unless the first due date is earlier (an overdue one-off).
-            trackFrom: compareIso(input.firstDueDate, today) < 0 ? input.firstDueDate : today,
+            // History before today is never treated as owed, except an overdue one-off (see initialTrackFrom).
+            trackFrom: initialTrackFrom(input, today),
             status: "active",
             createdBy: user.id,
           })

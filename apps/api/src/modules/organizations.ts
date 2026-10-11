@@ -1,6 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { DEFAULT_APPROVAL_POLICY, DEFAULT_TREASURY_POLICY, POLICY_PRESETS, type MemberRole } from "@tokeniq/core";
-import { and, asc, count, eq, gt, schema, sql } from "@tokeniq/db";
+import { and, asc, count, eq, gt, schema, sql, type Database } from "@tokeniq/db";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
 import { assertCan, canAssignRole, isRole, ROLES } from "../lib/authz.js";
@@ -37,18 +37,23 @@ function slugify(name: string) {
   return `${base || "org"}-${crypto.randomUUID().slice(0, 6)}`;
 }
 
-export async function createOrganization(deps: Deps, input: { userId: string; name: string; purpose: string | null; isSample?: boolean; preset?: keyof typeof POLICY_PRESETS }, info: { ip: string | null; userAgent: string | null }) {
+type NewOrganization = { userId: string; name: string; purpose: string | null; isSample?: boolean; preset?: keyof typeof POLICY_PRESETS };
+
+/** Insert an organization, its owner, profile and initial policies on the caller's transaction. */
+export async function insertOrganization(tx: Pick<Database, "select" | "insert">, input: NewOrganization, info: { ip: string | null; userAgent: string | null }) {
   const orgId = crypto.randomUUID();
-  await deps.db.transaction(async (tx) => {
-    await tx.insert(schema.organizations).values({ id: orgId, name: input.name, slug: slugify(input.name) });
-    await tx.insert(schema.members).values({ id: crypto.randomUUID(), organizationId: orgId, userId: input.userId, role: "owner" });
-    await tx.insert(schema.orgProfiles).values({ organizationId: orgId, purpose: input.purpose, isSample: input.isSample ?? false, onboardingSteps: ["organization"] });
-    const treasuryPolicy = input.preset ? POLICY_PRESETS[input.preset].policy : DEFAULT_TREASURY_POLICY;
-    await writePolicy(tx, { orgId, kind: "treasury", body: treasuryPolicy, reason: "Initial policy", userId: input.userId });
-    await writePolicy(tx, { orgId, kind: "approval", body: DEFAULT_APPROVAL_POLICY, reason: "Initial policy", userId: input.userId });
-    await audit(tx, { organizationId: orgId, actorUserId: input.userId, action: "organization.created", targetType: "organization", targetId: orgId, data: { name: input.name, isSample: !!input.isSample }, ...info });
-  });
+  await tx.insert(schema.organizations).values({ id: orgId, name: input.name, slug: slugify(input.name) });
+  await tx.insert(schema.members).values({ id: crypto.randomUUID(), organizationId: orgId, userId: input.userId, role: "owner" });
+  await tx.insert(schema.orgProfiles).values({ organizationId: orgId, purpose: input.purpose, isSample: input.isSample ?? false, onboardingSteps: ["organization"] });
+  const treasuryPolicy = input.preset ? POLICY_PRESETS[input.preset].policy : DEFAULT_TREASURY_POLICY;
+  await writePolicy(tx, { orgId, kind: "treasury", body: treasuryPolicy, reason: "Initial policy", userId: input.userId });
+  await writePolicy(tx, { orgId, kind: "approval", body: DEFAULT_APPROVAL_POLICY, reason: "Initial policy", userId: input.userId });
+  await audit(tx, { organizationId: orgId, actorUserId: input.userId, action: "organization.created", targetType: "organization", targetId: orgId, data: { name: input.name, isSample: !!input.isSample }, ...info });
   return orgId;
+}
+
+export async function createOrganization(deps: Deps, input: NewOrganization, info: { ip: string | null; userAgent: string | null }) {
+  return deps.db.transaction((tx) => insertOrganization(tx, input, info));
 }
 
 async function loadOrg(deps: Deps, orgId: string, role: MemberRole) {
@@ -205,6 +210,8 @@ export function registerOrganizations(app: App, deps: Deps) {
     async (c) => {
       const m = c.get("member");
       const user = requireUser(c);
+      // Progress and completion are organization settings: the same people who can change them may record them.
+      assertCan(m.role, "org.manage");
       const { step, complete } = c.req.valid("json");
       if (step) {
         await db
@@ -303,11 +310,14 @@ export function registerOrganizations(app: App, deps: Deps) {
   // --- Invitations ------------------------------------------------------------
 
   const InvitationSchema = z.object({ id: z.string(), email: z.string(), role: RoleEnum, status: z.string(), expiresAt: z.string(), createdAt: z.string() }).openapi("Invitation");
+  const InvitationCreatedSchema = InvitationSchema.extend({ emailSent: z.boolean(), inviteUrl: z.string() }).openapi("InvitationCreated");
 
   app.openapi(
-    createRoute({ method: "get", path: "/api/v1/orgs/{orgId}/invitations", tags, summary: "Pending invitations", request: { params: orgParams }, responses: { 200: json(z.object({ invitations: z.array(InvitationSchema) })), ...errors } }),
+    createRoute({ method: "get", path: "/api/v1/orgs/{orgId}/invitations", tags, summary: "Pending invitations (owners and admins)", request: { params: orgParams }, responses: { 200: json(z.object({ invitations: z.array(InvitationSchema) })), ...errors } }),
     async (c) => {
       const m = c.get("member");
+      // Invitee emails and roles are personal data of people who are not members yet.
+      assertCan(m.role, "members.manage");
       const rows = await db
         .select()
         .from(schema.invitations)
@@ -321,9 +331,11 @@ export function registerOrganizations(app: App, deps: Deps) {
       method: "post",
       path: "/api/v1/orgs/{orgId}/invitations",
       tags,
-      summary: "Invite someone by email",
+      summary: "Invite someone by email (sending again supersedes the earlier invitation)",
+      description:
+        "`emailSent` is false when the email could not be sent; the invitation still exists, and `inviteUrl` can be shared another way. Only the person signed in with the invited address can open it.",
       request: { params: orgParams, ...body(z.object({ email: z.email().max(254), role: RoleEnum })) },
-      responses: { 201: json(InvitationSchema), ...errors },
+      responses: { 201: json(InvitationCreatedSchema), ...errors },
     }),
     async (c) => {
       const m = c.get("member");
@@ -349,14 +361,21 @@ export function registerOrganizations(app: App, deps: Deps) {
         await tx.insert(schema.invitations).values({ id, organizationId: m.organizationId, email, role, status: "pending", expiresAt, inviterId: user.id });
         await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "invitation.created", targetType: "invitation", targetId: id, data: { email, role }, ...clientInfo(c) });
       });
-      await deps.mailer
+      const inviteUrl = `${deps.env.APP_URL}/invite/${id}`;
+      // A failed send keeps the invitation: the inviter gets the link to share instead. The link (and the
+      // invitation id in it) is never logged.
+      const emailSent = await deps.mailer
         .send({
           to: email,
           subject: `${user.name || user.email} invited you to ${org?.name ?? "an organization"} on TokenIQ`,
-          text: `You have been invited to join ${org?.name} on TokenIQ as ${role}.\n\nAccept the invitation: ${deps.env.APP_URL}/invite/${id}\n\nThe invitation expires on ${expiresAt.toUTCString()}. Sign in with this email address (${email}) to accept it.`,
+          text: `You have been invited to join ${org?.name} on TokenIQ as ${role}.\n\nAccept the invitation: ${inviteUrl}\n\nThe invitation expires on ${expiresAt.toUTCString()}. Sign in with this email address (${email}) to accept it.`,
         })
-        .catch((err) => deps.logger.warn({ err }, "invitation email failed"));
-      return c.json({ id, email, role, status: "pending", expiresAt: expiresAt.toISOString(), createdAt: deps.now().toISOString() }, 201);
+        .then(() => true)
+        .catch((err: unknown) => {
+          deps.logger.warn({ organizationId: m.organizationId, err: { name: (err as Error)?.name, message: (err as Error)?.message?.split("\n")[0]?.slice(0, 200) } }, "invitation email failed");
+          return false;
+        });
+      return c.json({ id, email, role, status: "pending", expiresAt: expiresAt.toISOString(), createdAt: deps.now().toISOString(), emailSent, inviteUrl }, 201);
     },
   );
 

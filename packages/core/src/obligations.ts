@@ -116,6 +116,15 @@ export function dueDatesBetween(ob: Pick<Obligation, "firstDueDate" | "recurrenc
   return out;
 }
 
+/**
+ * Where tracking starts for an obligation recorded `today`: history before today is never treated as owed,
+ * except for a one-off whose due date has already passed, which is owed (overdue) from that date. A recurring
+ * obligation entered with a past first due date is owed from today, not from its historical occurrences.
+ */
+export function initialTrackFrom(ob: Pick<Obligation, "firstDueDate" | "recurrence">, today: IsoDate): IsoDate {
+  return ob.recurrence.freq === "once" && compareIso(ob.firstDueDate, today) < 0 ? ob.firstDueDate : today;
+}
+
 export function convertToUsd(amount: Wad, currency: Currency, fx: FxTable, rounding: "down" | "up" = "up"): Wad | null {
   if (currency === "USD") return amount;
   const rate = fx[currency];

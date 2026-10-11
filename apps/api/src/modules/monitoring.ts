@@ -7,6 +7,8 @@ import { audit } from "../lib/audit.js";
 import { assertCan } from "../lib/authz.js";
 import { notFound } from "../lib/errors.js";
 import { clientInfo, errors, Id, json, orgParams, requireUser, send } from "../lib/route.js";
+import { notifyNewAlerts } from "../services/notify.js";
+import { degradedProviders } from "../services/providers.js";
 import { loadOrgState, type OrgState } from "../services/state.js";
 
 const tags = ["Risk & activity"];
@@ -57,6 +59,25 @@ export async function reconcileAlerts(deps: Deps, state: OrgState, extra: { sequ
   return { alerts, opened };
 }
 
+/** Platform-wide inputs (provider and L2 sequencer health) that every alert evaluation must pass. */
+export async function platformAlertInputs(deps: Deps) {
+  const health = await deps.db.select().from(schema.providerHealth);
+  const sequencerDown = health.filter((h) => h.provider.startsWith("sequencer:") && h.status !== "ok").map((h) => Number(h.provider.split(":")[1]));
+  return { sequencerDown, degradedProviders: await degradedProviders(deps) };
+}
+
+/**
+ * The one way alerts are evaluated, from a page read or from the job: the same inputs (or sequencer and
+ * provider alerts would resolve on a page load and re-open on the next job run), and notifications for
+ * whatever this run opened. Reconciles are serialised per organization, so each opened alert is reported
+ * by exactly one run; notifications are de-duplicated per member by alert fingerprint as well.
+ */
+export async function evaluateAlerts(deps: Deps, state: OrgState) {
+  const result = await reconcileAlerts(deps, state, await platformAlertInputs(deps));
+  if (result.opened.length && !state.isSample) await notifyNewAlerts(deps, state.orgId, result.opened);
+  return result;
+}
+
 export function registerMonitoring(app: App, deps: Deps) {
   const { db } = deps;
 
@@ -73,7 +94,7 @@ export function registerMonitoring(app: App, deps: Deps) {
       const m = c.get("member");
       const { status } = c.req.valid("query");
       const state = await loadOrgState(db, m.organizationId, deps.now());
-      await reconcileAlerts(deps, state);
+      await evaluateAlerts(deps, state);
       const where =
         status === "active"
           ? and(eq(schema.riskAlerts.organizationId, m.organizationId), inArray(schema.riskAlerts.status, ["open", "acknowledged"]))
@@ -144,7 +165,8 @@ export function registerMonitoring(app: App, deps: Deps) {
           and(
             eq(schema.auditEvents.organizationId, m.organizationId),
             before ? lt(schema.auditEvents.id, before) : undefined,
-            action ? sql`${schema.auditEvents.action} like ${action.replace(/[%_]/g, "") + "%"}` : undefined,
+            // Prefix match. LIKE wildcards in the filter are escaped, not stripped: action names contain "_".
+            action ? sql`${schema.auditEvents.action} like ${action.replace(/[\\%_]/g, (ch) => `\\${ch}`) + "%"} escape '\\'` : undefined,
           ),
         )
         .orderBy(desc(schema.auditEvents.id))

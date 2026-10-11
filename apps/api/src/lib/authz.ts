@@ -6,14 +6,17 @@ export const ROLES: MemberRole[] = ["owner", "admin", "finance", "approver", "vi
 /**
  * Server-side permission matrix. Every organization route declares the
  * permission it needs; the UI may hide controls, but this is the boundary.
- * Copilot tools run with the requesting member's role and are read-only
- * except for drafting (which never executes anything).
+ * Copilot tools run with the requesting member's role and are all read-only.
  */
 export const PERMISSIONS = {
   "org.read": ["owner", "admin", "finance", "approver", "viewer"],
+  // Organization details and onboarding progress.
   "org.manage": ["owner", "admin"],
+  // Members, roles and invitations (including reading pending invitations: invitee emails and roles).
   "members.manage": ["owner", "admin"],
   "accounts.manage": ["owner", "admin", "finance"],
+  // Manual "sync now": anyone who can see balances, rate-limited per account in the route.
+  "accounts.sync": ["owner", "admin", "finance", "approver", "viewer"],
   "accounts.verify": ["owner", "admin", "finance", "approver"],
   "obligations.write": ["owner", "admin", "finance"],
   "payments.record": ["owner", "admin", "finance"],

@@ -9,6 +9,7 @@ import {
   parseDecimal,
   runScenario,
   validateAction,
+  WAD,
   wadToString,
   type ScenarioShock,
   type TreasuryAction,
@@ -47,7 +48,8 @@ export interface CopilotTool {
 }
 
 const shockSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("depeg"), symbol: z.string().max(16), price: decimalString }),
+  // Same bound as the scenario route: a stablecoin above $2 is not a depeg scenario.
+  z.object({ type: z.literal("depeg"), symbol: z.string().max(16), price: decimalString.refine((v) => /^\d+(\.\d{1,18})?$/.test(v) && parseDecimal(v) <= 2n * WAD, "A depeg price must be at most 2") }),
   z.object({ type: z.literal("new_obligation"), title: z.string().max(120), amount: decimalString, dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), monthly: z.boolean().default(false) }),
   z.object({ type: z.literal("burn_change"), monthlyBurnUsd: decimalString }),
   z.object({ type: z.literal("runway_months"), months: z.number().int().min(0).max(36) }),

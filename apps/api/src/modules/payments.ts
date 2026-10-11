@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { chainName, explorerTx, findTokenBySymbol, verifyErc20Transfer } from "@tokeniq/chain";
 import { addDays, dueDatesBetween, fromWad, parseDecimal } from "@tokeniq/core";
-import { and, desc, eq, schema } from "@tokeniq/db";
+import { and, desc, eq, schema, sql } from "@tokeniq/db";
 import { getAddress, type Hex } from "viem";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
@@ -238,9 +238,30 @@ export function registerPayments(app: App, deps: Deps) {
       if (!p) throw notFound("Payment");
       if (p.status === "paid_verified") throw conflict("verified_payment", "Payments verified on-chain cannot be undone.");
       await db.transaction(async (tx) => {
-        await tx.delete(schema.payments).where(eq(schema.payments.id, id));
-        await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "payment.undone", targetType: "obligation", targetId: p.obligationId, data: { dueDate: p.dueDate, previousStatus: p.status, reason: c.req.valid("json").reason }, ...clientInfo(c) });
+        const removed = await tx.delete(schema.payments).where(eq(schema.payments.id, id)).returning({ id: schema.payments.id });
+        if (!removed.length) throw notFound("Payment");
+        // Recording a paid one-off completes its obligation (see POST above); undoing that payment re-opens it,
+        // so the occurrence is owed again. Recurring obligations are never completed by a payment, and a status
+        // someone set by hand (paused, cancelled) is left alone.
+        const reopened =
+          p.status === "skipped"
+            ? []
+            : await tx
+                .update(schema.obligations)
+                .set({ status: "active" })
+                .where(and(eq(schema.obligations.id, p.obligationId), eq(schema.obligations.status, "completed"), sql`${schema.obligations.recurrence}->>'freq' = 'once'`))
+                .returning({ id: schema.obligations.id });
+        await audit(tx, {
+          organizationId: m.organizationId,
+          actorUserId: user.id,
+          action: "payment.undone",
+          targetType: "obligation",
+          targetId: p.obligationId,
+          data: { dueDate: p.dueDate, previousStatus: p.status, reason: c.req.valid("json").reason, ...(reopened.length ? { obligationStatus: "active" } : {}) },
+          ...clientInfo(c),
+        });
       });
+      await deps.boss?.send("evaluate-org", { orgId: m.organizationId }, { singletonKey: m.organizationId, singletonSeconds: 30 }).catch(() => undefined);
       return c.json({ ok: true }, 200);
     },
   );

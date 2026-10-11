@@ -12,6 +12,8 @@ export async function notifyNewAlerts(deps: Deps, orgId: string, alerts: Alert[]
     .from(schema.members)
     .innerJoin(schema.users, eq(schema.users.id, schema.members.userId))
     .where(eq(schema.members.organizationId, orgId));
+  // Emails are read outside the app, where the active organization may be another one: name it in the link.
+  const link = `${deps.env.APP_URL}/app/risk?org=${encodeURIComponent(orgId)}`;
   for (const a of alerts) {
     if (a.severity === "info") continue;
     for (const m of members) {
@@ -22,7 +24,7 @@ export async function notifyNewAlerts(deps: Deps, orgId: string, alerts: Alert[]
         .returning({ id: schema.notifications.id });
       if (inserted.length && a.severity === "critical" && ["owner", "admin", "finance"].includes(m.role) && !m.email.endsWith(".invalid")) {
         await deps.mailer
-          .send({ to: m.email, subject: `TokenIQ alert: ${a.title}`, text: `${a.condition}\n\nRecommended: ${a.recommendedAction}\n\nOpen TokenIQ: ${deps.env.APP_URL}/app/risk` })
+          .send({ to: m.email, subject: `TokenIQ alert: ${a.title}`, text: `${a.condition}\n\nRecommended: ${a.recommendedAction}\n\nOpen TokenIQ: ${link}` })
           .catch((err) => deps.logger.warn({ err }, "alert email failed"));
       }
     }

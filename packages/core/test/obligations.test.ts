@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { addDays, addMonths, diffDays, parseIsoDate } from "../src/dates.js";
 import { wad } from "../src/money.js";
-import { dueDatesBetween, expandOccurrences, itemizedMonthlyBurn, nextDueDate } from "../src/obligations.js";
+import { dueDatesBetween, expandOccurrences, initialTrackFrom, itemizedMonthlyBurn, nextDueDate, type Recurrence } from "../src/obligations.js";
 import { obligation } from "./fixtures";
 
 describe("calendar arithmetic", () => {
@@ -98,5 +98,33 @@ describe("burn", () => {
     const ob = obligation({ id: "n", amount: wad(1), firstDueDate: "2025-09-01", recurrence: { freq: "monthly", interval: 1 } });
     expect(nextDueDate(ob, "2025-10-09")).toBe("2025-11-01");
     expect(nextDueDate(ob, "2025-10-09", [{ obligationId: "n", dueDate: "2025-11-01" }])).toBe("2025-12-01");
+  });
+});
+
+describe("initialTrackFrom (where a newly recorded obligation starts being owed)", () => {
+  const today = "2025-10-09";
+  const overdue = (ob: ReturnType<typeof obligation>) => expandOccurrences([ob], { asOf: today, through: "2025-10-31" }).filter((o) => o.overdue).map((o) => o.dueDate);
+
+  it("owes a backdated one-off from its due date, so it shows as overdue", () => {
+    const once = { firstDueDate: "2025-10-01", recurrence: { freq: "once" } as Recurrence };
+    expect(initialTrackFrom(once, today)).toBe("2025-10-01");
+    expect(overdue(obligation({ id: "audit", amount: wad(45000), ...once, trackFrom: initialTrackFrom(once, today) }))).toEqual(["2025-10-01"]);
+  });
+
+  it("owes a backdated recurring obligation from today: its historical occurrences are not overdue", () => {
+    const weekly = { firstDueDate: "2025-04-01", recurrence: { freq: "weekly", interval: 1 } as Recurrence };
+    expect(initialTrackFrom(weekly, today)).toBe(today);
+    const ob = obligation({ id: "payroll", amount: wad(1000), ...weekly, trackFrom: initialTrackFrom(weekly, today) });
+    expect(overdue(ob)).toEqual([]);
+    expect(expandOccurrences([ob], { asOf: today, through: "2025-10-31" }).map((o) => o.dueDate)).toEqual(["2025-10-14", "2025-10-21", "2025-10-28"]);
+    // Tracking from the first due date instead would have made every occurrence in the look-back window overdue.
+    expect(overdue({ ...ob, trackFrom: weekly.firstDueDate })).toEqual(["2025-09-09", "2025-09-16", "2025-09-23", "2025-09-30", "2025-10-07"]);
+  });
+
+  it("starts today for obligations first due today or later", () => {
+    for (const recurrence of [{ freq: "once" }, { freq: "monthly", interval: 1 }] as Recurrence[]) {
+      expect(initialTrackFrom({ firstDueDate: today, recurrence }, today)).toBe(today);
+      expect(initialTrackFrom({ firstDueDate: "2025-11-01", recurrence }, today)).toBe(today);
+    }
   });
 });

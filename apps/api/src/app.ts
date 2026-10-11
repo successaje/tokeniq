@@ -10,6 +10,7 @@ import { ZodError } from "zod";
 import type { AppEnv, Deps } from "./context.js";
 import { isRole } from "./lib/authz.js";
 import { ApiError, notFound, unauthorized, type ErrorBody } from "./lib/errors.js";
+import { idempotency } from "./lib/idempotency.js";
 import { CLIENT_IP_HEADER, clientIp, rateLimit, windowCounter } from "./lib/rate-limit.js";
 import { registerModules } from "./modules/index.js";
 
@@ -30,7 +31,8 @@ export function createApp(deps: Deps) {
     await next();
     const ms = Math.round(performance.now() - started);
     if (!c.req.path.startsWith("/api/health")) {
-      logger.info({ requestId, method: c.req.method, path: c.req.path, status: c.res.status, ms }, "request");
+      // Invitation ids act as bearer links, so they are masked in logs.
+      logger.info({ requestId, method: c.req.method, path: c.req.path.replace(/\/invitations\/[^/]+/, "/invitations/:id"), status: c.res.status, ms }, "request");
     }
   });
 
@@ -126,6 +128,9 @@ export function createApp(deps: Deps) {
     c.set("member", { id: m.id, organizationId: m.organizationId, role: m.role });
     await next();
   });
+
+  // Retries of organization-scoped creates replay the first result instead of duplicating it (BE-21).
+  app.use("/api/v1/orgs/:orgId/*", idempotency(db, deps.now));
 
   registerModules(app, deps);
 

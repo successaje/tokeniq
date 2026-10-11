@@ -1,13 +1,27 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { approvalPolicySchema, POLICY_PRESETS, treasuryPolicySchema } from "@tokeniq/core";
-import { and, desc, eq, schema } from "@tokeniq/db";
+import { and, desc, eq, schema, sql, type Database } from "@tokeniq/db";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
 import { assertCan } from "../lib/authz.js";
+import { isUniqueViolation } from "../lib/errors.js";
 import { body, clientInfo, errors, json, orgParams, requireUser, send } from "../lib/route.js";
-import { diffPolicy, getPolicies, writePolicy } from "../services/policies.js";
+import { diffPolicy, getPolicies, writePolicy, type PolicyKind } from "../services/policies.js";
 
 const tags = ["Policies"];
+
+/**
+ * Serialise saves of one policy kind per organization for the rest of the transaction. Without it, two saves
+ * with the same expectedVersion both pass the version check and the second hits the unique version index (500).
+ */
+async function lockPolicy(tx: Pick<Database, "execute">, orgId: string, kind: PolicyKind) {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`policy:${kind}:${orgId}`}))`);
+}
+
+/** Belt and braces for writers that do not take the lock: a duplicate version is still a version conflict. */
+function rethrowUnlessDuplicateVersion(err: unknown) {
+  if (!isUniqueViolation(err, "policy_versions_org_kind_version_uq")) throw err;
+}
 
 export function registerPolicies(app: App, deps: Deps) {
   const { db } = deps;
@@ -42,20 +56,27 @@ export function registerPolicies(app: App, deps: Deps) {
       const user = requireUser(c);
       assertCan(m.role, "policy.write");
       const { policy, reason, expectedVersion } = c.req.valid("json");
-      const result = await db.transaction(async (tx) => {
-        const current = await getPolicies(tx, m.organizationId);
-        if (current.treasuryVersion !== expectedVersion) {
-          return { conflict: true as const, current: current.treasuryVersion };
-        }
-        // Autonomous execution cannot be enabled from the API: it requires the on-chain guard (docs/CONTRACTS.md).
-        if (policy.autonomy === "bounded_automation") return { forbiddenAutomation: true as const };
-        const changes = diffPolicy(current.treasury as Record<string, unknown>, policy as Record<string, unknown>);
-        const version = await writePolicy(tx, { orgId: m.organizationId, kind: "treasury", body: policy, reason, userId: user.id });
-        await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "policy.treasury_updated", targetType: "policy", targetId: `treasury:${version}`, data: { reason, changes }, ...clientInfo(c) });
-        return { version, changes };
-      });
+      const result = await db
+        .transaction(async (tx) => {
+          await lockPolicy(tx, m.organizationId, "treasury");
+          const current = await getPolicies(tx, m.organizationId);
+          if (current.treasuryVersion !== expectedVersion) {
+            return { conflict: true as const, current: current.treasuryVersion as number | null };
+          }
+          // Autonomous execution cannot be enabled from the API: it requires the on-chain guard (docs/CONTRACTS.md).
+          if (policy.autonomy === "bounded_automation") return { forbiddenAutomation: true as const };
+          const changes = diffPolicy(current.treasury as Record<string, unknown>, policy as Record<string, unknown>);
+          const version = await writePolicy(tx, { orgId: m.organizationId, kind: "treasury", body: policy, reason, userId: user.id });
+          await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "policy.treasury_updated", targetType: "policy", targetId: `treasury:${version}`, data: { reason, changes }, ...clientInfo(c) });
+          return { version, changes };
+        })
+        .catch((err) => {
+          rethrowUnlessDuplicateVersion(err);
+          return { conflict: true as const, current: null };
+        });
       if ("conflict" in result) {
-        return send(c, { error: { code: "policy_version_conflict", message: `The policy changed while you were editing (now version ${result.current}). Review the latest version and try again.` } }, 409);
+        const now = result.current === null ? "" : ` (now version ${result.current})`;
+        return send(c, { error: { code: "policy_version_conflict", message: `The policy changed while you were editing${now}. Review the latest version and try again.` } }, 409);
       }
       if ("forbiddenAutomation" in result) {
         return send(c, { error: { code: "automation_not_enabled", message: "Bounded automation requires the on-chain reserve guard and Roles module to be installed on your Safe. It cannot be switched on from settings." } }, 422);
@@ -81,14 +102,20 @@ export function registerPolicies(app: App, deps: Deps) {
       if (!policy.tiers.some((t) => t.upToUsd === null)) {
         return send(c, { error: { code: "invalid_tiers", message: "The last approval tier must have no upper limit so every amount is covered." } }, 400);
       }
-      const result = await db.transaction(async (tx) => {
-        const current = await getPolicies(tx, m.organizationId);
-        if (current.approvalVersion !== expectedVersion) return null;
-        const changes = diffPolicy(current.approval as Record<string, unknown>, policy as Record<string, unknown>);
-        const version = await writePolicy(tx, { orgId: m.organizationId, kind: "approval", body: policy, reason, userId: user.id });
-        await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "policy.approval_updated", targetType: "policy", targetId: `approval:${version}`, data: { reason, changes }, ...clientInfo(c) });
-        return { version, changes };
-      });
+      const result = await db
+        .transaction(async (tx) => {
+          await lockPolicy(tx, m.organizationId, "approval");
+          const current = await getPolicies(tx, m.organizationId);
+          if (current.approvalVersion !== expectedVersion) return null;
+          const changes = diffPolicy(current.approval as Record<string, unknown>, policy as Record<string, unknown>);
+          const version = await writePolicy(tx, { orgId: m.organizationId, kind: "approval", body: policy, reason, userId: user.id });
+          await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "policy.approval_updated", targetType: "policy", targetId: `approval:${version}`, data: { reason, changes }, ...clientInfo(c) });
+          return { version, changes };
+        })
+        .catch((err) => {
+          rethrowUnlessDuplicateVersion(err);
+          return null;
+        });
       if (!result) return send(c, { error: { code: "policy_version_conflict", message: "The approval policy changed while you were editing. Reload and try again." } }, 409);
       return c.json(result, 200);
     },
