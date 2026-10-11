@@ -51,7 +51,9 @@ A rebuild from a clean tree on the `tokeniq-2` branch. TokenIQ 2.0 shares no cod
   - Approval policy is snapshotted per proposal.
   - Approvals lapse when approvers leave or are demoted.
   - New or changed payee addresses are held for 48 hours.
-- Internal frontend, contract and dependency reviews are in [`audits/`](audits/).
+- Internal frontend review: 1 High (owners could be asked to sign typed data that the page had not checked against the proposal), 15 Medium; 40 of 46 findings fixed, including an open redirect after sign-in and accessibility issues found by axe.
+- The service worker was missing from git because of a template ignore rule; it is now committed.
+- Contract and dependency reviews are in [`audits/`](audits/). The release assessment is [`audits/RELEASE_RISKS.md`](audits/RELEASE_RISKS.md).
 
 ### Removed
 

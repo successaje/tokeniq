@@ -55,7 +55,10 @@ What TokenIQ 2.0 does not do, or does only partly, in this release candidate. Re
 
 ## Web
 
-- The Content-Security-Policy allows inline scripts (BE-30). The copilot renderer emits no HTML, which limits the impact.
+- The Content-Security-Policy allows inline scripts (BE-30, FR-07). The copilot renderer emits no HTML and links are sanitised, which limits the impact.
+- Inside Safe{Wallet} as a Safe App, the session cookie is not sent in the cross-site iframe, so signing in there does not work yet (FR-32). The standalone app works.
+- The service worker's cache version is bumped by hand, so a deploy does not force clients to update it (FR-30). It never caches API data or signed-in pages.
+- The signing panel's hashes have not yet been compared against a hardware wallet's screen. Do that on a test Safe before relying on it.
 - Known design-system deviations are listed in [Design system §13](DESIGN_SYSTEM.md). The release candidate targets WCAG 2.2 AA, and automated axe checks run in CI; a manual screen-reader pass has not been done.
 
 ## Before launch (owner decisions)

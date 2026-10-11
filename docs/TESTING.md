@@ -8,6 +8,7 @@
 | API integration tests | Real Postgres and real auth flow: email code sign-in, origin checks, organization isolation (404), role permissions, last owner, invitations, policy versioning and conflicts, the automation lock, treasury maths end to end, stale data flagged, scenarios write nothing, append-only audit, CSV injection, proposal lifecycle, copilot tool boundaries and streaming loop | `apps/api/test` | `TEST_DATABASE_URL=… pnpm --filter @tokeniq/api test` |
 | Security regression tests | Adversarial scenarios from the backend review (cross-organization access, races, state machine, structured-action consistency, injection) | `apps/api/test/security.test.ts` | as above |
 | Controlled execution on a fork | The whole money path against real contracts: a 2-of-3 Safe v1.4.1 created through the canonical factory on an anvil fork of Base, live Chainlink and Morpho data, account verification by an owner's signature (non-owner rejected, challenge not replayable), policy-checked proposal, internal approval, Safe transaction built and simulated, two owner signatures (non-owner rejected), execution, confirmation depth respected before `executed`, vault shares received, position reconciled, full audit trail | `apps/api/test/fork-execution.test.ts` | `FORK_E2E=1 TEST_DATABASE_URL=… pnpm --filter @tokeniq/api vitest run test/fork-execution.test.ts` (needs `anvil`; set `BASE_RPC_URL` for a faster fork) |
+| Web unit tests | The client's own check of the Safe typed data before an owner signs (domain, Safe, nonce, decoded calls, amounts, recipients, recomputed hashes); signature `v` normalisation; link and redirect sanitising | `apps/web/src/**/*.test.ts` (Vitest) | `pnpm --filter @tokeniq/web test` |
 | Contract tests | Unit, fuzz (1,000 runs), invariant (128 × 64), deploy script, Base mainnet fork with real Safe 1.5.0 and a live Morpho vault | `packages/contracts/test` (Foundry) | `cd packages/contracts && forge test` |
 | End to end and accessibility | Journeys in a real browser; axe-core WCAG 2.2 AA checks in light and dark; mobile and tablet layouts | `apps/e2e` (Playwright) | `pnpm test:e2e` |
 
@@ -27,4 +28,4 @@
 
 ## Latest results
 
-Recorded at the end of each milestone in [`audits/RELEASE_RISKS.md`](../audits/RELEASE_RISKS.md).
+Recorded at the end of each milestone in [`audits/RELEASE_RISKS.md`](../audits/RELEASE_RISKS.md). At `78515fa8`: engine 73, chain 62 (plus 11 live), API 118, web unit 22, browser end to end 41, contracts 85, Base fork 6 (local).
