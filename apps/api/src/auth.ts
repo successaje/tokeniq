@@ -59,6 +59,8 @@ export function createAuth(db: Database, env: Env, mailer: Mailer, publicClient:
       useSecureCookies: env.NODE_ENV === "production",
       cookiePrefix: "tokeniq",
       defaultCookieAttributes: { sameSite: "lax", httpOnly: true },
+      // The API resolves the client IP (TRUSTED_PROXY_COUNT) and passes it in this header (see app.ts).
+      ipAddress: { ipAddressHeaders: ["x-tokeniq-client-ip"] },
     },
     plugins: [
       emailOTP({

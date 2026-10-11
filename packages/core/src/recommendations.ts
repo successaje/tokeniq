@@ -65,8 +65,9 @@ export function generateRecommendations(input: RecommendationInput): Recommendat
   return out;
 }
 
-function ctxFor(input: RecommendationInput, accountAssetBalanceRaw: bigint | null): ValidationContext {
+function ctxFor(input: RecommendationInput, accountAssetBalanceRaw: bigint | null, source?: Holding): ValidationContext {
   return {
+    ...(source ? { actionAsset: { asset: source.asset, price: source.price } } : {}),
     nowSec: input.nowSec,
     policy: input.policy,
     treasury: input.treasury,
@@ -118,7 +119,7 @@ function deploySurplus(input: RecommendationInput): Recommendation | null {
     // Token amount at the conservative $1 valuation: never send more tokens than the USD figure implies.
     const assetAmountRaw = fromWad(amountUsd, opp.asset.decimals, "down");
     const action: TreasuryAction = { type: "allocate", accountId: source.h.accountId, opportunityId: opp.id, amountUsd, assetAmountRaw };
-    const validation = validateAction(action, ctxFor(input, source.h.raw));
+    const validation = validateAction(action, ctxFor(input, source.h.raw, source.h));
     if (!validation.valid) continue;
 
     const yearly = estimateYield(amountUsd, opp.apy.netBps, 365);

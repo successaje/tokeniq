@@ -133,8 +133,37 @@ export const COPILOT_TOOLS: CopilotTool[] = [
     input: z.object({}),
     jsonSchema: { type: "object", properties: {}, additionalProperties: false },
     async run(ctx) {
-      const rows = await ctx.deps.db.select().from(schema.recommendations).where(and(eq(schema.recommendations.organizationId, ctx.orgId), eq(schema.recommendations.status, "open"))).orderBy(desc(schema.recommendations.createdAt)).limit(10);
-      return { recommendations: rows.map((r) => ({ ref: `recommendation:${r.id}`, ...(r.payload as object) })) };
+      const rows = await ctx.deps.db
+        .select()
+        .from(schema.recommendations)
+        .where(and(eq(schema.recommendations.organizationId, ctx.orgId), eq(schema.recommendations.status, "open")))
+        .orderBy(desc(schema.recommendations.createdAt))
+        .limit(10);
+      // Recommendation text embeds venue names from external data sources, so the narrative is passed as
+      // untrusted data; the structured action and check results come straight from the engine.
+      return {
+        recommendations: rows.map((r) => {
+          const {
+            action,
+            validation,
+            kind,
+            fingerprint: _f,
+            ...narrative
+          } = r.payload as {
+            action?: unknown;
+            validation?: { valid: boolean; checks: Array<{ id: string; status: string }> } | null;
+            kind?: string;
+            fingerprint?: string;
+          } & Record<string, unknown>;
+          return {
+            ref: `recommendation:${r.id}`,
+            kind,
+            action: action ?? null,
+            policyChecks: validation ? { valid: validation.valid, checks: validation.checks.map((c) => ({ id: c.id, status: c.status })) } : null,
+            details: { untrusted_json: JSON.stringify(narrative).slice(0, 6000) },
+          };
+        }),
+      };
     },
   },
   {
@@ -159,8 +188,26 @@ export const COPILOT_TOOLS: CopilotTool[] = [
     input: z.object({}),
     jsonSchema: { type: "object", properties: {}, additionalProperties: false },
     async run(ctx) {
-      const rows = await ctx.deps.db.select().from(schema.riskAlerts).where(and(eq(schema.riskAlerts.organizationId, ctx.orgId), inArray(schema.riskAlerts.status, ["open", "acknowledged"]))).orderBy(desc(schema.riskAlerts.lastSeenAt)).limit(30);
-      return { alerts: rows.map((a) => ({ ref: `alert:${a.id}`, severity: a.severity, title: a.title, condition: a.condition, evidence: a.evidence, recommendedAction: a.recommendedAction, status: a.status, since: a.firstSeenAt.toISOString() })) };
+      const rows = await ctx.deps.db
+        .select()
+        .from(schema.riskAlerts)
+        .where(and(eq(schema.riskAlerts.organizationId, ctx.orgId), inArray(schema.riskAlerts.status, ["open", "acknowledged"])))
+        .orderBy(desc(schema.riskAlerts.lastSeenAt))
+        .limit(30);
+      // Alert text can quote account labels, venue names and provider error messages: pass it as untrusted data.
+      return {
+        alerts: rows.map((a) => ({
+          ref: `alert:${a.id}`,
+          kind: a.kind,
+          severity: a.severity,
+          title: untrusted(a.title),
+          condition: untrusted(a.condition),
+          evidence: { untrusted_json: JSON.stringify(a.evidence).slice(0, 2000) },
+          recommendedAction: untrusted(a.recommendedAction),
+          status: a.status,
+          since: a.firstSeenAt.toISOString(),
+        })),
+      };
     },
   },
   {
@@ -243,9 +290,34 @@ export const COPILOT_TOOLS: CopilotTool[] = [
       const source = candidates.sort((a, b) => (b.raw > a.raw ? 1 : -1))[0];
       if (!source) return { error: `No tracked account holds ${opp.asset.symbol} on ${chainName(opp.chainId)}.` };
       const amountUsd = parseDecimal(input.amountUsd);
-      const action: TreasuryAction = { type: "allocate", accountId: source.accountId, opportunityId: opp.id, amountUsd, assetAmountRaw: fromWad(amountUsd, opp.asset.decimals, "down") };
-      const v = validateAction(action, { nowSec: s.nowSec, policy: s.policy, treasury: s.treasury, reserve: s.reserve, accounts: s.accounts, positions: s.positions, opportunities: s.opportunities, accountAssetBalanceRaw: source.raw });
-      return { ref: `opportunity:${opp.id}`, hypothetical: true, wouldPass: v.valid, checks: v.checks, after: { reserveEligibleUsd: ws(v.after.reserveEligible), coverageBps: v.after.coverageBps?.toString() ?? null, deployableUsd: ws(v.after.deployable) }, nextStep: v.valid ? "A finance member can create a proposal from the Recommendations or Opportunities page; it then needs internal approval and Safe owner signatures." : "Resolve the failing checks or choose a smaller amount." };
+      const action: TreasuryAction = {
+        type: "allocate",
+        accountId: source.accountId,
+        opportunityId: opp.id,
+        amountUsd,
+        assetAmountRaw: fromWad(amountUsd, opp.asset.decimals, "down"),
+      };
+      const v = validateAction(action, {
+        nowSec: s.nowSec,
+        policy: s.policy,
+        treasury: s.treasury,
+        reserve: s.reserve,
+        accounts: s.accounts,
+        positions: s.positions,
+        opportunities: s.opportunities,
+        accountAssetBalanceRaw: source.raw,
+        actionAsset: { asset: source.asset, price: source.price },
+      });
+      return {
+        ref: `opportunity:${opp.id}`,
+        hypothetical: true,
+        wouldPass: v.valid,
+        checks: v.checks,
+        after: { reserveEligibleUsd: ws(v.after.reserveEligible), coverageBps: v.after.coverageBps?.toString() ?? null, deployableUsd: ws(v.after.deployable) },
+        nextStep: v.valid
+          ? "A finance member can create a proposal from the Recommendations or Opportunities page; it then needs internal approval and Safe owner signatures."
+          : "Resolve the failing checks or choose a smaller amount.",
+      };
     },
   },
   {

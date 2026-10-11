@@ -88,6 +88,20 @@ export function registerAccounts(app: App, deps: Deps) {
       const input = c.req.valid("json");
       const chain = getChain(input.chainId);
       if (!chain) throw badRequest("unsupported_chain", "That network is not supported yet.");
+      // Test tokens are valued at their peg so flows can be exercised. Mixed with real accounts they would
+      // inflate the reserve and the deployable surplus that policy checks real allocations against.
+      const existing = await db
+        .select({ chainId: schema.treasuryAccounts.chainId })
+        .from(schema.treasuryAccounts)
+        .where(and(eq(schema.treasuryAccounts.organizationId, m.organizationId), isNull(schema.treasuryAccounts.archivedAt)));
+      if (existing.some((a) => (getChain(a.chainId)?.testnet ?? false) !== chain.testnet)) {
+        throw unprocessable(
+          "mixed_networks",
+          chain.testnet
+            ? "This organization tracks mainnet accounts. Test networks hold tokens with no market value, so use a separate organization for testnet accounts."
+            : "This organization tracks testnet accounts. Use a separate organization for mainnet accounts so test tokens never count toward real reserves.",
+        );
+      }
       const client = deps.clientFor(input.chainId);
       if (!client) throw unavailable("chain_unavailable", "No RPC connection is configured for this network.");
       const address = getAddress(input.address);

@@ -1,13 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { buildExecTransactionData, encodeSafeSignatures, explorerTx, readSafeInfo, recoverSafeSigner, simulateSafeTransaction, type SafeInfo } from "@tokeniq/chain";
-import { canApprove, evaluateApprovals, formatUsd, parseDecimal, validateAction, type ApprovalRecord, type MemberRole, type TreasuryAction } from "@tokeniq/core";
+import { canApprove, decimalString, evaluateApprovals, formatUsd, parseDecimal, validateAction, type ApprovalRecord, type MemberRole, type TreasuryAction } from "@tokeniq/core";
 import { and, asc, desc, eq, inArray, schema, sql } from "@tokeniq/db";
 import { getAddress, isAddressEqual, type Hex } from "viem";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
 import { assertCan, isRole } from "../lib/authz.js";
-import { ApiError, badRequest, conflict, notFound, unavailable, unprocessable } from "../lib/errors.js";
-import { body, clientInfo, errors, Id, json, orgParams, requireUser, send, TxHash } from "../lib/route.js";
+import { ApiError, badRequest, conflict, isUniqueViolation, notFound, unavailable, unprocessable } from "../lib/errors.js";
+import { Address, body, clientInfo, errors, Id, IsoDateString, json, orgParams, requireUser, send, TxHash } from "../lib/route.js";
 import { BuildError, buildSafeTxForAction, safeTxFromJson, safeTxToJson, type SafeTxJson } from "../services/build-tx.js";
 import { actionFromJson, actionToJson, validationDto, type ActionJson, type RecommendationJson } from "../services/dto.js";
 import { notifyRoles } from "../services/notify.js";
@@ -37,11 +37,46 @@ export type ProposalStatus =
 
 type ProposalRow = typeof schema.proposals.$inferSelect;
 
+const UINT256_MAX = 2n ** 256n - 1n;
+/** Positive integer token amount in base units that fits a uint256 (no signs, hex, whitespace or leading zeros). */
+const RawAmountInput = z
+  .string()
+  .regex(/^[1-9]\d{0,77}$/, "Enter the token amount as a positive integer in base units")
+  .refine((v) => BigInt(v) <= UINT256_MAX, "Token amount is too large");
+
+/** Structured actions accepted from clients. Unknown types and extra fields are rejected. */
+const ActionInput = z.discriminatedUnion("type", [
+  z
+    .object({ type: z.literal("allocate"), accountId: Id, opportunityId: z.string().min(1).max(128), amountUsd: decimalString, assetAmountRaw: RawAmountInput })
+    .strict(),
+  z
+    .object({ type: z.literal("withdraw"), accountId: Id, positionId: z.string().min(1).max(200), amountUsd: decimalString, assetAmountRaw: RawAmountInput })
+    .strict(),
+  z
+    .object({
+      type: z.literal("payment"),
+      accountId: Id,
+      obligationId: Id,
+      dueDate: IsoDateString,
+      amountUsd: decimalString,
+      assetAmountRaw: RawAmountInput,
+      assetSymbol: z.string().min(1).max(16),
+      recipient: Address,
+    })
+    .strict(),
+]);
+
 function validationContext(state: OrgState, action: TreasuryAction) {
   const holding = state.holdings.find((h) => h.accountId === action.accountId && (action.type === "payment" ? h.asset.symbol === action.assetSymbol : action.type === "allocate" ? state.opportunities.find((o) => o.id === action.opportunityId)?.asset.address.toLowerCase() === h.asset.address.toLowerCase() : false));
   const unsettled = new Map<string, bigint>();
   for (const o of state.reserve.obligations.occurrences) if (o.usd !== null) unsettled.set(`${o.obligationId}|${o.dueDate}`, o.usd);
+  const paymentTerms = new Map(
+    state.obligationRows.map((o) => [o.id, { recipient: o.recipientAddress, chainId: o.recipientChainId, assetSymbol: o.paymentAsset }]),
+  );
   return {
+    // The token being moved and its quote, so the engine can bind amountUsd to assetAmountRaw (withdrawals use the position).
+    actionAsset: action.type === "withdraw" ? undefined : holding ? { asset: holding.asset, price: holding.price } : null,
+    paymentTerms,
     nowSec: state.nowSec,
     policy: state.policy,
     treasury: state.treasury,
@@ -114,7 +149,7 @@ export function registerProposals(app: App, deps: Deps) {
         ...body(
           z.object({
             recommendationId: Id.optional(),
-            action: z.any().optional(),
+            action: ActionInput.optional(),
             idempotencyKey: z.string().min(8).max(100),
             note: z.string().trim().max(1000).optional(),
           }),
@@ -163,29 +198,53 @@ export function registerProposals(app: App, deps: Deps) {
       const ttl = state.approvalPolicy.proposalTtlHours;
       const id = crypto.randomUUID();
       const title = titleFor(action, state);
-      await db.transaction(async (tx) => {
-        await tx.insert(schema.proposals).values({
-          id,
-          organizationId: m.organizationId,
-          recommendationId,
-          kind: action.type,
-          title,
-          status: "pending_approval",
-          action: actionToJson(action),
-          amountUsd: actionToJson(action).amountUsd,
-          accountId: account.id,
-          chainId: account.chainId,
-          validation: validationDto(validation),
-          proposerId: user.id,
-          idempotencyKey: input.idempotencyKey,
-          expiresAt: new Date(deps.now().getTime() + ttl * 3600_000),
+      try {
+        await db.transaction(async (tx) => {
+          await tx.insert(schema.proposals).values({
+            id,
+            organizationId: m.organizationId,
+            recommendationId,
+            kind: action.type,
+            title,
+            status: "pending_approval",
+            action: actionToJson(action),
+            amountUsd: actionToJson(action).amountUsd,
+            accountId: account.id,
+            chainId: account.chainId,
+            validation: validationDto(validation),
+            proposerId: user.id,
+            idempotencyKey: input.idempotencyKey,
+            expiresAt: new Date(deps.now().getTime() + ttl * 3600_000),
+          });
+          if (recommendationId) {
+            await tx
+              .update(schema.recommendations)
+              .set({ status: "accepted", resolvedAt: deps.now(), resolvedBy: user.id, resolution: `Proposal ${id}` })
+              .where(eq(schema.recommendations.id, recommendationId));
+          }
+          if (input.note)
+            await tx.insert(schema.proposalComments).values({ organizationId: m.organizationId, proposalId: id, userId: user.id, body: input.note });
+          await audit(tx, {
+            organizationId: m.organizationId,
+            actorUserId: user.id,
+            action: "proposal.created",
+            targetType: "proposal",
+            targetId: id,
+            data: { title, amountUsd: actionToJson(action).amountUsd, kind: action.type, recommendationId, policyVersion: state.policyVersion },
+            ...clientInfo(c),
+          });
         });
-        if (recommendationId) {
-          await tx.update(schema.recommendations).set({ status: "accepted", resolvedAt: deps.now(), resolvedBy: user.id, resolution: `Proposal ${id}` }).where(eq(schema.recommendations.id, recommendationId));
-        }
-        if (input.note) await tx.insert(schema.proposalComments).values({ organizationId: m.organizationId, proposalId: id, userId: user.id, body: input.note });
-        await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "proposal.created", targetType: "proposal", targetId: id, data: { title, amountUsd: actionToJson(action).amountUsd, kind: action.type, recommendationId, policyVersion: state.policyVersion }, ...clientInfo(c) });
-      });
+      } catch (err) {
+        // A concurrent request with the same idempotency key won the race: answer as a duplicate, not a 500.
+        if (!isUniqueViolation(err, "proposals_org_idempotency_uq")) throw err;
+        const [winner] = await db
+          .select()
+          .from(schema.proposals)
+          .where(and(eq(schema.proposals.organizationId, m.organizationId), eq(schema.proposals.idempotencyKey, input.idempotencyKey)))
+          .limit(1);
+        if (!winner) throw err;
+        return send(c, { id: winner.id, status: winner.status, duplicate: true }, 200);
+      }
       await notifyRoles(deps, m.organizationId, ["owner", "admin", "finance", "approver"], { kind: "proposal.created", title: `Review: ${title}`, body: `Proposed by ${user.name || user.email}. Needs internal approval.`, link: `/app/approvals/${id}`, dedupeKey: `proposal:${id}:created` }, user.id);
       return send(c, { id, status: "pending_approval", duplicate: false }, 201);
     },
@@ -338,15 +397,53 @@ export function registerProposals(app: App, deps: Deps) {
       const [prior] = await db.select().from(schema.approvals).where(and(eq(schema.approvals.proposalId, id), eq(schema.approvals.userId, user.id))).limit(1);
       if (prior) throw conflict("already_decided", "You have already recorded a decision on this proposal.");
 
-      const result = await db.transaction(async (tx) => {
-        await tx.insert(schema.approvals).values({ organizationId: m.organizationId, proposalId: id, userId: user.id, role: m.role, decision, comment: comment ?? null });
-        const rows = await tx.select().from(schema.approvals).where(eq(schema.approvals.proposalId, id));
-        const ev = evaluateApprovals({ policy: state.approvalPolicy, amountUsd: parseDecimal(p.amountUsd), proposerId: p.proposerId, createdAt: Math.floor(p.createdAt.getTime() / 1000), nowSec: state.nowSec, records: approvalRecords(rows) });
-        if (ev.state === "approved") await setStatus(tx, id, ["pending_approval"], "approved");
-        if (ev.state === "rejected") await setStatus(tx, id, ["pending_approval"], "rejected");
-        await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: decision === "approve" ? "proposal.approved" : "proposal.rejected", targetType: "proposal", targetId: id, data: { title: p.title, comment, state: ev.state, approvals: ev.approvals, required: ev.requiredApprovals }, ...clientInfo(c) });
-        return ev;
-      });
+      const result = await db
+        .transaction(async (tx) => {
+          // Serialize decisions on this proposal: concurrent requests (the same member twice, or two members
+          // completing the tier together) are evaluated one after another against committed rows.
+          const [locked] = await tx
+            .select({ status: schema.proposals.status, expiresAt: schema.proposals.expiresAt })
+            .from(schema.proposals)
+            .where(eq(schema.proposals.id, id))
+            .for("update");
+          if (!locked || locked.status !== "pending_approval")
+            throw conflict("not_pending", `This proposal is ${(locked?.status ?? "gone").replace(/_/g, " ")} and no longer accepts decisions.`);
+          if (locked.expiresAt <= deps.now()) throw conflict("expired", "This proposal expired before it was fully approved.");
+          const [again] = await tx
+            .select({ id: schema.approvals.id })
+            .from(schema.approvals)
+            .where(and(eq(schema.approvals.proposalId, id), eq(schema.approvals.userId, user.id)))
+            .limit(1);
+          if (again) throw conflict("already_decided", "You have already recorded a decision on this proposal.");
+          await tx
+            .insert(schema.approvals)
+            .values({ organizationId: m.organizationId, proposalId: id, userId: user.id, role: m.role, decision, comment: comment ?? null });
+          const rows = await tx.select().from(schema.approvals).where(eq(schema.approvals.proposalId, id));
+          const ev = evaluateApprovals({
+            policy: state.approvalPolicy,
+            amountUsd: parseDecimal(p.amountUsd),
+            proposerId: p.proposerId,
+            createdAt: Math.floor(p.createdAt.getTime() / 1000),
+            nowSec: state.nowSec,
+            records: approvalRecords(rows),
+          });
+          if (ev.state === "approved") await setStatus(tx, id, ["pending_approval"], "approved");
+          if (ev.state === "rejected") await setStatus(tx, id, ["pending_approval"], "rejected");
+          await audit(tx, {
+            organizationId: m.organizationId,
+            actorUserId: user.id,
+            action: decision === "approve" ? "proposal.approved" : "proposal.rejected",
+            targetType: "proposal",
+            targetId: id,
+            data: { title: p.title, comment, state: ev.state, approvals: ev.approvals, required: ev.requiredApprovals },
+            ...clientInfo(c),
+          });
+          return ev;
+        })
+        .catch((err) => {
+          if (isUniqueViolation(err, "approvals_proposal_user_uq")) throw conflict("already_decided", "You have already recorded a decision on this proposal.");
+          throw err;
+        });
       if (result.state === "approved") {
         await notifyRoles(deps, m.organizationId, ["owner", "admin", "finance", "approver"], { kind: "proposal.approved", title: `Approved: ${p.title}`, body: "Internal approval is complete. Safe owners can now prepare and sign the transaction.", link: `/app/approvals/${id}`, dedupeKey: `proposal:${id}:approved` });
       } else if (result.state === "rejected") {

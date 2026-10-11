@@ -34,6 +34,9 @@ export async function reconcileAlerts(deps: Deps, state: OrgState, extra: { sequ
   const now = deps.now();
   const opened: Alert[] = [];
   await deps.db.transaction(async (tx) => {
+    // Reconciles run from GET requests and from the evaluate job, often at the same moment for one org.
+    // Serialise them per organization so the read-then-insert below never races (no duplicate-key 500s).
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`alerts:${state.orgId}`}))`);
     for (const a of alerts) {
       const updated = await tx
         .update(schema.riskAlerts)

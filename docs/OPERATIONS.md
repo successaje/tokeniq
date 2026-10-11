@@ -50,7 +50,7 @@ Separately, the on-chain `TreasuryReserveGuard` can be paused by any guardian wi
 
 ## Scaling notes
 
-- **Rate limit:** the API's limiter is in memory, per instance. With multiple API instances, either accept per-instance limits or move the limiter to a shared store. Better Auth's own limiter covers sign-in endpoints per instance as well.
+- **Rate limit:** the API's limiter is in memory, per instance, keyed by signed-in user (or client IP before sign-in). One-time codes are also limited per email address (5 sends and 10 attempts per 15 minutes). With multiple API instances, either accept per-instance limits or move the limiters to a shared store. Better Auth's own limiter covers sign-in endpoints per instance as well and receives the client IP resolved with `TRUSTED_PROXY_COUNT`.
 - **Worker:** one worker instance is recommended. pg-boss singleton keys de-duplicate work if two run during a deploy.
 - **RPC:** each sync reads one pinned block per account. Configure dedicated RPC endpoints in production; the public fallbacks are rate-limited.
 

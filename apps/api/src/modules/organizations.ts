@@ -73,9 +73,17 @@ async function loadOrg(deps: Deps, orgId: string, role: MemberRole) {
   };
 }
 
-async function ownerCount(deps: Deps, orgId: string) {
-  const [r] = await deps.db.select({ n: count() }).from(schema.members).where(and(eq(schema.members.organizationId, orgId), eq(schema.members.role, "owner")));
-  return Number(r?.n ?? 0);
+/**
+ * Owners of the organization, row-locked for the rest of the transaction. Concurrent demotions or
+ * removals of owners serialize on these locks, so two owners cannot remove each other at the same time
+ * and leave the organization without an owner.
+ */
+async function lockOwners(tx: Pick<Deps["db"], "select">, orgId: string) {
+  return tx
+    .select({ id: schema.members.id })
+    .from(schema.members)
+    .where(and(eq(schema.members.organizationId, orgId), eq(schema.members.role, "owner")))
+    .for("update");
 }
 
 export function registerOrganizations(app: App, deps: Deps) {
@@ -252,8 +260,9 @@ export function registerOrganizations(app: App, deps: Deps) {
       const [target] = await db.select().from(schema.members).where(and(eq(schema.members.id, memberId), eq(schema.members.organizationId, m.organizationId))).limit(1);
       if (!target || !isRole(target.role)) throw notFound("Member");
       if (!canAssignRole(m.role, role) || !canAssignRole(m.role, target.role)) throw forbidden("Only owners can grant or change the owner role");
-      if (target.role === "owner" && role !== "owner" && (await ownerCount(deps, m.organizationId)) <= 1) throw conflict("last_owner", "An organization must keep at least one owner");
       await db.transaction(async (tx) => {
+        if (target.role === "owner" && role !== "owner" && (await lockOwners(tx, m.organizationId)).length <= 1)
+          throw conflict("last_owner", "An organization must keep at least one owner");
         await tx.update(schema.members).set({ role }).where(eq(schema.members.id, memberId));
         await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: "member.role_changed", targetType: "member", targetId: memberId, data: { from: target.role, to: role }, ...clientInfo(c) });
       });
@@ -281,8 +290,9 @@ export function registerOrganizations(app: App, deps: Deps) {
         assertCan(m.role, "members.manage");
         if (!canAssignRole(m.role, target.role)) throw forbidden("Only owners can remove an owner");
       }
-      if (target.role === "owner" && (await ownerCount(deps, m.organizationId)) <= 1) throw conflict("last_owner", "An organization must keep at least one owner. Transfer ownership first.");
       await db.transaction(async (tx) => {
+        if (target.role === "owner" && (await lockOwners(tx, m.organizationId)).length <= 1)
+          throw conflict("last_owner", "An organization must keep at least one owner. Transfer ownership first.");
         await tx.delete(schema.members).where(eq(schema.members.id, memberId));
         await audit(tx, { organizationId: m.organizationId, actorUserId: user.id, action: self ? "member.left" : "member.removed", targetType: "member", targetId: memberId, data: { userId: target.userId, role: target.role }, ...clientInfo(c) });
       });

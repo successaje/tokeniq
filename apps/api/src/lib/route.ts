@@ -50,7 +50,7 @@ export function requireUser(c: Context<AppEnv>): SessionUser {
 
 export function clientInfo(c: Context<AppEnv>) {
   return {
-    ip: c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    ip: c.get("clientIp") ?? null,
     userAgent: c.req.header("user-agent")?.slice(0, 256) ?? null,
   };
 }

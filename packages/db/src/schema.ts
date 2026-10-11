@@ -401,6 +401,8 @@ export const payments = pgTable(
     tokenAmountRaw: raw("token_amount_raw"),
     chainId: integer("chain_id"),
     txHash: text("tx_hash"),
+    /** Log index of the matched Transfer; one on-chain transfer can settle only one occurrence. */
+    transferLogIndex: integer("transfer_log_index"),
     fromAddress: text("from_address"),
     toAddress: text("to_address"),
     verifiedAt: timestamp("verified_at", { withTimezone: true }),
@@ -411,7 +413,13 @@ export const payments = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [uniqueIndex("payments_obligation_due_uq").on(t.obligationId, t.dueDate), index("payments_org_idx").on(t.organizationId, t.createdAt)],
+  (t) => [
+    uniqueIndex("payments_obligation_due_uq").on(t.obligationId, t.dueDate),
+    index("payments_org_idx").on(t.organizationId, t.createdAt),
+    uniqueIndex("payments_transfer_uq")
+      .on(t.organizationId, t.chainId, t.txHash, t.transferLogIndex)
+      .where(sql`${t.transferLogIndex} is not null`),
+  ],
 );
 
 // ---------------------------------------------------------------------------
@@ -515,7 +523,8 @@ export const approvals = pgTable(
     comment: text("comment"),
     createdAt: createdAt(),
   },
-  (t) => [index("approvals_proposal_idx").on(t.proposalId)],
+  // One decision per member per proposal, enforced by the database as well as the route.
+  (t) => [index("approvals_proposal_idx").on(t.proposalId), uniqueIndex("approvals_proposal_user_uq").on(t.proposalId, t.userId)],
 );
 
 export const proposalComments = pgTable(
@@ -567,7 +576,9 @@ export const executions = pgTable(
     reconciledAt: timestamp("reconciled_at", { withTimezone: true }),
     updatedAt: updatedAt(),
   },
-  (t) => [uniqueIndex("executions_chain_tx_uq").on(t.chainId, t.txHash), index("executions_proposal_idx").on(t.proposalId)],
+  // Unique per proposal, not per chain: a transaction hash is public, so another organization recording it
+  // first must not block the real proposal from tracking its own execution.
+  (t) => [uniqueIndex("executions_proposal_tx_uq").on(t.proposalId, t.txHash), index("executions_chain_tx_idx").on(t.chainId, t.txHash)],
 );
 
 // ---------------------------------------------------------------------------

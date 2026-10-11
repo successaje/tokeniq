@@ -25,6 +25,8 @@ export interface Membership {
 export type AppEnv = {
   Variables: {
     requestId: string;
+    /** Client IP resolved from X-Forwarded-For with TRUSTED_PROXY_COUNT (see lib/rate-limit.ts). */
+    clientIp: string | null;
     user: SessionUser | null;
     sessionId: string | null;
     member: Membership;

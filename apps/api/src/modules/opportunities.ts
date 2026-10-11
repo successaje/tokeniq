@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { assessSuitability, estimateYield, generateRecommendations, liquidityLimit, wad, wadToString } from "@tokeniq/core";
 import { chainName } from "@tokeniq/chain";
-import { and, desc, eq, inArray, notInArray, schema } from "@tokeniq/db";
+import { and, desc, eq, inArray, notInArray, schema, sql } from "@tokeniq/db";
 import type { App, Deps } from "../context.js";
 import { audit } from "../lib/audit.js";
 import { assertCan } from "../lib/authz.js";
@@ -27,6 +27,8 @@ export async function refreshRecommendations(deps: Deps, state: OrgState) {
   });
   const fingerprints = all.map((r) => r.fingerprint);
   await deps.db.transaction(async (tx) => {
+    // Serialised per organization: GET /recommendations and the evaluate job may refresh concurrently.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`recommendations:${state.orgId}`}))`);
     for (const r of all) {
       await tx
         .insert(schema.recommendations)

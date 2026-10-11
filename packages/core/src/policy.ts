@@ -1,11 +1,15 @@
 import { z } from "zod";
 import { parseDecimal, WAD_DECIMALS } from "./money";
 
-/** A non-negative decimal string with up to 18 fractional digits, e.g. "125000" or "99.5". */
+/**
+ * A non-negative decimal string with up to 18 fractional digits, e.g. "125000" or "99.5".
+ * At most 20 integer digits, so every value fits the numeric(38,18) columns it is stored in.
+ */
 export const decimalString = z
   .string()
   .trim()
   .regex(/^\d+(\.\d{1,18})?$/, "Enter a positive amount using digits and an optional decimal point")
+  .refine((v) => v.split(".")[0]!.replace(/^0+(?=\d)/, "").length <= 20, "Amount is too large")
   .refine((v) => {
     try {
       parseDecimal(v, WAD_DECIMALS);

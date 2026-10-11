@@ -20,6 +20,12 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   /** Development only: additional browser origins (comma-separated), e.g. per-tester *.localhost hosts. Ignored in production. */
   DEV_EXTRA_ORIGINS: z.string().default(""),
+  /**
+   * Number of reverse proxies in front of the API that append to X-Forwarded-For (for example 2 for a
+   * platform edge plus the web app's /api rewrite). Used to find the real client IP for rate limits and
+   * audit records. Unset = leftmost X-Forwarded-For entry, which clients can spoof.
+   */
+  TRUSTED_PROXY_COUNT: z.coerce.number().int().min(0).max(10).optional(),
   /** Run background jobs in this process. Production runs a dedicated worker. */
   RUN_JOBS: bool.default(true),
   /** Apply database migrations when the API starts (development). Production uses a release step. */

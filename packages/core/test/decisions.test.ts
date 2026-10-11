@@ -67,6 +67,91 @@ describe("validateAction", () => {
   });
 });
 
+describe("validateAction binds amounts and payees (security review BE-01, BE-02)", () => {
+  const payment = (over: Record<string, unknown> = {}) =>
+    ({
+      type: "payment",
+      accountId: SAFE.id,
+      obligationId: "payroll",
+      dueDate: "2025-10-25",
+      amountUsd: wad(40_000),
+      assetAmountRaw: usdc(40_000),
+      assetSymbol: "USDC",
+      recipient: "0x3333333333333333333333333333333333333333",
+      ...over,
+    }) as Parameters<typeof validateAction>[0];
+  const paymentCtx = (
+    ctx: ValidationContext,
+    terms: Partial<{ recipient: string | null; chainId: number | null; assetSymbol: string | null }> = {},
+  ): ValidationContext => ({
+    ...ctx,
+    unsettledOccurrences: new Map([["payroll|2025-10-25", wad(40_000)]]),
+    actionAsset: { asset: USDC_BASE, price: quote("1") },
+    paymentTerms: new Map([["payroll", { recipient: "0x3333333333333333333333333333333333333333", chainId: 8453, assetSymbol: "USDC", ...terms }]]),
+  });
+
+  it("rejects an allocation whose USD figure understates the token amount", () => {
+    const { ctx } = setup();
+    // $10k stated, 900k USDC moved: every USD check would pass on the small figure.
+    const v = validateAction(
+      { type: "allocate", accountId: SAFE.id, opportunityId: "morpho:8453:0xvault", amountUsd: wad(10_000), assetAmountRaw: usdc(900_000) },
+      ctx,
+    );
+    expect(v.valid).toBe(false);
+    expect(v.checks.find((c) => c.id === "amount_consistent")?.status).toBe("fail");
+  });
+
+  it("accepts amounts within the 1% tolerance and values USD stablecoins at no less than $1", () => {
+    const { ctx } = setup();
+    const ok = validateAction(
+      { type: "allocate", accountId: SAFE.id, opportunityId: "morpho:8453:0xvault", amountUsd: wad(100_000), assetAmountRaw: usdc("100500") },
+      ctx,
+    );
+    expect(ok.checks.find((c) => c.id === "amount_consistent")?.status).toBe("pass");
+    // Depegged quote (0.50): the token amount is still valued at $1 for approval and caps, never understated.
+    const depeg = validateAction(
+      { type: "allocate", accountId: SAFE.id, opportunityId: "morpho:8453:0xvault", amountUsd: wad(50_000), assetAmountRaw: usdc(100_000) },
+      { ...ctx, actionAsset: { asset: USDC_BASE, price: quote("0.5") } },
+    );
+    expect(depeg.checks.find((c) => c.id === "amount_consistent")?.status).toBe("fail");
+  });
+
+  it("rejects understated withdrawals (valued from the position)", () => {
+    const { ctx } = setup({ positions: 500_000 });
+    const v = validateAction({ type: "withdraw", accountId: SAFE.id, positionId: "p1", amountUsd: wad(1), assetAmountRaw: usdc(400_000) }, ctx);
+    expect(v.checks.find((c) => c.id === "amount_consistent")?.status).toBe("fail");
+  });
+
+  it("passes a payment to the recorded payee on its network and asset", () => {
+    const { ctx } = setup();
+    const v = validateAction(payment(), paymentCtx(ctx));
+    expect(v.checks.filter((c) => c.status === "fail")).toEqual([]);
+  });
+
+  it("rejects payments to an address other than the obligation's payee", () => {
+    const { ctx } = setup();
+    const v = validateAction(payment({ recipient: "0x4444444444444444444444444444444444444444" }), paymentCtx(ctx));
+    expect(v.checks.find((c) => c.id === "recipient_matches")?.status).toBe("fail");
+  });
+
+  it("fails closed when the obligation has no recorded payee or terms are not supplied", () => {
+    const { ctx } = setup();
+    expect(validateAction(payment(), paymentCtx(ctx, { recipient: null })).checks.find((c) => c.id === "recipient_matches")?.status).toBe("fail");
+    const noTerms = validateAction(payment(), { ...paymentCtx(ctx), paymentTerms: undefined });
+    expect(noTerms.valid).toBe(false);
+    const noAsset = validateAction(payment(), { ...paymentCtx(ctx), actionAsset: undefined });
+    expect(noAsset.checks.find((c) => c.id === "amount_valued")?.status).toBe("fail");
+  });
+
+  it("rejects payments on another network, in another asset, or understating the amount", () => {
+    const { ctx } = setup();
+    const failed = (v: ReturnType<typeof validateAction>) => v.checks.filter((c) => c.status === "fail").map((c) => c.id);
+    expect(failed(validateAction(payment(), paymentCtx(ctx, { chainId: 1 })))).toContain("payment_network");
+    expect(failed(validateAction(payment(), paymentCtx(ctx, { assetSymbol: "EURC" })))).toContain("payment_asset");
+    expect(failed(validateAction(payment({ amountUsd: wad(100) }), paymentCtx(ctx)))).toContain("amount_consistent");
+  });
+});
+
 describe("generateRecommendations", () => {
   it("recommends deploying part of the surplus within every cap, with do-nothing as an alternative", () => {
     const s = setup();

@@ -126,3 +126,13 @@ describe("formatUsd", () => {
     expect(formatUsd(wad("999"), { compact: true })).toBe("$999.00");
   });
 });
+
+describe("decimalString bounds (security review BE-12)", () => {
+  it("rejects amounts that would overflow numeric(38,18) storage", async () => {
+    const { decimalString } = await import("../src/policy.js");
+    expect(decimalString.safeParse("99999999999999999999.5").success).toBe(true);
+    expect(decimalString.safeParse("100000000000000000000").success).toBe(false);
+    expect(decimalString.safeParse("-1").success).toBe(false);
+    expect(decimalString.safeParse("1e6").success).toBe(false);
+  });
+});

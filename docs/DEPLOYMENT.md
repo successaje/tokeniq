@@ -33,6 +33,7 @@ API and worker (validated at boot by `apps/api/src/env.ts`; an invalid configura
 | `NODE_ENV=production` | yes | secure cookies; disables `/api/docs` and `DEV_EXTRA_ORIGINS` |
 | `MIGRATE_ON_BOOT=false` | yes (prod) | migrations run as a release step |
 | `RUN_JOBS=false` | yes (api) | jobs run in the worker only |
+| `TRUSTED_PROXY_COUNT` | yes (prod) | number of reverse proxies in front of the API that append to `X-Forwarded-For` (Railway edge + the web `/api` rewrite = `2`). Used to find the client IP for rate limits, Better Auth's sign-in limits and audit records. Unset falls back to the leftmost entry, which clients can spoof |
 | `SMTP_URL`, `EMAIL_FROM` | yes (prod) | without SMTP, production refuses to send email (sign-in codes fail loudly) |
 | `RPC_URL_1`, `RPC_URL_8453`, `RPC_URL_42161`, `RPC_URL_10` | strongly recommended | dedicated endpoints, tried before the public fallbacks |
 | `ANTHROPIC_API_KEY`, `COPILOT_MODEL` | optional | copilot; default model `claude-opus-5-5` |

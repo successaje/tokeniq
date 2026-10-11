@@ -28,3 +28,17 @@ export const unavailable = (code: string, message: string) => new ApiError(503, 
 export interface ErrorBody {
   error: { code: string; message: string; details?: unknown; requestId?: string };
 }
+
+/**
+ * True when `err` (or any error in its cause chain, e.g. a DrizzleQueryError wrapping a pg error) is a
+ * Postgres unique violation, optionally on a specific constraint or index name.
+ */
+export function isUniqueViolation(err: unknown, constraint?: string): boolean {
+  let cur: unknown = err;
+  for (let depth = 0; cur && typeof cur === "object" && depth < 6; depth++) {
+    const e = cur as { code?: unknown; constraint?: unknown; cause?: unknown };
+    if (e.code === "23505") return constraint === undefined || e.constraint === constraint;
+    cur = e.cause;
+  }
+  return false;
+}
