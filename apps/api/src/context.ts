@@ -43,6 +43,8 @@ export interface Deps {
   boss: PgBoss | null;
   /** Clock injection for deterministic tests. */
   now: () => Date;
+  /** Optional injected Claude client (tests); otherwise created from ANTHROPIC_API_KEY. */
+  copilotClient?: import("@anthropic-ai/sdk").default;
 }
 
 export type App = OpenAPIHono<AppEnv>;

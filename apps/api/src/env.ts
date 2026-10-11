@@ -18,6 +18,8 @@ const schema = z.object({
   /** Origin at which the browser reaches the API (normally the web origin through its /api proxy). */
   API_PUBLIC_URL: z.string().url().default("http://localhost:3000"),
   BETTER_AUTH_SECRET: z.string().min(32),
+  /** Development only: additional browser origins (comma-separated), e.g. per-tester *.localhost hosts. Ignored in production. */
+  DEV_EXTRA_ORIGINS: z.string().default(""),
   /** Run background jobs in this process. Production runs a dedicated worker. */
   RUN_JOBS: bool.default(true),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
@@ -43,7 +45,7 @@ const schema = z.object({
   DISABLED_FEATURES: z.string().default(""),
 });
 
-export type Env = z.infer<typeof schema> & { disabled: Set<string> };
+export type Env = z.infer<typeof schema> & { disabled: Set<string>; extraOrigins: string[] };
 
 export function loadEnv(source: Record<string, string | undefined> = process.env): Env {
   const parsed = schema.safeParse(source);
@@ -56,7 +58,8 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
       .map((s) => s.trim())
       .filter(Boolean),
   );
-  return { ...parsed.data, disabled };
+  const extraOrigins = parsed.data.NODE_ENV === "production" ? [] : parsed.data.DEV_EXTRA_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean);
+  return { ...parsed.data, disabled, extraOrigins };
 }
 
 /** Features that can be disabled at runtime via DISABLED_FEATURES. */

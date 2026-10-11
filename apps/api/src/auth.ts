@@ -22,7 +22,7 @@ export function createAuth(db: Database, env: Env, mailer: Mailer, publicClient:
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.API_PUBLIC_URL,
     basePath: "/api/auth",
-    trustedOrigins: [env.APP_URL],
+    trustedOrigins: [env.APP_URL, ...env.extraOrigins],
     database: drizzleAdapter(db, {
       provider: "pg",
       usePlural: true,

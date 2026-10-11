@@ -35,7 +35,7 @@ export function createApp(deps: Deps) {
   app.use("*", secureHeaders({ crossOriginResourcePolicy: "same-site", referrerPolicy: "no-referrer" }));
   // State-changing requests must come from the web app's origin (defence in depth with SameSite=Lax cookies).
   // Hono's csrf() only inspects form content types, so JSON requests are checked here too.
-  const allowedOrigins = new Set([new URL(env.APP_URL).origin, new URL(env.API_PUBLIC_URL).origin]);
+  const allowedOrigins = new Set([new URL(env.APP_URL).origin, new URL(env.API_PUBLIC_URL).origin, ...env.extraOrigins]);
   app.use("/api/*", csrf({ origin: [...allowedOrigins] }));
   app.use("/api/v1/*", async (c, next) => {
     if (!["GET", "HEAD", "OPTIONS"].includes(c.req.method)) {

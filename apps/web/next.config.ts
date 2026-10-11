@@ -26,6 +26,8 @@ const config: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ["@tokeniq/core"],
   typedRoutes: false,
+  // Development: allow per-tester hostnames (cookies are host-scoped, so sessions stay separate).
+  allowedDevOrigins: ["127.0.0.1", "*.localhost"],
   async rewrites() {
     // The browser only ever talks to the web origin; /api is proxied to the API service.
     return [{ source: "/api/:path*", destination: `${API_ORIGIN}/api/:path*` }];

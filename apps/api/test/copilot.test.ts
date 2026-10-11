@@ -74,3 +74,61 @@ describe("copilot endpoint without an API key", () => {
     expect(res.json.error.code).toBe("copilot_not_configured");
   });
 });
+
+describe("copilot streaming loop (fake Claude client)", () => {
+  it("runs tools server-side, streams text, and stores the history append-only", async () => {
+    const calls: any[] = [];
+    let round = 0;
+    const fake = {
+      beta: {
+        messages: {
+          stream(params: any) {
+            calls.push(JSON.parse(JSON.stringify(params)));
+            round++;
+            const content =
+              round === 1
+                ? [{ type: "tool_use", id: "toolu_1", name: "get_treasury_overview", input: {} }]
+                : [{ type: "text", text: "You can deploy the amount shown [ref:reserve]." }];
+            const listeners: Record<string, (d: string) => void> = {};
+            return {
+              on(ev: string, cb: (d: string) => void) {
+                listeners[ev] = cb;
+                return this;
+              },
+              async finalMessage() {
+                if (round !== 1) listeners.text?.("You can deploy the amount shown [ref:reserve].");
+                return { id: `msg_${round}`, model: "claude-opus-5-5", content, stop_reason: round === 1 ? "tool_use" : "end_turn", usage: { input_tokens: 10, output_tokens: 5 } };
+              },
+            };
+          },
+        },
+      },
+    };
+    const local = await setup();
+    try {
+      local.deps.copilotClient = fake as any;
+      const { createApp } = await import("../src/app.js");
+      const app = createApp(local.deps);
+      const c = new Client({ ...local, app });
+      await c.signIn("loop@example.com", "Lou Loop");
+      const org = (await c.post("/api/v1/sample-workspace")).json.organizationId;
+      const res = await c.post(`/api/v1/orgs/${org}/copilot/messages`, { message: "How much can we deploy?" });
+      expect(res.status).toBe(200);
+      const events = res.text.split("\n\n").map((e: string) => /^event: (.*)$/m.exec(e)?.[1]).filter(Boolean);
+      expect(events).toEqual(expect.arrayContaining(["thread", "tool", "text", "done"]));
+      // Second request carries the tool result produced by TokenIQ, scoped to this org.
+      const toolResult = calls[1].messages.at(-1).content[0];
+      expect(toolResult.type).toBe("tool_result");
+      expect(JSON.parse(toolResult.content).ref).toBe("treasury");
+      expect(calls[0].model).toBe("claude-opus-5-5");
+      expect(calls[0].fallbacks).toBe("default");
+      expect(calls[0].tools.every((t: any) => !/transfer|execute|approve_/i.test(t.name))).toBe(true);
+      const threads = await c.get(`/api/v1/orgs/${org}/copilot/threads`);
+      const thread = await c.get(`/api/v1/orgs/${org}/copilot/threads/${threads.json.threads[0].id}`);
+      expect(thread.json.messages.map((m: any) => m.role)).toEqual(["user", "assistant"]);
+      expect(thread.json.messages[1].text).toContain("[ref:reserve]");
+    } finally {
+      await local.close();
+    }
+  });
+});

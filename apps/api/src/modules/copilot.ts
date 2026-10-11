@@ -36,7 +36,7 @@ type StoredContent = Anthropic.Beta.BetaContentBlockParam[] | string;
 
 export function registerCopilot(app: App, deps: Deps) {
   const { db, env } = deps;
-  const client = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 120_000 }) : null;
+  const client = deps.copilotClient ?? (env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 120_000 }) : null);
   const tools: Anthropic.Beta.BetaTool[] = COPILOT_TOOLS.map((t) => ({ name: t.name, description: t.description, input_schema: t.jsonSchema as Anthropic.Beta.BetaTool.InputSchema, eager_input_streaming: true }));
 
   function requireConfigured() {
