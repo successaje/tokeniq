@@ -1,0 +1,92 @@
+A Ledger Grid — light|Text primary on canvas|#0F1416|#FAFAF9|text
+A Ledger Grid — light|Text primary on surface|#0F1416|#FFFFFF|text
+A Ledger Grid — light|Text secondary on canvas|#4A5458|#FAFAF9|text
+A Ledger Grid — light|Text tertiary on canvas|#636D71|#FAFAF9|text
+A Ledger Grid — light|Text tertiary on sunken|#636D71|#F2F3F2|text
+A Ledger Grid — light|Accent (link/label) on canvas|#0E6470|#FAFAF9|text
+A Ledger Grid — light|On-accent (button label) on accent|#FFFFFF|#0E6470|text
+A Ledger Grid — light|Accent on accent-subtle (selected row)|#0E6470|#E4F1F2|text
+A Ledger Grid — light|Success text on surface|#1E7A46|#FFFFFF|text
+A Ledger Grid — light|Warning text on surface|#995700|#FFFFFF|text
+A Ledger Grid — light|Warning text on warning-subtle|#995700|#FDF3E3|text
+A Ledger Grid — light|Danger text on surface|#B42318|#FFFFFF|text
+A Ledger Grid — light|Danger text on danger-subtle|#B42318|#FDECEA|text
+A Ledger Grid — light|Info text on surface|#2F5FB3|#FFFFFF|text
+A Ledger Grid — light|Input border on surface|#8A9396|#FFFFFF|ui
+A Ledger Grid — light|Focus ring on canvas|#0E6470|#FAFAF9|ui
+A Ledger Grid — light|Bucket: reserve fill on surface|#2D3A40|#FFFFFF|ui
+A Ledger Grid — light|Bucket: obligations fill on surface|#B07018|#FFFFFF|ui
+A Ledger Grid — light|Bucket: surplus fill on surface|#0E6470|#FFFFFF|ui
+A Ledger Grid — dark|Text primary on canvas|#ECEFEE|#0C0F10|text
+A Ledger Grid — dark|Text primary on surface|#ECEFEE|#14181A|text
+A Ledger Grid — dark|Text secondary on surface|#A9B2B5|#14181A|text
+A Ledger Grid — dark|Text tertiary on surface|#87929A|#14181A|text
+A Ledger Grid — dark|Text tertiary on raised|#87929A|#1B2023|text
+A Ledger Grid — dark|Accent on surface|#5CBAC6|#14181A|text
+A Ledger Grid — dark|On-accent on accent|#062A2F|#5CBAC6|text
+A Ledger Grid — dark|Success on surface|#4CC38A|#14181A|text
+A Ledger Grid — dark|Warning on surface|#E2A23B|#14181A|text
+A Ledger Grid — dark|Danger on surface|#F2786D|#14181A|text
+A Ledger Grid — dark|Info on surface|#7EA9F2|#14181A|text
+A Ledger Grid — dark|Input border on surface|#5F6A70|#14181A|ui
+A Ledger Grid — dark|Focus ring on canvas|#5CBAC6|#0C0F10|ui
+A Ledger Grid — dark|Bucket: reserve fill on surface|#6E7A80|#14181A|ui
+A Ledger Grid — dark|Bucket: obligations fill on surface|#D9A441|#14181A|ui
+A Ledger Grid — dark|Bucket: surplus fill on surface|#5CBAC6|#14181A|ui
+B Annual Report — light|Ink on paper|#1B1A17|#F6F3EC|text
+B Annual Report — light|Ink on sheet|#1B1A17|#FFFDF8|text
+B Annual Report — light|Secondary on paper|#57524A|#F6F3EC|text
+B Annual Report — light|Tertiary (footnotes) on paper|#6A645A|#F6F3EC|text
+B Annual Report — light|Accent (Prussian) on paper|#1F3F6B|#F6F3EC|text
+B Annual Report — light|On-accent on accent|#FFFFFF|#1F3F6B|text
+B Annual Report — light|Success on sheet|#2C6B3F|#FFFDF8|text
+B Annual Report — light|Warning on sheet|#8F5300|#FFFDF8|text
+B Annual Report — light|Danger on sheet|#A3261B|#FFFDF8|text
+B Annual Report — light|Info on sheet|#2F5F8F|#FFFDF8|text
+B Annual Report — light|Input rule on sheet|#8C857A|#FFFDF8|ui
+B Annual Report — light|Bucket: reserve on sheet|#1F3F6B|#FFFDF8|ui
+B Annual Report — light|Bucket: obligations on sheet|#A0522D|#FFFDF8|ui
+B Annual Report — light|Bucket: surplus on sheet|#3D6B5A|#FFFDF8|ui
+B Annual Report — dark|Ink on bg|#EEE9DF|#141310|text
+B Annual Report — dark|Ink on sheet|#EEE9DF|#1C1A16|text
+B Annual Report — dark|Secondary on sheet|#B5AEA2|#1C1A16|text
+B Annual Report — dark|Tertiary on sheet|#958E83|#1C1A16|text
+B Annual Report — dark|Accent on sheet|#9DB8E3|#1C1A16|text
+B Annual Report — dark|On-accent on accent|#0F1E33|#9DB8E3|text
+B Annual Report — dark|Success on sheet|#7CC49A|#1C1A16|text
+B Annual Report — dark|Warning on sheet|#E0A85A|#1C1A16|text
+B Annual Report — dark|Danger on sheet|#F08A7E|#1C1A16|text
+B Annual Report — dark|Info on sheet|#8FC1E8|#1C1A16|text
+B Annual Report — dark|Input rule on sheet|#6B655B|#1C1A16|ui
+B Annual Report — dark|Bucket: reserve on sheet|#7E9ED6|#1C1A16|ui
+B Annual Report — dark|Bucket: obligations on sheet|#D98E63|#1C1A16|ui
+B Annual Report — dark|Bucket: surplus on sheet|#9CCB9E|#1C1A16|ui
+C Reservoir — dark (default)|Text primary on bg|#E8EAEC|#0E1012|text
+C Reservoir — dark (default)|Text primary on surface|#E8EAEC|#15181B|text
+C Reservoir — dark (default)|Secondary on surface|#A3AAB1|#15181B|text
+C Reservoir — dark (default)|Tertiary on surface|#868E96|#15181B|text
+C Reservoir — dark (default)|Tertiary on raised|#868E96|#1C2024|text
+C Reservoir — dark (default)|Accent (brass) on surface|#D2A857|#15181B|text
+C Reservoir — dark (default)|On-accent on brass|#1A1408|#D2A857|text
+C Reservoir — dark (default)|Success on surface|#5FBF8F|#15181B|text
+C Reservoir — dark (default)|Warning (tangerine) on surface|#F08C4A|#15181B|text
+C Reservoir — dark (default)|Danger on surface|#F0716A|#15181B|text
+C Reservoir — dark (default)|Info on surface|#78A9E0|#15181B|text
+C Reservoir — dark (default)|Input border on surface|#656E77|#15181B|ui
+C Reservoir — dark (default)|Bucket: reserve on surface|#4E6B8A|#15181B|ui
+C Reservoir — dark (default)|Bucket: obligations on surface|#7E9AB6|#15181B|ui
+C Reservoir — dark (default)|Bucket: surplus on surface|#D2A857|#15181B|ui
+C Reservoir — light|Text primary on bg|#121518|#F4F5F6|text
+C Reservoir — light|Secondary on bg|#4B535B|#F4F5F6|text
+C Reservoir — light|Tertiary on bg|#646D76|#F4F5F6|text
+C Reservoir — light|Tertiary on surface|#646D76|#FFFFFF|text
+C Reservoir — light|Accent (brass ink) on surface|#85611A|#FFFFFF|text
+C Reservoir — light|On-accent on brass ink|#FFFFFF|#85611A|text
+C Reservoir — light|Success on surface|#1F7A4D|#FFFFFF|text
+C Reservoir — light|Warning on surface|#A3470C|#FFFFFF|text
+C Reservoir — light|Danger on surface|#B3261E|#FFFFFF|text
+C Reservoir — light|Info on surface|#2B5E9E|#FFFFFF|text
+C Reservoir — light|Input border on surface|#858E97|#FFFFFF|ui
+C Reservoir — light|Bucket: reserve on surface|#2F4A63|#FFFFFF|ui
+C Reservoir — light|Bucket: obligations on surface|#6A879F|#FFFFFF|ui
+C Reservoir — light|Bucket: surplus on surface|#B07F22|#FFFFFF|ui

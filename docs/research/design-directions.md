@@ -731,7 +731,7 @@ def contrast(a, b):
     return (hi + 0.05) / (lo + 0.05)   # text >= 4.5, large text / non-text >= 3.0
 ```
 
-The scripts are in `scratchpad/research/`: `contrast.py`, `cvd.py`, and `final_pairs.txt` with the exact pair list.
+The scripts are in [`scripts/`](scripts/): `contrast.py`, `cvd.py`, and `final_pairs.txt` with the exact pair list. Run `python3 scripts/contrast.py < scripts/final_pairs.txt`.
 
 ## Appendix B: Font verification log ([T], 2026-10-11)
 
