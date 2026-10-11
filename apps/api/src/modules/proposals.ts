@@ -403,9 +403,9 @@ export function registerProposals(app: App, deps: Deps) {
       assertCan(m.role, "proposals.sign");
       const { id } = c.req.valid("param");
       const p = await getProposal(m.organizationId, id);
-      if (!["approved", "awaiting_signatures", "stale"].includes(p.status)) throw conflict("not_approved", "The transaction can be prepared only after internal approval is complete.");
       const state = await loadOrgState(db, m.organizationId, deps.now());
       requireExecutionAllowed(state);
+      if (!["approved", "awaiting_signatures", "stale"].includes(p.status)) throw conflict("not_approved", "The transaction can be prepared only after internal approval is complete.");
       const action = actionFromJson(p.action as ActionJson);
       const live = validateAction(action, validationContext(state, action));
       if (!live.valid) throw new ApiError(422, "policy_check_failed", "The action no longer passes every policy check with current data. Create a new proposal from fresh figures.", validationDto(live));
