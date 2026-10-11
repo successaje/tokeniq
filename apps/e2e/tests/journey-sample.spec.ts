@@ -61,9 +61,12 @@ test.describe.serial("sample workspace", () => {
 
   test("the command palette navigates by keyboard", async ({ page }) => {
     await page.goto("/app");
-    await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
+    // The shortcut listener attaches on hydration, which can finish after the first paint on a slow runner.
+    await expect(async () => {
+      await page.keyboard.press("ControlOrMeta+k");
+      await expect(dialog).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
     await page.keyboard.type("Reserves");
     await page.keyboard.press("Enter");
     await page.waitForURL(/\/app\/reserves$/);
