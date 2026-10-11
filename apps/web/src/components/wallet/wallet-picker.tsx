@@ -41,7 +41,7 @@ export function WalletPicker({ onConnected }: { onConnected?: (c: Connector) => 
           {c.type === "safe" && <span className="ml-auto text-xs text-text-3">Inside Safe&#123;Wallet&#125;</span>}
         </Button>
       ))}
-      {!hasInjected && !walletConnectEnabled && <Callout tone="info">No wallet extension was detected in this browser. Install one such as Rabby or MetaMask, or sign in with email.</Callout>}
+      {!hasInjected && !walletConnectEnabled && <Callout tone="info">No wallet extension was detected in this browser. Install one such as Rabby or MetaMask, then reload this page.</Callout>}
       {describeError(error) && <Callout tone="danger">{describeError(error)}</Callout>}
     </div>
   );

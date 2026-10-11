@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="8" height="8" fill="#475C6B"/><rect width="2.6" height="8" fill="#ffffff" opacity="0.22"/></pattern>
+    <pattern id="ticks" width="14" height="20" patternUnits="userSpaceOnUse"><rect width="14" height="20" fill="#B07018"/><rect x="12.6" width="1.4" height="20" fill="#ffffff" opacity="0.35"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#FAFAF9"/>
+  <g stroke="#E3E5E4" stroke-width="1">
+    <line x1="80" y1="0" x2="80" y2="630"/><line x1="1120" y1="0" x2="1120" y2="630"/>
+    <line x1="0" y1="96" x2="1200" y2="96"/><line x1="0" y1="534" x2="1200" y2="534"/>
+  </g>
+  <g transform="translate(80 30) scale(1.5)">
+    <rect x="1" y="1" width="22" height="22" rx="6" fill="#0F1416"/><rect x="5.5" y="15.5" width="13" height="2.5" rx="1.25" fill="#FAFAF9"/><rect x="5.5" y="10.75" width="9" height="2.5" rx="1.25" fill="#FAFAF9" opacity="0.7"/><rect x="5.5" y="6" width="5" height="2.5" rx="1.25" fill="#5CBAC6"/>
+  </g>
+  <text x="126" y="63" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="26" font-weight="600" letter-spacing="-0.5" fill="#0F1416">TokenIQ</text>
+  <text x="1120" y="61" text-anchor="end" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="18" fill="#4A5458">Treasury operations for on-chain organizations</text>
+  <text x="80" y="200" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="64" font-weight="500" letter-spacing="-2" fill="#0F1416">Make every treasury</text>
+  <text x="80" y="272" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="64" font-weight="500" letter-spacing="-2" fill="#0F1416">decision count.</text>
+  <text x="80" y="330" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="24" fill="#4A5458">Know what you owe, protect what you cannot risk, decide what the rest should do.</text>
+  <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="18" fill="#0F1416">
+    <text x="80" y="402">Free to work</text>
+    <rect x="260" y="390" width="330" height="14" rx="7" fill="#0E7C8A"/>
+    <line x1="80" y1="424" x2="1120" y2="424" stroke="#E3E5E4"/>
+    <text x="80" y="456">Committed</text>
+    <rect x="260" y="444" width="560" height="14" rx="7" fill="url(#ticks)"/>
+    <line x1="80" y1="478" x2="1120" y2="478" stroke="#E3E5E4"/>
+    <text x="80" y="510">Protected</text>
+    <rect x="260" y="498" width="860" height="14" rx="7" fill="url(#hatch)"/>
+  </g>
+  <text x="80" y="584" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="18" fill="#636D71">Non-custodial · Reserve-first policy · Approvals, Safe signatures and execution kept separate</text>
+</svg>

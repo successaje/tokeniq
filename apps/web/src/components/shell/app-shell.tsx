@@ -17,6 +17,7 @@ import { relativeTime } from "@/lib/format";
 import { OrgProvider, ROLE_LABEL, useMe, useOrg } from "@/lib/org";
 import { useTheme } from "@/lib/theme";
 import type { AlertDto, OverviewDto } from "@/lib/types";
+import { PwaClient } from "@/components/pwa/pwa-client";
 import { CommandPalette } from "./command-palette";
 import { ALL_NAV, MOBILE_TABS, NAV, SECONDARY_NAV, type NavItem } from "./nav";
 
@@ -370,6 +371,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
       </Sheet>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <PwaClient />
     </div>
   );
 }
