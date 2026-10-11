@@ -1,0 +1,3638 @@
+{
+  "capturedAt": "2026-10-11T19:29:39.182Z",
+  "endpoint": "https://api.morpho.org/graphql",
+  "variables": {
+    "chainIds": [8453, 1],
+    "minTvlUsd": 20000000,
+    "first": 50,
+    "skip": 0,
+    "assets": ["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"]
+  },
+  "response": {
+    "data": {
+      "vaultV2s": {
+        "pageInfo": {
+          "count": 18,
+          "countTotal": 18
+        },
+        "items": [
+          {
+            "address": "0xbeeff2490FEffa212faC2f6553682C219E6a8845",
+            "name": "Steakhouse High Yield USDC Edition",
+            "symbol": "sirloinUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 463729635.2607258,
+            "liquidityUsd": 38382610.98219815,
+            "apyNative": 0.030616505594202065,
+            "apyNet": 0.030616505594202065,
+            "performanceFee": 0.25,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 32270109275888,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "mGLO"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x182e072F2C9C58c6F19F144c97986F7496c6A109",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 25281798348710,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 32270109275888,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 14314589331516,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbXRP"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x031b2EFC8d70042Ac8d9f5c793c4149eC4b60fdE",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 10,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "JitoSOL"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x78F772F5Fcc03256260cC1165e34Da9bb3f9BE1C",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 463889699270616,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "reUSD"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x04C10C80EceD1b5FEBBC59442b392470773C9bc0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1141822246837,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 390199426296317,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 14314589331516,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 546187173041,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 390199426296317,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "USDe"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xF4b17C79492d68775e22e8Dd0a2Bb22854A39A47",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 546187173041,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 10,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1141822246837,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbZEC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3CB2d7204F47a468B82C6fAb1CA9675e9F7A272",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 135766598297,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbHYPE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x7FaD8B8De2DDb7b4B415e1Aa3613e45EeF9E4bFf",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "sUSDe"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xeFE4A8e53Ff7c65fe07A079B54e26b48d1a51967",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 25281798348710,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 135766598297,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeef0786756810478b88982DE00F3CD7fdB8e7c7",
+            "name": "Grove x Steakhouse USDC",
+            "symbol": "grove-steakUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 262005799.4257831,
+            "liquidityUsd": 170279225.72808522,
+            "apyNative": 0.04601388455759424,
+            "apyNet": 0.04601388455759424,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 219470151108808,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 42626083983971,
+                  "data": {}
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 262096235092779,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 219470151108808,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 42626083983971,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeef0e0834849aCC03f0089F01f4F1Eeb06873C9",
+            "name": "Steakhouse Prime USDC",
+            "symbol": "steakUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 209329691.5420739,
+            "liquidityUsd": 170278071.34592342,
+            "apyNative": 0.04601022525310483,
+            "apyNet": 0.04601022525310483,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 197401412971480,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 9166602434497,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 305247551051,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xD7A1abA119a236Fea5BBC5cAC6836465cbe9289A",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2468241739259,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 197401412971480,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2528682215760,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 9166602434497,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 305247551051,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 60440476501,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xb40d93F44411D8C09aD17d7F88195eF9b05cCD96",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 209401945172788,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x050cE30b927Da55177A4914EC73480238BAD56f0",
+            "name": "Gauntlet USDC Prime",
+            "symbol": "gtusdcp",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 186349967.2465057,
+            "liquidityUsd": 170279225.6014449,
+            "apyNative": 0.04600965763828482,
+            "apyNet": 0.04600965763828482,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Gauntlet",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.gauntlet.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/gauntlet_xyz"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Adapter",
+                  "allocation": 186414282787614,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 175795890085813,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 8320270241602,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 121288990151,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xD7A1abA119a236Fea5BBC5cAC6836465cbe9289A",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 175795890085813,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1211,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x4756c26E01E61c7c2F86b10f4316e179db8F9425",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 447654168202,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xb40d93F44411D8C09aD17d7F88195eF9b05cCD96",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2176833470048,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 8320270241602,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 121288990151,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1729179300635,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x8c106EEDAd96553e64287A5A6839c3Cc78afA3D0",
+            "name": "Gauntlet USDC Prime",
+            "symbol": "gtusdcp",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 120128052.50713782,
+            "liquidityUsd": 33291810.09026372,
+            "apyNative": 0.04523260123621556,
+            "apyNet": 0.04523260123621556,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Gauntlet",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.gauntlet.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/gauntlet_xyz"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 89033837363732,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 89056113274515,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 676544713602,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 120169516705935,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2042655735923,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 22275910783,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 26978517059416,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 27221550068522,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2719200449525,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1172652913373,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 243033009106,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xf1561bC4b3D1bA49053986Fb9ee88D4fE22d0Cf4",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1172652913373,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeef088055857739C12CD3765F20b7679Def0f51",
+            "name": "Steakhouse Prime USDC",
+            "symbol": "steakUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 113107261.73689178,
+            "liquidityUsd": 33291810.09026372,
+            "apyNative": 0.045645803482919224,
+            "apyNet": 0.045645803482919224,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 64211971108229,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 246303108494,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "weETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3A7A3ceFee206f9d7Fe00eC3C83324ED4228411",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 25705144381573,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "weETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3A7A3ceFee206f9d7Fe00eC3C83324ED4228411",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2727002510608,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 6771102685528,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 95926333001,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 596410941341,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 12888367857007,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 9498105196136,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 784855559067,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xf1561bC4b3D1bA49053986Fb9ee88D4fE22d0Cf4",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 25951447490067,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 64116044775228,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 12103512297940,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 113146302592780,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 596410941341,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x55C1B6e461a6334B567bAF0FEb5D728715446f05",
+            "name": "Pendle Ecosystem USDC",
+            "symbol": "pendleUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 60141625.43548588,
+            "liquidityUsd": 14461405.7717119,
+            "apyNative": 0.05600513184583205,
+            "apyNet": 0.06522279731421586,
+            "performanceFee": 0.05,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Armitage by Wintermute",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://armitage.wintermute.com/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/wintermute_t"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 14261489964346,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-sUSDS-26NOV2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x3464a61A68C486241FE07201C913F055Bdce35BF",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 14261489964346,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 7759429207213,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 38141465147976,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-reUSD-10DEC2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 38141465147976,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 7759429207213,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-sUSDE-26NOV2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xF8b29e7E9c00CE531434775f7923CC9fbCa01b08",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 60162384319535,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeeff2C5bF38f90e3482a8b19F12E5a6D2FCa757",
+            "name": "Steakhouse High Yield USDC",
+            "symbol": "bbqUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 48869894.440189175,
+            "liquidityUsd": 4290488.90511082,
+            "apyNative": 0.05674695780962994,
+            "apyNet": 0.05674695780962994,
+            "performanceFee": 0.05,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 4,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-srUSDe-2APR2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x8B417d1e0C08d8005B7Ca1d5ebbc72Ea877DB391",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 16132633159798,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "mF-ONE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x0cB1928EcA8783F05a07D9Ae2AfB33f38BFBEb78",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-USDG-28MAY2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xEA268c588072e2639448E3a9433AB92E871335E2",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 3428,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-stcUSD-23JUL2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x11aEFbf08bAB2b3f3141c2CC4749A638c4c3b674",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 92106505,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1726415907399,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "reUSD"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA66a4F03Fd8031973f8C7718904ce32385f54E70",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-USDG-24SEP2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x4C0fE43eCF0C552F9cFE40D07B7fb5235d808076",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 92106505,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "TSLAon"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xeCcf43900d96c79fB36122818b42F40bDe01597c",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 5525382,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 387212995089,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "weETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x5635a2F38c5dFd1d8fDB176d9CB5AEFA07bf6A68",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "tBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x57bfdF6aB73995C5af58A95A16798190e366CA5b",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 9999053242646,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-reUSD-10DEC2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 3426,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 48886707578407,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 4,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 16132633159798,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 5802197104727,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "AA_FalconXUSDC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x52eA2C12734B5bB61e1edf52Bb0f01D9206493Fc",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "syrupUSDC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x80032f4cb6E3573b9ed61E888AF658E48Fb790cC",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1726415907399,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 9999053242646,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "USCC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x68066D2891254F1F3285Cac0bB16B65B28EE3cAb",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xA2EAaD0D586cF9FD73bb2c09cF6A7E3e187D68cd",
+            "name": "Wintermute USDC Select",
+            "symbol": "armUSDCs",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 45128058.62868189,
+            "liquidityUsd": 20661252.562908195,
+            "apyNative": 0.05259504466529112,
+            "apyNet": 0.05268851221631166,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Armitage by Wintermute",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://armitage.wintermute.com/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/wintermute_t"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 1229392000983,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 20668384138471,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-USDG-24SEP2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x4C0fE43eCF0C552F9cFE40D07B7fb5235d808076",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 6800035353333,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 6800035353333,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2293846554188,
+                  "data": {}
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 45143635330004,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1229392000983,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-USDat-14JAN2027"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x034f45AcCB8949e55366BEc6d4023d1C1E372Dad",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 9327555947709,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-reUSD-10DEC2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2293846554188,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 20668384138471,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 4324166312119,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "v-wmtUSDC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x6969A0296d9fEC77e794651469e362105d2307e8",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 9327555947709,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 500255023200,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 500255023200,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "USD3"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x68b4c2B2b2e245AB54a3bD55DfD5A9d84f029C06",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "reUSD"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA66a4F03Fd8031973f8C7718904ce32385f54E70",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 4324166312119,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x91C056B6d4311a743614FBc03ac32d4E6A2d3a3c",
+            "name": "Clearstar cbAssets Vault",
+            "symbol": "CSCBUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 36276702.80333099,
+            "liquidityUsd": 23286551.302072816,
+            "apyNative": 0.042495189248192,
+            "apyNet": 0.060495189246500755,
+            "performanceFee": 0.1,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Clearstar",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.clearstar.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/ClearstarLabs"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 23294589043236,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2973772899976,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "JitoSOL"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x78F772F5Fcc03256260cC1165e34Da9bb3f9BE1C",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1659281150016,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbXRP"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x031b2EFC8d70042Ac8d9f5c793c4149eC4b60fdE",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 36289224311716,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 368779362029,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1107164076551,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1659281150016,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 725862841484,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 23294589043236,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1107164076551,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbADA"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x35D87a743D1F2f7CaFb42D855dC1c5Df857Ce45f",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2973772899976,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 5968225800602,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 725862841484,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x4756c26E01E61c7c2F86b10f4316e179db8F9425",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 368779362029,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbZEC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3CB2d7204F47a468B82C6fAb1CA9675e9F7A272",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 191549137822,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbHYPE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x7FaD8B8De2DDb7b4B415e1Aa3613e45EeF9E4bFf",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 5968225800602,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "SOL"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xE9725430f3A72611ac72EdDc650625bce4F45DC7",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 191549137822,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbEEF00A59B577423653A1526c7009bdE103F542B",
+            "name": "Steakhouse Confidential Prime USDC",
+            "symbol": "steakcUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 34774628.52393284,
+            "liquidityUsd": 23125347.503901597,
+            "apyNative": 0.07199999719278122,
+            "apyNet": 0.07199999719278122,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 23133301361645,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 23133301361645,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 10221837257579,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1438360349507,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 34793498968731,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1438360349507,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 10221837257579,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xBeEfF0be997Cca5B1c13A7433c2004637975739e",
+            "name": "Ethena x Steakhouse USDC",
+            "symbol": "ethenaUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 31487296.27663581,
+            "liquidityUsd": 0,
+            "apyNative": 0.050361506496243796,
+            "apyNet": 0.050361506496243796,
+            "performanceFee": 0.05,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 12046499965296,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 12046499965296,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 19397851933496,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 53812742769,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 53812742769,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "USDe"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xF4b17C79492d68775e22e8Dd0a2Bb22854A39A47",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 19397851933496,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbXRP"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x031b2EFC8d70042Ac8d9f5c793c4149eC4b60fdE",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 31498164641561,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x4Ef53d2cAa51C447fdFEEedee8F07FD1962C9ee6",
+            "name": "KPK USDC Prime",
+            "symbol": "KPK_USDC_Prime",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 28947036.47946551,
+            "liquidityUsd": 12498978.664347347,
+            "apyNative": 0.046637675672342976,
+            "apyNet": 0.046637675672342976,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "KPK",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://kpk.io"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/kpk_io"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 12475178021237,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 292258156171,
+                  "data": {}
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 28928913157554,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 12475178021237,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 292258156171,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "LsETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x377F722043bb5D021f4366127d49c772e1c01c7b",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 3128375619163,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 7234609469476,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2894524491728,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2894524491728,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2401467146522,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "OETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xE8aDfF9117151fb5ad7313873780b87cC56EEDB0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 7234609469476,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 502500253256,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 3128375619163,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "rETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x36Cb058364a811636685ef15a71E8ea99043f815",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2401467146522,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "weETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3A7A3ceFee206f9d7Fe00eC3C83324ED4228411",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 502500253256,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xc207d3f66537D7F66456808379A0E560cF20Da36",
+            "name": "RockawayX Confidential RWA USDC",
+            "symbol": "roxcUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 26491685.908226196,
+            "liquidityUsd": 3608039.8894899637,
+            "apyNative": 0.06493597579266021,
+            "apyNet": 0.10010044839057888,
+            "performanceFee": 0.1,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "RockawayX",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://rockawayx.com/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/RockawayX"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 4078774273144,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-reUSD-10DEC2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 26500829955000,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 600019517563,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 21822036164293,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 4078774273144,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 21822036164293,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PST"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa5657B406Fc4282039861C6fcA64452aeFEC8ac0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wFalconX"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x52eA2C12734B5bB61e1edf52Bb0f01D9206493Fc",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 600018464942,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "AUTO"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x9abd4961996b7957baA4Be82716d23BdfE541854",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1052621,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "AUTO"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xd21756Fc315da9218A36bc7a7F69784cc60cCEFE",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PRIME"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x999eFF9cA63D23A60A0Cd19B9F65A0918674119a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeeff7aE5E00Aae3Db302e4B0d8C883810a58100",
+            "name": "Steakhouse High Yield USDC",
+            "symbol": "bbqUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 25497797.609794747,
+            "liquidityUsd": 6230649.7118720105,
+            "apyNative": 0.052816630352929106,
+            "apyNet": 0.052816630352929106,
+            "performanceFee": 0.05,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 1,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 2560012344,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 31387328753,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbHYPE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x7FaD8B8De2DDb7b4B415e1Aa3613e45EeF9E4bFf",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 7808013978,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xD7A1abA119a236Fea5BBC5cAC6836465cbe9289A",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 87669268523,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 5531449396697,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 5589379610,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 15561841497573,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbXRP"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x031b2EFC8d70042Ac8d9f5c793c4149eC4b60fdE",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 23528133353,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 2250135835,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "GOOGLc"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x24DC11055aa5b2C5692E4B77d7285c4f0fd9Cf99",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 352820672287,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "AERO"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x96F1485DAf396c2ab7e53DC76d7B330143Cb2269",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 568135528447,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1521917517367,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbDOGE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA9D36600Fb9eba7548857e61F836Ec951e3091B2",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbADA"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x35D87a743D1F2f7CaFb42D855dC1c5Df857Ce45f",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 115715056814,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "SOL"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xE9725430f3A72611ac72EdDc650625bce4F45DC7",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 24411952407,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "deSPXA"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x98c27f1C7772d66bCF837F0b8A435A31E6e85b6d",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "reUSD"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x04C10C80EceD1b5FEBBC59442b392470773C9bc0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 253921171873,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbZEC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xa3CB2d7204F47a468B82C6fAb1CA9675e9F7A272",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 253921171873,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 87669268523,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1411869940185,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "JitoSOL"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x78F772F5Fcc03256260cC1165e34Da9bb3f9BE1C",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 24411952407,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wsrUSD"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x1A2681baB91Dc48c56f858808f6A65C402e63b3F",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1411869940185,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbADA"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x35D87a743D1F2f7CaFb42D855dC1c5Df857Ce45f",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 863528233,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "weETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xaacbD2BbCA7927F772145f99EC942024Ddd0FAB0",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 5531449396697,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "mGLO"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x182e072F2C9C58c6F19F144c97986F7496c6A109",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xBeefF08dF54897e7544aB01d0e86f013DA354111",
+            "name": "Grove x Steakhouse USDC",
+            "symbol": "grove-bbqUSDC",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 24674816.386465814,
+            "liquidityUsd": 12674957.49092134,
+            "apyNative": 0.045976723339925286,
+            "apyNet": 0.045976723339925286,
+            "performanceFee": 0,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "MarketV1",
+                  "allocation": 4482705537,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 762196933001,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 23406157283132,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 514957984553,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 12154501723,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xf1561bC4b3D1bA49053986Fb9ee88D4fE22d0Cf4",
+                        "type": "Unknown"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 241308760476,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 24683312200686,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 273649224077,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "wstETH"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 23394002781409,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "WBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                        "type": "ChainlinkOracle"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 757714227464,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xe05faDf242331808f504661BEA65972594869826",
+            "name": "3Jane Ecosystem Vault",
+            "symbol": "CS3JANECO",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 22413254.228620872,
+            "liquidityUsd": 4313121.638944649,
+            "apyNative": 0.05552112778372195,
+            "apyNet": 0.06303697196553185,
+            "performanceFee": 0.15,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "Clearstar",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.clearstar.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/ClearstarLabs"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Adapter",
+                  "allocation": 22420990536749,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 14076426875524,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 8344563661225,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "USD3"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x68b4c2B2b2e245AB54a3bD55DfD5A9d84f029C06",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 14076426875524,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-USD3-17DEC2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xe5E6Ec063E63A9D0c6Ac041d0AD2bd03F7f08d72",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 8344563661225,
+                  "data": {}
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x2cA22cb25558fa2018ecb1CE4eD8AF92Ee7ea423",
+            "name": "RockawayX f(x) Protocol Ecosystem USDC",
+            "symbol": "roxFX",
+            "listed": true,
+            "type": "MorphoVault",
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "totalAssetsUsd": 21362154.490802933,
+            "liquidityUsd": 3152731.706150412,
+            "apyNative": 0.03338721987334791,
+            "apyNet": 0.07704895144843751,
+            "performanceFee": 0.1,
+            "managementFee": 0,
+            "curators": {
+              "items": [
+                {
+                  "name": "RockawayX",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://rockawayx.com/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/RockawayX"
+                    }
+                  ]
+                }
+              ]
+            },
+            "warnings": [],
+            "caps": {
+              "items": [
+                {
+                  "type": "Collateral",
+                  "allocation": 20144162690712,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 0,
+                  "data": {}
+                },
+                {
+                  "type": "Collateral",
+                  "allocation": 1225365303632,
+                  "data": {}
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 0,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "cbBTC"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 20144162690712,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "fxSAVE"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x16931Dcc888754Ae780B153598376a6474DE4440",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "MarketV1",
+                  "allocation": 1225365303632,
+                  "data": {
+                    "market": {
+                      "collateralAsset": {
+                        "symbol": "PT-fxSAVE-29OCT2026"
+                      },
+                      "loanAsset": {
+                        "symbol": "USDC"
+                      },
+                      "oracle": {
+                        "address": "0x5911530E5f62FFF0A73e91cCD797D717E6D49FA9",
+                        "type": "ChainlinkOracleV2"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Adapter",
+                  "allocation": 21369527994344,
+                  "data": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "extensions": {
+      "complexity": 250000,
+      "maximumComplexity": 1000000
+    }
+  }
+}

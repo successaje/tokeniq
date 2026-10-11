@@ -1,0 +1,772 @@
+{
+  "capturedAt": "2026-10-11T19:29:38.564Z",
+  "endpoint": "https://api.morpho.org/graphql",
+  "variables": {
+    "chainIds": [8453, 1],
+    "minTvlUsd": 20000000,
+    "first": 50,
+    "skip": 0,
+    "assetSymbols": ["USDC"]
+  },
+  "response": {
+    "data": {
+      "vaults": {
+        "pageInfo": {
+          "count": 5,
+          "countTotal": 5
+        },
+        "items": [
+          {
+            "address": "0xeE8F4eC5672F09119b96Ab6fB59C27E1b7e44b61",
+            "name": "Gauntlet USDC Prime",
+            "symbol": "gtUSDCp",
+            "listed": true,
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "liquidity": {
+              "usd": 182393937.768877
+            },
+            "warnings": [],
+            "state": {
+              "totalAssetsUsd": 414367896.5948938,
+              "apyNative": 0.04601522875221099,
+              "apyNet": 0.04601522875221099,
+              "fee": 0,
+              "timelock": 604800,
+              "curators": [
+                {
+                  "name": "Gauntlet",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.gauntlet.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/gauntlet_xyz"
+                    }
+                  ]
+                }
+              ],
+              "allocation": [
+                {
+                  "supplyAssetsUsd": 951094.3381858274,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xb40d93F44411D8C09aD17d7F88195eF9b05cCD96",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 60.0297437337843,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x4756c26E01E61c7c2F86b10f4316e179db8F9425",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 32780325.87950999,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x957e76d8f2D3ab0B4f342cd5f4b03A6f6eF2ce5F",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 3182539.0276957555,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 376557610.4559124,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": null,
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": null
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 896266.8638460856,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xD7A1abA119a236Fea5BBC5cAC6836465cbe9289A",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
+            "name": "Spark USDC Vault",
+            "symbol": "sparkUSDC",
+            "listed": true,
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "liquidity": {
+              "usd": 170269394.09559295
+            },
+            "warnings": [],
+            "state": {
+              "totalAssetsUsd": 390712997.8940158,
+              "apyNative": 0.0413190953131307,
+              "apyNet": 0.04131909530327899,
+              "fee": 0.1,
+              "timelock": 864000,
+              "curators": [
+                {
+                  "name": "SparkDAO",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://spark.fi/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/sparkdotfi"
+                    }
+                  ]
+                }
+              ],
+              "allocation": [
+                {
+                  "supplyAssetsUsd": 390712997.8940158,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": null,
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": null
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xbeeF010f9cb27031ad51e3333f9aF9C6B1228183",
+            "name": "Steakhouse USDC",
+            "symbol": "steakUSDC",
+            "listed": true,
+            "chain": {
+              "id": 8453
+            },
+            "asset": {
+              "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "liquidity": {
+              "usd": 119659460.94943824
+            },
+            "warnings": [],
+            "state": {
+              "totalAssetsUsd": 121114967.81242004,
+              "apyNative": 0.03431567347389925,
+              "apyNet": 0.034315673457590165,
+              "fee": 0.25,
+              "timelock": 604800,
+              "curators": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ],
+              "allocation": [
+                {
+                  "supplyAssetsUsd": 117275886.01046959,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x663BECd10daE6C4A3Dcd89F1d76c1174199639B9",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 577531.0889882899,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xFEa2D58cEfCb9fcb597723c6bAE66fFE4193aFE4",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 2961314.0098025496,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x97FF9CbD7E77348b2B8FfBB883bF29452aD18295",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": null,
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": null
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 300236.70315960865,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xD7A1abA119a236Fea5BBC5cAC6836465cbe9289A",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xb40d93F44411D8C09aD17d7F88195eF9b05cCD96",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xBEEF01735c132Ada46AA9aA4c54623cAA92A64CB",
+            "name": "Steakhouse USDC",
+            "symbol": "steakUSDC",
+            "listed": true,
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "liquidity": {
+              "usd": 48530697.710539825
+            },
+            "warnings": [],
+            "state": {
+              "totalAssetsUsd": 65331836.9862981,
+              "apyNative": 0.04350391398188372,
+              "apyNet": 0.04350391396707515,
+              "fee": 0.05,
+              "timelock": 604800,
+              "curators": [
+                {
+                  "name": "Steakhouse Financial",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.steakhouse.financial"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/SteakhouseFi"
+                    }
+                  ]
+                }
+              ],
+              "allocation": [
+                {
+                  "supplyAssetsUsd": 10282283.92766545,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "weETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xa3A7A3ceFee206f9d7Fe00eC3C83324ED4228411",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 49.80986729441249,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "FLHYon"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xD703c55B871D999eA5435aC3721B19296Ac249D1",
+                      "type": "Unknown"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 10308260.972023781,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                      "type": "ChainlinkOracle"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 1251346.7075649793,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 162027.4895734056,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xf1561bC4b3D1bA49053986Fb9ee88D4fE22d0Cf4",
+                      "type": "Unknown"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 977.4962258913993,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                      "type": "Unknown"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 60755.4315335494,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 11931601.79209397,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "steakEURCV"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xF3EFa46246d319381F5E7023Ae83F9C23C11b0F6",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": null,
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": null
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 28277580.103324663,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 3011242.287018805,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                      "type": "ChainlinkOracle"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 45710.969406311015,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "weETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xa3A7A3ceFee206f9d7Fe00eC3C83324ED4228411",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "address": "0xdd0f28e19C1780eb6396170735D45153D261490d",
+            "name": "Gauntlet USDC Prime",
+            "symbol": "gtUSDC",
+            "listed": true,
+            "chain": {
+              "id": 1
+            },
+            "asset": {
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "symbol": "USDC",
+              "decimals": 6
+            },
+            "liquidity": {
+              "usd": 17440715.55955183
+            },
+            "warnings": [],
+            "state": {
+              "totalAssetsUsd": 22002838.8679746,
+              "apyNative": 0.04344096421838269,
+              "apyNet": 0.04344096419534853,
+              "fee": 0.05,
+              "timelock": 604800,
+              "curators": [
+                {
+                  "name": "Gauntlet",
+                  "verified": true,
+                  "socials": [
+                    {
+                      "type": "url",
+                      "url": "https://www.gauntlet.xyz/"
+                    },
+                    {
+                      "type": "twitter",
+                      "url": "https://x.com/gauntlet_xyz"
+                    }
+                  ]
+                }
+              ],
+              "allocation": [
+                {
+                  "supplyAssetsUsd": 290266.4207167104,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xf1561bC4b3D1bA49053986Fb9ee88D4fE22d0Cf4",
+                      "type": "Unknown"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 2044818.350130379,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xe087AD7FE989cF63F8383579D160a20Ee7e69F9F",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 4524944.990613596,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x0F948CBa8231Db7898ef36A4212581Ad7b1B4580",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 2249.8581429766746,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x9F983115741D0F7F2EAE07831415057AD3de34d2",
+                      "type": "Unknown"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 6988706.574266838,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "cbBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a",
+                      "type": "ChainlinkOracleV2"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 8149867.938988494,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "WBTC"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0xDddd770BADd886dF3864029e4B377B5F6a2B6b83",
+                      "type": "ChainlinkOracle"
+                    }
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 0,
+                  "market": {
+                    "collateralAsset": null,
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": null
+                  }
+                },
+                {
+                  "supplyAssetsUsd": 1984.735115606832,
+                  "market": {
+                    "collateralAsset": {
+                      "symbol": "wstETH"
+                    },
+                    "loanAsset": {
+                      "symbol": "USDC"
+                    },
+                    "oracle": {
+                      "address": "0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40e2",
+                      "type": "ChainlinkOracle"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "extensions": {
+      "complexity": 20750,
+      "maximumComplexity": 1000000
+    }
+  }
+}
